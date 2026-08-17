@@ -44,7 +44,7 @@ npm run db:seed
 npm run dev
 ```
 
-Keep production work in `src/`. The `prototype/` directory is a design reference and should change only when a task explicitly updates the prototype.
+Keep production work in `src/`. The `prototype/` directory is the employee/team-lead static reference. The `admin-prototype/` directory is the separately runnable admin reference and should change only when a task explicitly updates that prototype. Do not present either prototype as production-integrated functionality.
 
 ## Validate the change
 
@@ -57,7 +57,15 @@ npm run lint
 npm run build
 ```
 
-For UI changes, manually test the affected employee, lead, and HR operations roles and attach before/after screenshots. For database changes, include a migration and explain rollback or compatibility considerations.
+If the admin prototype changes, install and validate its independent runtime too:
+
+```bash
+npm ci --prefix admin-prototype
+npm run admin:build
+npm run admin:test
+```
+
+For UI changes, manually test the affected employee, lead, and HR operations roles and attach before/after screenshots. The admin prototype is intentionally separate from the production Next.js runtime; a prototype change must not be described as a server-authorized production capability. For database changes, include a migration and explain rollback or compatibility considerations.
 
 ## Commit and push
 

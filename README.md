@@ -1,8 +1,16 @@
 # MUST HRIS
 
-MUST HRIS is the shared human-resources application for employees, team leads, and HR operations. This repository contains the production-oriented Next.js application and the original static prototype used as a design reference.
+MUST HRIS is the shared human-resources product for employees, team leads, HR operations and platform administrators. This repository keeps the production-oriented application and the approved role prototypes together so the product can evolve through one reviewed workflow.
 
-> Current status: the employee leave flow and team-lead approval flow are implemented end to end. The `HR_OPS` role exists in the data model, but a dedicated admin workspace and complete admin permissions are still roadmap work. Do not treat this repository as a fully hardened production HR platform yet.
+> Current status: the root Next.js application implements the employee leave and team-lead approval flows end to end. A comprehensive admin workspace is available in `admin-prototype/`, but it is an interactive Vite prototype with mock data—not yet a server-authorized production admin application. Do not treat this repository as a fully hardened production HR platform yet.
+
+## Live prototypes
+
+- [Employee experience](https://must-hris-employee-share.vercel.app/)
+- [Team-lead experience](https://must-hris-team-lead-share.vercel.app/)
+- [HR operations/admin experience](https://admin-prototype-five.vercel.app/)
+
+These hosted applications are interactive review prototypes. Do not enter real employee, payroll, identity or banking information.
 
 ## Product scope
 
@@ -15,8 +23,9 @@ The current application supports:
 - Team-lead approval queues and decision history.
 - Role-aware navigation and server-side authorization checks.
 - Seed data for local development and unit tests for the leave rules and balance logic.
+- A complete, separately runnable HR operations/admin prototype covering employees, teams, organization, requests, assets, reports, documents, feedback, settings, users, roles and activity logs.
 
-Planned work includes the HR operations/admin workspace, employee administration, policies, documents and signatures, payslips, notifications UI, audit logs, and stronger production RBAC. See [Current limitations](#current-limitations).
+Planned work is to migrate the approved admin prototype into protected Next.js routes backed by the shared database, audit trail and production RBAC. Documents and signatures, payslips, notifications UI and broader admin APIs also require production completion. See [Current limitations](#current-limitations).
 
 ## Roles
 
@@ -24,9 +33,10 @@ Planned work includes the HR operations/admin workspace, employee administration
 | --- | --- | --- |
 | Employee (`EMPLOYEE`) | Dashboard, leave balances, create/cancel requests, request history | Implemented |
 | Team lead (`LEAD`) | Employee access plus managed-team approval queue and decision history | Implemented |
-| HR operations/admin (`HR_OPS`) | Role is represented in the schema | Admin workspace and policies are not yet implemented |
+| HR operations/admin (`HR_OPS`) | Comprehensive admin prototype; role represented in the production schema | UI prototype complete; production data, APIs and authorization integration pending |
+| Super admin | Admin-prototype access and platform-control designs | Production role model and server enforcement pending |
 
-All roles belong in this repository because they share one identity model, one database, one set of HR business rules, and one deployment. Role separation should happen through authorization and route boundaries, not separate repositories.
+All roles belong in this repository because they share one identity model, one database and one set of HR business rules. Separate repositories are not recommended. The admin prototype remains a separate runnable app inside this repository only because its current Vite/React 19 runtime differs from the production Next.js/React 18 application. Production admin slices should move into the root application behind server-enforced authorization rather than becoming a separately deployed system of record.
 
 ## Technology
 
@@ -36,6 +46,7 @@ All roles belong in this repository because they share one identity model, one d
 - SQLite for local development; PostgreSQL recommended for production
 - Auth.js / NextAuth with Google SSO and optional demo credentials
 - Vitest
+- Vite and React 19 for the separately runnable admin prototype
 
 ## Local setup
 
@@ -58,6 +69,17 @@ npm run dev
 ```
 
 
+### Start the admin prototype
+
+The admin workspace has its own dependency lock because it is currently an independent Vite runtime:
+
+```bash
+npm ci --prefix admin-prototype
+npm run admin:dev
+```
+
+The command prints the local admin preview address. This prototype uses mock data and a client-side access preview; it does not read the root application's `.env` or production database.
+
 Useful commands:
 
 ```bash
@@ -68,6 +90,9 @@ npm run lint         # run Next.js linting
 npm run build        # generate Prisma client and create a production build
 npm run db:push      # apply the schema to the local database
 npm run db:seed      # load demo data
+npm run admin:dev    # start the HR operations/admin prototype
+npm run admin:build  # build the admin prototype
+npm run admin:test   # verify the admin hosting worker
 ```
 
 ## Environment variables
@@ -100,12 +125,17 @@ For production, use PostgreSQL, change the Prisma datasource provider accordingl
 │   ├── schema.prisma         # employee, leave, notification, document, and payslip models
 │   └── seed.ts               # local employee and team-lead demo data
 ├── prototype/                # earlier static UX reference; not the production app
+├── admin-prototype/          # complete interactive admin UI reference (Vite + mock data)
+│   ├── src/                  # admin screens, responsive styles and interactions
+│   ├── public/assets/        # approved local logo and font assets
+│   ├── tests/                # hosting-worker verification
+│   └── README.md             # coverage and production migration boundary
 ├── .github/                  # CI, ownership, and contribution templates
 ├── CONTRIBUTING.md           # team workflow and review rules
 └── .env.example              # safe configuration template
 ```
 
-The `prototype/` folder is intentionally retained as a reference for broader screens and interactions. New production work belongs in `src/`; do not add features only to the prototype.
+The `prototype/` folder preserves the original employee/team-lead static experience. The `admin-prototype/` folder preserves the complete interactive admin build. New production capabilities belong in the root `src/` application; prototype-only work must be labelled as such and must never be represented as server-authorized functionality.
 
 ## Collaboration workflow
 
@@ -153,4 +183,28 @@ git fetch upstream
 git switch -c feature/short-description upstream/main
 ```
 
-The static prototype remains available at <https://must-hris.vercel.app>, but it is not the production application in this repository.
+Push the branch to `origin`, then open a pull request into `must-matildaanashie/MUST-HRIS-:main`.
+
+## Current limitations
+
+- The admin UI is complete as an interactive prototype, but it is not yet connected to the root application's Prisma data, Auth.js session or server-side `HR_OPS` authorization.
+- Super-admin controls are designed in the prototype but do not yet have a production role model or protected server actions.
+- Documents, payslips, and notifications have partial data foundations but incomplete user interfaces.
+- Demo authentication must never be enabled in production.
+- SQLite is for local development; production should use PostgreSQL and reviewed migrations.
+- API route and end-to-end test coverage still needs expansion.
+- Audit logging, security review, retention rules, backups, and operational monitoring are required before handling real employee records.
+
+## Deployment
+
+For a production deployment:
+
+1. Provision PostgreSQL and update the Prisma datasource provider.
+2. configure the production environment variables listed above.
+3. Set `ENABLE_DEMO_LOGIN=false`.
+4. Run reviewed database migrations.
+5. Build the production application with `npm run build`.
+6. If sharing the admin prototype for review, build it separately with `npm run admin:build`; do not connect it to real HR data.
+7. Complete security, privacy, backup, and access-control reviews before importing real employee records.
+
+The hosted role prototypes are listed at the top of this README. They are design and workflow review builds, not the production system of record.
