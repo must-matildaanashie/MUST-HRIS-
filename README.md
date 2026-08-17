@@ -4,6 +4,14 @@ MUST HRIS is the shared human-resources product for employees, team leads, HR op
 
 > Current status: the root Next.js application implements the employee leave and team-lead approval flows end to end. A comprehensive admin workspace is available in `admin-prototype/`, but it is an interactive Vite prototype with mock data—not yet a server-authorized production admin application. Do not treat this repository as a fully hardened production HR platform yet.
 
+## Live prototypes
+
+- [Employee experience](https://must-hris-employee-share.vercel.app/)
+- [Team-lead experience](https://must-hris-team-lead-share.vercel.app/)
+- [HR operations/admin experience](https://admin-prototype-five.vercel.app/)
+
+These hosted applications are interactive review prototypes. Do not enter real employee, payroll, identity or banking information.
+
 ## Product scope
 
 The current application supports:
@@ -200,4 +208,4 @@ For a production deployment:
 6. If sharing the admin prototype for review, build it separately with `npm run admin:build`; do not connect it to real HR data.
 7. Complete security, privacy, backup, and access-control reviews before importing real employee records.
 
-The static prototype remains available at <https://must-hris.vercel.app>, but it is not the production application in this repository.
+The hosted role prototypes are listed at the top of this README. They are design and workflow review builds, not the production system of record.
