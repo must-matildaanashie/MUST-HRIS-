@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a focused improvement to MUST HRIS.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: role
+    attributes:
+      label: Primary role
+      options:
+        - Employee
+        - Team lead
+        - HR operations/admin
+        - Shared across roles
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the user or business problem before suggesting a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should the user be able to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable conditions that would make this complete.
+  - type: textarea
+    id: considerations
+    attributes:
+      label: Security, privacy, or policy considerations
+      description: Note access-control, employee-data, policy, or audit requirements.

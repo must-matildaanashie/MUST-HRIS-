@@ -1,0 +1,9 @@
+# A maintainer review is requested for all changes.
+* @must-matildaanashie
+
+# Sensitive application boundaries.
+/prisma/ @must-matildaanashie
+/src/lib/auth.ts @must-matildaanashie
+/src/lib/session.ts @must-matildaanashie
+/src/app/api/ @must-matildaanashie
+/.github/ @must-matildaanashie

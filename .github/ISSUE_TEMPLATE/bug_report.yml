@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem in MUST HRIS.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include passwords, tokens, private employee data, or confidential HR records."
+  - type: dropdown
+    id: role
+    attributes:
+      label: Affected role
+      options:
+        - Employee
+        - Team lead
+        - HR operations/admin
+        - Multiple or unknown
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Sign in as...\n2. Open...\n3. Select..."
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, device, branch/commit, and local or deployed environment.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Safe supporting evidence
+      description: Add redacted screenshots or logs. Remove secrets and personal data first.

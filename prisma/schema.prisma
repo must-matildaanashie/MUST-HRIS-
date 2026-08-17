@@ -1,0 +1,146 @@
+// MUST HRIS — data model.
+//
+// Dev uses SQLite (zero-config). For production, change `provider` to "postgresql"
+// and set DATABASE_URL to your Postgres connection string, then run `prisma migrate`.
+//
+// NOTE: SQLite does not support native enums, so status/role are String fields with
+// the allowed values documented next to them (see src/domain/enums.ts). On Postgres
+// you can convert these to real Prisma `enum`s.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String
+  role       String   @default("EMPLOYEE") // EMPLOYEE | LEAD | HR_OPS
+  title      String?
+  department String?
+  team       String?
+  location   String?
+  timezone   String?
+  avatarUrl  String?
+  joinedAt   DateTime?
+  active     Boolean  @default(true)
+
+  managerId String?
+  manager   Employee?  @relation("Reports", fields: [managerId], references: [id])
+  reports   Employee[] @relation("Reports")
+
+  balances       LeaveBalance[]
+  requests       LeaveRequest[] @relation("Requester")
+  decisions      LeaveRequest[] @relation("DecidedBy")
+  notifications  Notification[]
+  documents      Document[]
+  payslips       Payslip[]
+
+  createdAt DateTime @default(now())
+}
+
+model LeaveType {
+  id                String  @id @default(cuid())
+  key               String  @unique // annual | bvl | family | maternity | ot | pto | public | tenure | uto | vl
+  name              String
+  unlimited         Boolean @default(false)
+  entitlementHours  Int?    // null when unlimited
+  maxDaysPerRequest Int?    // e.g. Annual = 3
+  exactDays         Int?    // e.g. BVL = 4, VL = 3
+  maxHoursPerDay    Int?    // e.g. OT = 2
+  incrementHours    Int?    // e.g. Annual = 4 (half/full-day steps)
+  requiresAdvance   Boolean @default(false) // OT must be future-dated
+  requiresProof     Boolean @default(false) // Family
+  policyUrl         String?
+  color             String?
+
+  balances LeaveBalance[]
+  requests LeaveRequest[]
+}
+
+model LeaveBalance {
+  id               String @id @default(cuid())
+  employeeId       String
+  leaveTypeId      String
+  year             Int
+  entitlementHours Int    @default(0)
+  usedHours        Float  @default(0)
+  reservedHours    Float  @default(0)
+  updatedAt        DateTime @updatedAt
+
+  employee  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([employeeId, leaveTypeId, year])
+}
+
+model LeaveRequest {
+  id             String   @id @default(cuid())
+  employeeId     String
+  leaveTypeId    String
+  fromDate       DateTime
+  toDate         DateTime
+  hours          Float
+  days           Float
+  reason         String?
+  retrospective  Boolean  @default(false)
+  proofUrl       String?
+  status         String   @default("PENDING") // PENDING | APPROVED | DECLINED | CANCELLED | EXPIRED
+  decidedById    String?
+  decidedAt      DateTime?
+  decisionReason String?
+  createdAt      DateTime @default(now())
+
+  employee  Employee  @relation("Requester", fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+  decidedBy Employee? @relation("DecidedBy", fields: [decidedById], references: [id])
+
+  @@index([employeeId, status])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  employeeId String
+  title      String
+  body       String?
+  targetType String   @default("PAGE") // REQUEST | DOCUMENT | PAYSLIP | PAGE
+  targetId   String?  // request id, document id, payslip id, or a page key
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, read])
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  employeeId String
+  name       String
+  type       String   @default("PDF")
+  status     String   @default("NEEDS_SIGN") // SIGNED | NEEDS_SIGN
+  url        String?
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Payslip {
+  id         String   @id @default(cuid())
+  employeeId String
+  period     String
+  netAmount  Float
+  baseSalary Float
+  overtime   Float    @default(0)
+  deductions Float    @default(0)
+  hours      Float
+  rate       Float
+  paidAt     DateTime
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
