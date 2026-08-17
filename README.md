@@ -57,7 +57,6 @@ npm run db:seed
 npm run dev
 ```
 
-Open <http://localhost:3000>. With `ENABLE_DEMO_LOGIN=true`, the sign-in page offers the seeded employee and team-lead accounts without Google credentials.
 
 Useful commands:
 
@@ -153,27 +152,5 @@ git remote add upstream https://github.com/must-matildaanashie/MUST-HRIS-.git
 git fetch upstream
 git switch -c feature/short-description upstream/main
 ```
-
-Push the branch to `origin`, then open a pull request into `must-matildaanashie/MUST-HRIS-:main`.
-
-## Current limitations
-
-- `HR_OPS` is modeled but does not yet have a dedicated admin UI or complete authorization policy.
-- Documents, payslips, and notifications have partial data foundations but incomplete user interfaces.
-- Demo authentication must never be enabled in production.
-- SQLite is for local development; production should use PostgreSQL and reviewed migrations.
-- API route and end-to-end test coverage still needs expansion.
-- Audit logging, security review, retention rules, backups, and operational monitoring are required before handling real employee records.
-
-## Deployment
-
-For a production deployment:
-
-1. Provision PostgreSQL and update the Prisma datasource provider.
-2. configure the production environment variables listed above.
-3. Set `ENABLE_DEMO_LOGIN=false`.
-4. Run reviewed database migrations.
-5. Build with `npm run build`.
-6. Complete security, privacy, backup, and access-control reviews before importing real HR data.
 
 The static prototype remains available at <https://must-hris.vercel.app>, but it is not the production application in this repository.
