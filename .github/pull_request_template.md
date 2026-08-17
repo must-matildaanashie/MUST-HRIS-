@@ -17,6 +17,7 @@
 - [ ] `npm run typecheck`
 - [ ] `npm run lint`
 - [ ] `npm run build`
+- [ ] `npm run admin:build` and `npm run admin:test` when the admin prototype changes
 - [ ] Manual role-based testing completed where relevant
 
 <!-- List any check not run and explain why. -->
