@@ -68,7 +68,6 @@ npm run db:seed
 npm run dev
 ```
 
-Open <http://localhost:3000>. With `ENABLE_DEMO_LOGIN=true`, the sign-in page offers the seeded employee and team-lead accounts without Google credentials.
 
 ### Start the admin prototype
 
