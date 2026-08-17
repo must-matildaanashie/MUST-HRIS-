@@ -1,0 +1,45 @@
+{
+  "name": "must-hris",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MUST Company HRIS for employees, team leads, and HR operations (Next.js + Prisma).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prisma:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "5.17.0",
+    "date-fns": "3.6.0",
+    "next": "14.2.35",
+    "next-auth": "4.24.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.11",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "autoprefixer": "10.4.19",
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.2.5",
+    "postcss": "8.4.39",
+    "prisma": "5.17.0",
+    "tailwindcss": "3.4.7",
+    "tsx": "4.16.2",
+    "typescript": "5.5.4",
+    "vitest": "2.0.4"
+  }
+}
