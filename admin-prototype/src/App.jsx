@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity, AlertTriangle, Archive, ArrowLeft, BarChart3, Bell, Boxes, BriefcaseBusiness,
   Building2, Cake, CalendarDays, Check, ChevronDown, ChevronRight, CircleDollarSign, ClipboardCheck,
   Clock3, Copy, Crown, Download, Edit3, Eye, FileText, Filter, GitBranch, Globe2, GraduationCap, History,
-  IdCard, LayoutDashboard, ListChecks, LockKeyhole, Megaphone, Menu, MessageSquareText, MoreHorizontal,
-  Network, NotebookPen, PackagePlus, PanelLeftClose, Plus, RotateCcw, Search, Settings,
-  ShieldCheck, SlidersHorizontal, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, WalletCards,
+  IdCard, LayoutDashboard, ListChecks, LockKeyhole, Megaphone, Menu, MessageCircle, MessageSquareText, MoreHorizontal, Package, Send,
+  Landmark, Mail, MapPin, Network, NotebookPen, PackagePlus, PanelLeftClose, Phone, Plus, RotateCcw, Search, Settings,
+  ShieldCheck, SlidersHorizontal, Trash2, TrendingUp, Upload, UserCheck, UserCog, UserMinus, UserPlus, Users, WalletCards,
   X, ZoomIn, ZoomOut
 } from "lucide-react";
 import { Bar, BarChart as ReportBarChart, CartesianGrid, Line, LineChart as ReportLineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -34,8 +34,21 @@ const EMPLOYEE_DIRECTORY=[
     {name:"Aisha Ghazal",initials:"AG",email:"g.aisha@must.company",mobile:"+923348408908",department:"HR",team:"HR Management Team",title:"HR Management Specialist",joined:"Mar 6, 2023",dob:"—",manager:"Maryam Mansha"},
     {name:"Alia Nazir",initials:"AN",email:"n.alia@must.company",mobile:"+923074300413",department:"HR",team:"Recruitment Operations Team",title:"Recruitment Operations - Team Lead",joined:"Apr 3, 2025",dob:"—",manager:"—",status:"Resigned",separationDate:"May 20, 2026"},
   ];
+const PHONE_COUNTRIES=[["+234","Nigeria"],["+94","Sri Lanka"],["+92","Pakistan"],["+91","India"]];
+function countryFromMobile(mobile) { const hit=PHONE_COUNTRIES.find(([code])=>mobile.startsWith(code)); return hit?hit[1]:"Other"; }
+function hourlyRate(name) { let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0; return (18+(h%28)).toFixed(2); }
 const DEPARTMENTS=[["BIC",84],["MNC",63],["BLK",58],["HR",42],["HQ",18],["FIN",10],["UNASSIGNED",8],["AGN",2],["CEO",1],["VP",1]];
-const ACTIVITY_LOG=[["11 Aug 2026, 12:36","AA","Arshman Afzal","Updated","Updated User","User #6f00f3d5","200","10.8.9.24"],["11 Aug 2026, 12:36","AA","Arshman Afzal","USER_ROLE_UPDATED","USER_ROLE_UPDATED User","User #6f00f3d5","200","10.8.9.24"],["11 Aug 2026, 12:36","AA","Arshman Afzal","Updated","Updated User — Role","User #6f00f3d5","—","—"],["11 Aug 2026, 12:29","AA","Arshman Afzal","LOGIN_SUCCESS","Signed in","—","200","10.8.9.24"],["11 Aug 2026, 12:29","S","System","Created","Signed in","—","200","10.8.9.24"],["11 Aug 2026, 11:01","RC","Rohma Chaudhary","LOGIN_SUCCESS","Signed in","—","200","10.8.9.24"],["11 Aug 2026, 10:54","MI","Matilda Ipeh Anashie","Deleted","Deleted Feedback","Feedback #25a85f61","200","10.8.9.24"]];
+const ACTIVITY_LOG=[
+  ["11 Aug 2026, 12:36","AA","Arshman Afzal","Updated","Ri Le Tan's role changed to Admin","User · Ri Le Tan","200","10.8.9.24"],
+  ["11 Aug 2026, 12:31","MI","Matilda Ipeh Anashie","Approved","Aisha Bello's Annual Leave","Leave request","200","10.8.9.24"],
+  ["11 Aug 2026, 12:29","AA","Arshman Afzal","Logged in","—","—","200","10.8.9.24"],
+  ["11 Aug 2026, 12:10","DB","Dilhani Baskaran","Rejected","Kwame Mensah's Compassionate Leave","Leave request","200","10.8.9.24"],
+  ["11 Aug 2026, 11:45","S","System","Logged in","—","—","200","10.8.9.24"],
+  ["11 Aug 2026, 11:20","RC","Rohma Chaudhary","Viewed","Ethan Walker's salary record","Salary","200","10.8.9.24"],
+  ["11 Aug 2026, 11:01","RC","Rohma Chaudhary","Logged in","—","—","200","10.8.9.24"],
+  ["11 Aug 2026, 10:54","MI","Matilda Ipeh Anashie","Deleted","Q2 Leadership feedback cycle","Feedback #25a85f61","200","10.8.9.24"],
+  ["11 Aug 2026, 09:40","SG","Sneha Gupta","Created","New employee — Priya Nair","Employee","201","10.8.9.24"],
+];
 const OPEN_POSITIONS=[["Senior Backend Developer","BLK","3 candidates"],["Product Designer","HQ","5 candidates"],["Technical Recruiter","HR","2 candidates"]];
 const ANNOUNCEMENTS=[["Q3 all-hands on 20 Aug","All staff","Arshman Afzal","2d ago","Sent"],["New leave policy — Bonus Vacation","All staff","Matilda Ipeh Anashie","5d ago","78% read"],["Office closed — Independence Day","BIC office","Sneha Gupta","1w ago","Sent"],["Welcome new joiners to the team","All staff","Matilda Ipeh Anashie","1w ago","Sent"]];
 const DOCUMENT_TEMPLATES=[["Employment Contract","Offer & full-time contract","#E6F4EC","#018038"],["Offer Letter","Candidate offers","#E8F1FF","#1f6feb"],["NDA","Confidentiality agreement","#F1EAFB","#7c3aed"],["Experience Letter","On request / exit","#FFF4E5","#b9770e"],["Salary Certificate","Bank & visa letters","#FDEAEA","#c0392b"],["Warning Letter","HR disciplinary","#FDECEC","#d64545"]];
@@ -371,8 +384,10 @@ const routeMeta = {
   "/my-team": ["My Team", "My Team", "Your team and reporting line"],
   "/my-feedbacks": ["My Feedback", "My Feedback", "Your feedback activity"],
   "/my-leaves": ["My Leaves", "My Leaves", "Your leave balance and requests"],
-  "/requests": ["Requests", "Requests", "Your HRM requests"],
+  "/requests": ["Requests", "Requests", "Your Employee Services requests"],
   "/approvals": ["Approvals", "Approvals", "Requests awaiting your decision"],
+  "/sops": ["SOPs & Policies", "SOPs & Policies", "Company standard operating procedures and policies"],
+  "/decision-history": ["Decision History", "Decision History", "Your past approval decisions"],
   "/dashboard": ["Overview", "Welcome back", "Here's what's happening with your team"],
   "/settings": ["Settings", "Settings", "Organization structure, policies, and access & security"],
   "/employees": ["Employees", "Employees", "Manage employee records and employment details"],
@@ -385,12 +400,12 @@ const routeMeta = {
   "/feedbacks": ["Feedback Cycles", "Feedback Cycles", "Create and manage employee feedback cycles"],
   "/leaves": ["Leave Management", "Leave Management", "Review and manage employee leave requests"],
   "/leave-balances": ["Leave Balances", "Leave Balances", "View and adjust employee leave balances"],
-  "/all-requests": ["All HRM Requests", "All HRM Requests", "Track and manage employee requests"],
+  "/all-requests": ["All Employee Services Requests", "All Employee Services Requests", "Track and manage employee requests"],
   "/settings/users": ["Users & Roles", "Users & Roles", "Manage user access, roles and permissions"],
   "/settings/departments": ["Departments", "Departments", "Manage company departments"],
   "/settings/company-entities": ["Company Entities", "Company Entities", "Manage legal entities and locations"],
   "/settings/leave-types": ["Leave Types", "Leave Types", "Configure leave policies and allowances"],
-  "/settings/request-types": ["Request Types", "Request Types", "Configure HRM request workflows"],
+  "/settings/request-types": ["Request Types", "Request Types", "Configure Employee Services request workflows"],
   "/settings/feedback-forms": ["Feedback Forms", "Feedback Forms", "Build reusable feedback questionnaires"],
   "/activity-logs": ["Activity Logs", "Activity Logs", "Review user and system activity"],
   "/feedback-form-builder": ["Feedback Form", "Feedback Form", "Build sections and questions for this feedback form"],
@@ -402,12 +417,10 @@ const navGroups = [
     ["Dashboard", "/dashboard", LayoutDashboard],
   ]],
   ["People", [
-    ["Employees", "/employees", Users], ["Teams", "/teams", Network],
-    ["Org Chart", "/org-chart", GitBranch], ["Announcements", "/announcements", Megaphone],
+    ["Employee Directory", "/employees", Users], ["Announcements", "/announcements", Megaphone],
   ]],
   ["Time & Requests", [
-    ["Leave Management", "/leaves", CalendarDays], ["Leave Balances", "/leave-balances", WalletCards],
-    ["All Requests", "/all-requests", ListChecks], ["Feedback Cycles", "/feedbacks", MessageSquareText],
+    ["Leave & Requests", "/leaves", CalendarDays], ["Feedback Cycles", "/feedbacks", MessageSquareText],
   ]],
   ["Assets & Reports", [
     ["Assets", "/assets", Boxes], ["Documents", "/documents", FileText], ["Reports", "/reports", BarChart3],
@@ -417,12 +430,49 @@ const navGroups = [
   ]],
   ["My Space", [
     ["My Dashboard", "/my-dashboard", LayoutDashboard], ["My Profile", "/my-profile", UserCog],
-    ["My Salary", "/my-salary", CircleDollarSign], ["My Documents", "/my-documents", FileText],
-    ["My Team", "/my-team", Users], ["My Feedback", "/my-feedbacks", MessageSquareText],
-    ["My Leaves", "/my-leaves", CalendarDays], ["Requests", "/requests", ClipboardCheck],
-    ["Approvals", "/approvals", Archive],
+    ["My Team", "/my-team", Users], ["My Leaves & Requests", "/my-leaves", CalendarDays],
   ]],
 ];
+
+const MY_SPACE_FLAT_EMPLOYEE = [
+  ["Dashboard", "/my-dashboard", LayoutDashboard], ["My Profile", "/my-profile", UserCog],
+  ["My Salary", "/my-salary", CircleDollarSign], ["My Documents", "/my-documents", FileText],
+  ["SOPs & Policies", "/sops", NotebookPen], ["My Team", "/my-team", Users],
+  ["My Feedbacks", "/my-feedbacks", MessageSquareText], ["My Leaves", "/my-leaves", CalendarDays],
+  ["My Requests", "/requests", ClipboardCheck],
+];
+const MY_SPACE_FLAT_TEAM_LEAD = [
+  ...MY_SPACE_FLAT_EMPLOYEE,
+  ["Team Requests", "/approvals", Archive, 2], ["Decision history", "/decision-history", History],
+];
+
+const EMPLOYEE_DIRECTORY_TABS = [
+  ["Employees", "/employees", Users], ["Teams", "/teams", Network], ["Org Chart", "/org-chart", GitBranch],
+];
+const LEAVE_REQUESTS_TABS = [
+  ["Leave Requests", "/leaves", CalendarDays], ["Leave Balances", "/leave-balances", WalletCards], ["Employee Services Requests", "/all-requests", ListChecks],
+];
+const MY_PROFILE_TABS = [
+  ["Profile", "/my-profile", UserCog], ["Salary", "/my-salary", CircleDollarSign],
+  ["Documents", "/my-documents", FileText], ["Feedback", "/my-feedbacks", MessageSquareText],
+];
+function myRequestsTabs(role) {
+  const tabs = [["My Leaves", "/my-leaves", CalendarDays], ["Requests", "/requests", ClipboardCheck]];
+  if (role !== "Employee") tabs.push(["Approvals", "/approvals", Archive]);
+  return tabs;
+}
+function SectionTabs({ tabs, path, go, line }) {
+  if (line) return <div className="tabs-scroll"><div className="tabs line-tabs section-line-tabs">{tabs.map(([label, to]) => <button key={to} className={path === to ? "active" : ""} onClick={() => go(to)}>{label}</button>)}</div></div>;
+  return <div className="section-tabs">{tabs.map(([label, to, Icon]) => <button key={to} className={path === to ? "active" : ""} onClick={() => go(to)}><Icon size={15}/>{label}</button>)}</div>;
+}
+function ScrollFadeTable({ className, children }) {
+  const ref = useRef(null);
+  const [fade, setFade] = useState(false);
+  const check = () => { const el = ref.current; if (!el) return; setFade(el.scrollWidth - el.scrollLeft - el.clientWidth > 4); };
+  useEffect(() => { check(); });
+  useEffect(() => { window.addEventListener("resize", check); return () => window.removeEventListener("resize", check); }, []);
+  return <div ref={ref} className={`${className}${fade ? " scroll-fade-right" : ""}`} onScroll={check}>{children}</div>;
+}
 
 function useRoute() {
   const [path, setPath] = useState(window.location.pathname === "/" ? "/dashboard" : window.location.pathname);
@@ -438,7 +488,38 @@ const avatarPalette = [["#018038","#016A2D"],["#0B4F75","#08344C"],["#5B3E8C","#
 function avatarColor(seed = "") { let h = 0; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0; const [a, b] = avatarPalette[h % avatarPalette.length]; return `linear-gradient(145deg,${a},${b})`; }
 function Avatar({ initials = "M", small = false }) { return <span className={`avatar ${small ? "small" : ""}`} style={{background: avatarColor(initials)}}>{initials}</span>; }
 function Status({ children }) { return <span className={`status ${String(children).toLowerCase().replaceAll(" ", "-")}`}>{children}</span>; }
-function IconButton({ icon: Icon, label, onClick, danger = false, success = false }) { return <button className={`icon-btn ${danger ? "danger" : ""} ${success ? "success" : ""}`} aria-label={label} title={label} onClick={onClick || (()=>announce(`${label} action opened`))}><Icon size={17}/></button>; }
+function IconButton({ icon: Icon, label, onClick, danger = false, success = false, className = "" }) { return <button className={`icon-btn ${danger ? "danger" : ""} ${success ? "success" : ""} ${className}`} aria-label={label} title={label} onClick={onClick || (()=>announce(`${label} action opened`))}><Icon size={17}/></button>; }
+const FILTER_DOT_GREEN=["Active","Approved","Created","Logged in","Completed"];
+const FILTER_DOT_RED=["Blocked","Rejected","Deleted"];
+function filterDotTone(opt) { return FILTER_DOT_GREEN.includes(opt) ? "green" : FILTER_DOT_RED.includes(opt) ? "red" : "gray"; }
+// Single-trigger filter dropdown styled like the profile switcher (rows with a status dot,
+// checkmark on the selected option) instead of a native select or a row of toggle pills.
+function FilterMenu({ value, options, onChange, counts }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => { const onDoc = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }; document.addEventListener("mousedown", onDoc); return () => document.removeEventListener("mousedown", onDoc); }, []);
+  return <div className="filter-menu" ref={ref}>
+    <button type="button" className="filter-menu-trigger" onClick={()=>setOpen(v=>!v)} aria-expanded={open}><i className={`tone-dot ${filterDotTone(value)}`}/><span>{value}</span>{counts?.[value]!=null && <b>{counts[value]}</b>}<ChevronDown size={13}/></button>
+    {open && <div className="filter-menu-popover">{options.map(opt=><button type="button" key={opt} className={`profile-row ${opt===value?"selected":""}`} onClick={()=>{onChange(opt);setOpen(false)}}>
+      <i className={`tone-dot ${filterDotTone(opt)}`}/>
+      <span className="profile-row-copy"><strong>{opt}</strong></span>
+      {counts?.[opt]!=null && <small className="filter-menu-count">{counts[opt]}</small>}
+      {opt===value && <Check size={16}/>}
+    </button>)}</div>}
+  </div>;
+}
+function MoreMenu({ actions, label = "More" }) {
+  const [open, setOpen] = useState(false);
+  return <div className="more-menu-wrap">
+    <IconButton icon={MoreHorizontal} label={label} onClick={() => setOpen(v => !v)}/>
+    {open && <>
+      <button className="more-menu-scrim" aria-label="Close menu" onClick={() => setOpen(false)}/>
+      <div className="more-menu" role="menu">
+        {actions.map(([itemLabel, Icon, itemOnClick, danger]) => <button role="menuitem" key={itemLabel} className={danger ? "danger" : ""} onClick={() => { itemOnClick(); setOpen(false); }}><Icon size={14}/>{itemLabel}</button>)}
+      </div>
+    </>}
+  </div>;
+}
 function Button({ children, icon: Icon, kind = "primary", onClick, type = "button", ...props }) { return <button type={type} className={`btn ${kind}`} title={typeof children === "string" ? children : undefined} onClick={onClick || (()=>announce(`${children} action completed`))} {...props}>{Icon && <Icon size={17}/>}<span>{children}</span></button>; }
 function Card({ children, className = "", ...props }) { return <section className={`card ${className}`} {...props}>{children}</section>; }
 function PageTitle({ eyebrow, title, subtitle, actions, className = "" }) { return <div className={`page-title ${className}`}><div>{eyebrow&&<span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1><p>{subtitle}</p></div>{actions && <div className="page-actions">{actions}</div>}</div>; }
@@ -448,8 +529,9 @@ function Select({ children, value, onChange, label }) { return <label className=
 function Empty({ icon: Icon = FileText, title = "No records found", text = "There is nothing to display yet.", action }) { return <div className="empty"><span><Icon size={24}/></span><h3>{title}</h3><p>{text}</p>{action}</div>; }
 function ErrorState({ message = "Something went wrong while loading this data." }) { return <div className="error-state"><AlertTriangle size={22}/><div><strong>Unable to load data</strong><p>{message}</p></div><Button kind="secondary" icon={RotateCcw}>Try again</Button></div>; }
 
-function DataTable({ columns, rows, renderActions, onRow }) {
-  return <div className="table-scroll responsive-table"><table><thead><tr>{columns.map(c => <th key={c}>{c}</th>)}{renderActions && <th>Actions</th>}</tr></thead><tbody>{rows.map((row, i) => <tr key={i} onClick={() => onRow?.(row)} className={onRow ? "clickable" : ""}>{row.map((cell, j) => <td data-label={columns[j]} key={j}>{j === row.length - 1 && ["Active","Inactive","Pending","Approved","Rejected","Completed","Cancelled","Expired","Available","Assigned","Open","Resolved"].includes(cell) ? <Status>{cell}</Status> : cell}</td>)}{renderActions && <td data-label="Actions" onClick={e => e.stopPropagation()}>{renderActions(row, i)}</td>}</tr>)}</tbody></table></div>;
+function DataTable({ columns, rows, renderActions, onRow, selectable, selected, onToggle, onToggleAll, getKey }) {
+  const keyOf = (row, i) => getKey ? getKey(row, i) : i;
+  return <div className="table-scroll responsive-table"><table><thead><tr>{selectable && <th className="checkbox-cell"><input type="checkbox" checked={rows.length>0 && selected?.size===rows.length} onChange={onToggleAll} aria-label="Select all"/></th>}{columns.map(c => <th key={c}>{c}</th>)}{renderActions && <th>Actions</th>}</tr></thead><tbody>{rows.map((row, i) => <tr key={i} onClick={() => onRow?.(row)} className={onRow ? "clickable" : ""}>{selectable && <td className="checkbox-cell" data-label="" onClick={e=>e.stopPropagation()}><input type="checkbox" checked={!!selected?.has(keyOf(row,i))} onChange={()=>onToggle(keyOf(row,i))} aria-label="Select row"/></td>}{row.map((cell, j) => <td data-label={columns[j]} key={j}>{j === row.length - 1 && ["Active","Inactive","Pending","Approved","Rejected","Completed","Cancelled","Expired","Available","Assigned","Open","Resolved"].includes(cell) ? <Status>{cell}</Status> : cell}</td>)}{renderActions && <td data-label="Actions" onClick={e => e.stopPropagation()}>{renderActions(row, i)}</td>}</tr>)}</tbody></table></div>;
 }
 
 function Modal({ title, subtitle, children, onClose, wide = false, footer, onSave }) {
@@ -502,32 +584,152 @@ function BasicForm({ type }) {
 
 const roleRules = {
   "Super Admin": ["Overview","People","Time & Requests","Assets & Reports","Settings","My Space"],
-  "Admin": ["Overview","People","Time & Requests","Assets & Reports","My Space"],
+  "Admin": ["Overview","People","Time & Requests","Assets & Reports","Settings","My Space"],
   "Team Lead": ["My Space"],
   "Employee": ["My Space"],
 };
 
-function Shell({ path, go, children, role, setRole, open }) {
+const roleCapabilities = {
+  "Super Admin": { managePeople:true, administer:true, quickCreate:true, peopleSearch:true, myTeam:true, approvals:true },
+  "Admin": { managePeople:true, administer:true, quickCreate:true, peopleSearch:true, myTeam:true, approvals:true },
+  "Team Lead": { managePeople:false, administer:false, quickCreate:false, peopleSearch:false, myTeam:true, approvals:true },
+  "Employee": { managePeople:false, administer:false, quickCreate:false, peopleSearch:false, myTeam:true, approvals:false },
+};
+
+const roleIdentity = {
+  "Team Lead": { name:"Ethan Walker", initials:"EW", title:"Product Design Team Lead", team:"BLK-UXI", manager:"Ismail Gorkem Kara", country:"Ghana", phone:"+233 24 000 0011", email:"ethan.walker@must.company", start:"14 Jan 2024", tenure:"2y 7m" },
+  "Employee": { name:"Matilda Ipeh Anashie", initials:"MA", title:"Senior Product Designer", team:"BLK-UXI", manager:"Ismail Gorkem Kara", country:"Ghana", phone:"+233 24 000 0000", email:"matilda.anashie@must.company", start:"26 Feb 2025", tenure:"1y 4m" },
+};
+
+function roleHome(role) { return role === "Super Admin" || role === "Admin" ? "/dashboard" : "/my-dashboard"; }
+const PREVIEW_DISPLAY_NAME = { Employee: "Sarah Miller", "Team Lead": "Ethan Miller" };
+function roleProfile(role) { return roleIdentity[role] || roleIdentity.Employee; }
+
+// A small self-service assistant: suggestion chips and free-text both resolve against real
+// app data (employee records, computed hourly rates, leave/approvals pages) rather than a
+// canned script, so answers stay consistent with what's actually in the directory.
+function AskHris({ role, go, identity, scrolling, setScrolling }) {
+  const [open, setOpen] = useState(false);
+  const bodyRef = useRef(null);
+  const firstName = identity.name.split(" ")[0];
+  const suggestions = useMemo(() => {
+    const a = EMPLOYEE_DIRECTORY[0], b = EMPLOYEE_DIRECTORY[5];
+    const list = [
+      { text: `Take me to ${a.name}'s information`, to: `/employees/${slugify(a.name)}` },
+      { text: `What is ${b.name}'s hourly rate?` },
+      { text: "Who is on leave today?" },
+    ];
+    if (role !== "Employee") list.push({ text: "Open decision history" });
+    return list;
+  }, [role]);
+  const [messages, setMessages] = useState(() => [{ from: "bot", text: `Hi ${firstName} — ask me for a person, a fact or a page.\nTry "${suggestions[0].text}".` }]);
+  const [input, setInput] = useState("");
+  useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight; }, [messages, open]);
+
+  const answerFor = (text) => {
+    const q = text.toLowerCase();
+    const person = EMPLOYEE_DIRECTORY.find(e => q.includes(e.name.toLowerCase()));
+    if (person && (q.includes("rate") || q.includes("salary") || q.includes("pay"))) return { text: `${person.name}'s hourly rate is $${hourlyRate(person.name)}/hr.` };
+    if (person) return { text: `Opening ${person.name}'s profile…`, to: `/employees/${slugify(person.name)}` };
+    if (q.includes("leave") || q.includes("holiday") || q.includes("pto")) return { text: "Opening Leave Management…", to: "/leaves" };
+    if (q.includes("history") || q.includes("decision") || q.includes("approv")) return role !== "Employee" ? { text: "Opening decision history…", to: "/approvals" } : { text: "You don't have access to decision history — ask your manager or HR." };
+    if (q.includes("team")) return { text: "Opening your team…", to: "/my-team" };
+    return { text: "I can help you find people, facts, and pages — try asking about an employee, their pay, or who's on leave today." };
+  };
+
+  const send = (text) => {
+    if (!text.trim()) return;
+    setMessages(m => [...m, { from: "user", text }]);
+    setInput("");
+    const res = answerFor(text);
+    window.setTimeout(() => {
+      setMessages(m => [...m, { from: "bot", text: res.text }]);
+      if (res.to) window.setTimeout(() => { go(res.to); setOpen(false); }, 700);
+    }, 350);
+  };
+
+  return <>
+    {open && <div className="ask-hris-panel" role="dialog" aria-label="Ask HRIS">
+      <div className="ask-hris-header">
+        <span className="ask-hris-avatar"><Package size={20}/></span>
+        <div><h3>Ask HRIS</h3><p>Find people, facts and pages — instantly</p></div>
+        <button className="ask-hris-close" aria-label="Close Ask HRIS" onClick={() => setOpen(false)}><X size={18}/></button>
+      </div>
+      <div className="ask-hris-body" ref={bodyRef}>
+        {messages.map((m, i) => <div className={`ask-hris-bubble ${m.from}`} key={i}>{m.text}</div>)}
+        <div className="ask-hris-suggestions">
+          {suggestions.map(s => <button key={s.text} onClick={() => send(s.text)}>{s.text}</button>)}
+        </div>
+      </div>
+      <div className="ask-hris-input-row">
+        <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask about a person, a fact or a page…" onKeyDown={e => { if (e.key === "Enter") send(input); }}/>
+        <button className="ask-hris-send" aria-label="Send" onClick={() => send(input)}><Send size={16}/></button>
+      </div>
+    </div>}
+    <button className={`ask-hris ${scrolling && !open ? "docked" : ""}`} aria-label={open ? "Close Ask HRIS" : "Ask HRIS"} onClick={() => { setScrolling(false); setOpen(v => !v); }}><MessageCircle size={16}/>Ask HRIS</button>
+  </>;
+}
+function LogoDefs() {
+  return <svg width="0" height="0" style={{position:"absolute"}} aria-hidden="true"><symbol id="mc-logo" viewBox="0 0 247 68">    <rect width="16.8494" height="67.3976" fill="currentColor"/><rect x="25.2734" width="16.8494" height="67.3976" fill="currentColor"/><rect x="50.5469" width="16.8494" height="67.3976" fill="#018038"/>    <path d="M159.727 38.4254V21.4706H153.263V16.5684H172.114V21.4706H165.68V38.4254H159.727Z" fill="currentColor"/><path d="M143.582 38.4256C141.866 38.4256 140.211 38.2123 138.614 37.7859C137.038 37.3391 135.751 36.7704 134.754 36.0799L136.699 31.6322C137.637 32.2415 138.714 32.7492 139.931 33.1554C141.168 33.5412 142.395 33.7342 143.612 33.7342C144.43 33.7342 145.089 33.6631 145.587 33.5209C146.086 33.3585 146.445 33.1554 146.665 32.9117C146.904 32.6476 147.024 32.343 147.024 31.9978C147.024 31.5103 146.804 31.1245 146.365 30.8401C145.926 30.5558 145.358 30.3223 144.66 30.1395C143.961 29.9567 143.183 29.7739 142.325 29.5911C141.487 29.4083 140.639 29.1748 139.782 28.8905C138.944 28.6061 138.176 28.2406 137.477 27.7938C136.779 27.3267 136.21 26.7275 135.771 25.9964C135.332 25.245 135.113 24.3006 135.113 23.1633C135.113 21.8838 135.452 20.7262 136.131 19.6904C136.829 18.6547 137.866 17.822 139.243 17.1924C140.619 16.5628 142.335 16.248 144.39 16.248C145.767 16.248 147.114 16.4105 148.43 16.7355C149.767 17.0401 150.954 17.4971 151.992 18.1063L150.166 22.5845C149.168 22.0361 148.181 21.63 147.203 21.3659C146.226 21.0816 145.278 20.9395 144.36 20.9395C143.542 20.9395 142.884 21.0308 142.385 21.2136C141.886 21.3761 141.527 21.5995 141.308 21.8838C141.088 22.1681 140.979 22.4931 140.979 22.8587C140.979 23.3258 141.188 23.7015 141.607 23.9858C142.046 24.2498 142.615 24.4732 143.313 24.656C144.031 24.8185 144.809 24.9911 145.647 25.1739C146.505 25.3567 147.353 25.5902 148.191 25.8746C149.049 26.1386 149.827 26.5041 150.525 26.9713C151.223 27.4181 151.782 28.0172 152.201 28.7686C152.64 29.4997 152.859 30.4238 152.859 31.5408C152.859 32.7797 152.51 33.9271 151.812 34.9832C151.134 36.019 150.106 36.8516 148.73 37.4812C147.373 38.1108 145.657 38.4256 143.582 38.4256Z" fill="currentColor"/><path d="M122.363 38.4249C119.271 38.4249 116.857 37.5617 115.121 35.8355C113.385 34.1092 112.518 31.6619 112.518 28.4937V16.6738H118.443V28.3109C118.443 30.1388 118.792 31.4487 119.49 32.2408C120.209 33.0328 121.186 33.4288 122.423 33.4288C123.66 33.4288 124.628 33.0328 125.326 32.2408C126.024 31.4487 126.374 30.1388 126.374 28.3109V16.6738H132.209V28.4937C132.209 31.6619 131.341 34.1092 129.606 35.8355C127.87 37.5617 125.456 38.4249 122.363 38.4249Z" fill="currentColor"/><path d="M83.8672 38.4254V16.5684H88.7363L97.3993 31.4311H94.8303L103.254 16.5684H108.123L108.183 38.4254H102.746L102.687 25.2175H103.613L97.3096 36.2709H94.6809L88.1986 25.2175H89.3338V38.4254H83.8672Z" fill="currentColor"/><path d="M233.216 67.4746V58.5368L234.576 62.13L225.319 46.3379H231.501L238.185 57.7819H234.606L241.32 46.3379H246.998L237.771 62.13L239.072 58.5368V67.4746H233.216Z" fill="currentColor"/><path d="M203.911 67.4746V46.3379H208.753L220.218 60.4089H217.931V46.3379H223.693V67.4746H218.851L207.386 53.4036H209.673V67.4746H203.911Z" fill="currentColor"/><path d="M178.17 67.4746L187.325 46.3379H193.103L202.287 67.4746H196.184L189.014 49.2668H191.325L184.155 67.4746H178.17ZM183.177 63.368L184.688 58.9595H194.821L196.332 63.368H183.177Z" fill="currentColor"/><path d="M160.013 67.4746V46.3379H169.495C171.391 46.3379 173.021 46.6499 174.384 47.2739C175.767 47.898 176.834 48.8038 177.585 49.9915C178.335 51.1591 178.711 52.5481 178.711 54.1585C178.711 55.7487 178.335 57.1277 177.585 58.2952C176.834 59.4628 175.767 60.3686 174.384 61.0128C173.021 61.6368 171.391 61.9488 169.495 61.9488H163.272L165.88 59.352V67.4746H160.013ZM165.88 59.9862L163.272 57.2384H169.139C170.364 57.2384 171.273 56.9666 171.866 56.4231C172.478 55.8796 172.784 55.1247 172.784 54.1585C172.784 53.1721 172.478 52.4071 171.866 51.8636C171.273 51.3201 170.364 51.0484 169.139 51.0484H163.272L165.88 48.3006V59.9862Z" fill="currentColor"/><path d="M131.831 67.4746V46.3379H136.66L145.253 60.7108H142.705L151.06 46.3379H155.889L155.949 67.4746H150.556L150.497 54.702H151.415L145.164 65.3911H142.557L136.127 54.702H137.253V67.4746H131.831Z" fill="currentColor"/><path d="M117.167 67.7699C115.505 67.7699 113.972 67.5025 112.567 66.9678C111.162 66.433 109.935 65.6803 108.886 64.7097C107.857 63.7194 107.056 62.5706 106.482 61.2633C105.908 59.9561 105.621 58.52 105.621 56.9553C105.621 55.3905 105.908 53.9545 106.482 52.6472C107.056 51.34 107.857 50.2011 108.886 49.2305C109.935 48.2402 111.162 47.4776 112.567 46.9428C113.972 46.408 115.505 46.1406 117.167 46.1406C118.849 46.1406 120.383 46.408 121.768 46.9428C123.173 47.4776 124.39 48.2402 125.419 49.2305C126.448 50.2011 127.25 51.34 127.823 52.6472C128.417 53.9545 128.714 55.3905 128.714 56.9553C128.714 58.52 128.417 59.966 127.823 61.293C127.25 62.6003 126.448 63.7392 125.419 64.7097C124.39 65.6803 123.173 66.433 121.768 66.9678C120.383 67.5025 118.849 67.7699 117.167 67.7699ZM117.167 62.8974C117.959 62.8974 118.691 62.7588 119.364 62.4815C120.057 62.2042 120.65 61.808 121.145 61.293C121.659 60.7582 122.055 60.1244 122.332 59.3916C122.629 58.6587 122.777 57.8466 122.777 56.9553C122.777 56.0442 122.629 55.2321 122.332 54.519C122.055 53.7862 121.659 53.1622 121.145 52.6472C120.65 52.1125 120.057 51.7064 119.364 51.4291C118.691 51.1518 117.959 51.0132 117.167 51.0132C116.376 51.0132 115.634 51.1518 114.941 51.4291C114.269 51.7064 113.675 52.1125 113.16 52.6472C112.666 53.1622 112.27 53.7862 111.973 54.519C111.696 55.2321 111.558 56.0442 111.558 56.9553C111.558 57.8466 111.696 58.6587 111.973 59.3916C112.27 60.1244 112.666 60.7582 113.16 61.293C113.675 61.808 114.269 62.2042 114.941 62.4815C115.634 62.7588 116.376 62.8974 117.167 62.8974Z" fill="currentColor"/><path d="M95.2988 67.7699C93.6564 67.7699 92.1327 67.5124 90.7277 66.9975C89.3425 66.4627 88.1354 65.71 87.1065 64.7395C86.0973 63.7689 85.3057 62.63 84.7319 61.3227C84.158 59.9957 83.8711 58.5398 83.8711 56.9553C83.8711 55.3707 84.158 53.9248 84.7319 52.6175C85.3057 51.2905 86.0973 50.1417 87.1065 49.1711C88.1354 48.2006 89.3425 47.4578 90.7277 46.9428C92.1327 46.408 93.6564 46.1406 95.2988 46.1406C97.2182 46.1406 98.9299 46.4773 100.434 47.1508C101.957 47.8242 103.224 48.7948 104.233 50.0624L100.493 53.4494C99.8204 52.6571 99.0783 52.053 98.267 51.6371C97.4755 51.2211 96.585 51.0132 95.5956 51.0132C94.7447 51.0132 93.9631 51.1518 93.2507 51.4291C92.5383 51.7064 91.9249 52.1125 91.4104 52.6472C90.9157 53.1622 90.5199 53.7862 90.2231 54.519C89.9461 55.2519 89.8075 56.064 89.8075 56.9553C89.8075 57.8466 89.9461 58.6587 90.2231 59.3916C90.5199 60.1244 90.9157 60.7582 91.4104 61.293C91.9249 61.808 92.5383 62.2042 93.2507 62.4815C93.9631 62.7588 94.7447 62.8974 95.5956 62.8974C96.585 62.8974 97.4755 62.6894 98.267 62.2735C99.0783 61.8575 99.8204 61.2534 100.493 60.4611L104.233 63.8481C103.224 65.096 101.957 66.0665 100.434 66.7598C98.9299 67.4332 97.2182 67.7699 95.2988 67.7699Z" fill="currentColor"/>  </symbol><symbol id="mc-mark" viewBox="0 0 67.4 67.4"><rect width="16.8494" height="67.3976" fill="currentColor"/><rect x="25.2734" width="16.8494" height="67.3976" fill="currentColor"/><rect x="50.5469" width="16.8494" height="67.3976" fill="#018038"/></symbol></svg>;
+}
+function PreviewSidebar({ path, go, role, drawer, setDrawer }) {
+  const items = role === "Team Lead" ? MY_SPACE_FLAT_TEAM_LEAD : MY_SPACE_FLAT_EMPLOYEE;
+  const identity = roleProfile(role);
+  const displayName = PREVIEW_DISPLAY_NAME[role] || identity.name;
+  return <aside className={`sidebar ${drawer ? "open" : ""}`}>
+    <div className="brand"><a className="brandmark" href="/my-dashboard" onClick={e=>{e.preventDefault();go("/my-dashboard")}}><svg className="logo-full"><use href="#mc-logo"/></svg><svg className="logo-mark"><use href="#mc-mark"/></svg></a></div>
+    <div className="navlabel">My Space</div>
+    <div className="nav-scroll"><div className="nav-group"><div className="nav-group-items"><div>{items.map(([label,to,Icon,badge]) => <button title={label} key={to} className={path===to?"active":""} onClick={()=>{go(to);setDrawer(false)}}><Icon size={18}/><span>{label}</span>{badge && <span className="nav-badge">{badge}</span>}</button>)}</div></div></div></div>
+    <div className="side-user"><Avatar initials={identity.initials} small/><span><strong>{displayName}</strong><small>{role} · {identity.team}</small></span></div>
+  </aside>;
+}
+function Shell({ path, go, children, role, setRole, open, isMySpace }) {
+  const showRequest = isMySpace && path !== "/approvals" && path !== "/decision-history";
   role = role || "Super Admin";
-  const [drawer, setDrawer] = useState(false); const [collapsed,setCollapsed]=useState(false); const [toast,setToast]=useState(null); const [globalQ,setGlobalQ]=useState(""); const [notices,setNotices]=useState(false); const [account,setAccount]=useState(false); const [quickCreate,setQuickCreate]=useState(false);
+  const isPreviewRole = role === "Team Lead" || role === "Employee";
+  const [drawer, setDrawer] = useState(false); const [collapsed,setCollapsed]=useState(false); const [toast,setToast]=useState(null); const [globalQ,setGlobalQ]=useState(""); const [notices,setNotices]=useState(false); const [account,setAccount]=useState(false); const [quickCreate,setQuickCreate]=useState(false); const [scrolling,setScrolling]=useState(false); const [closedGroups,setClosedGroups]=useState(()=>new Set());
+  const toggleGroup=(group)=>setClosedGroups(prev=>{const next=new Set(prev);next.has(group)?next.delete(group):next.add(group);return next});
   useEffect(()=>{const fn=e=>{setToast(e.detail);window.clearTimeout(window.__hrisToast);window.__hrisToast=window.setTimeout(()=>setToast(null),2600)};window.addEventListener("prototype-toast",fn);return()=>window.removeEventListener("prototype-toast",fn)},[]);
-  const crumb = path.startsWith("/teams/") ? (teams[Number(path.split("/").pop())]?.name || "Team Detail") : path.startsWith("/employees/") ? (EMPLOYEE_DIRECTORY.find(e=>slugify(e.name)===path.slice(11))?.name || "Matilda Ipeh Anashie") : path.startsWith("/documents/") ? ([...DOCUMENT_TEMPLATES,...COMPANY_DOCUMENTS].find(([n])=>slugify(n)===path.slice(11))?.[0] || "Document") : (routeMeta[path]?.[0] || "Dashboard");
+  useEffect(()=>{let t;const fn=()=>{setScrolling(true);window.clearTimeout(t);t=window.setTimeout(()=>setScrolling(false),700)};window.addEventListener("scroll",fn,{passive:true});return()=>{window.removeEventListener("scroll",fn);window.clearTimeout(t)}},[]);
+  const identity=roleProfile(role);
+  useEffect(()=>{setQuickCreate(false);setGlobalQ("")},[role]);
+  const crumbParent = isPreviewRole ? "Pages" : path.startsWith("/teams/") ? "Teams" : path.startsWith("/employees/") ? "Employees" : path.startsWith("/documents/") ? "Documents" : null;
+  const crumb = isPreviewRole ? (path === "/my-dashboard" ? "Dashboard" : (routeMeta[path]?.[0] || "Dashboard")) : path.startsWith("/teams/") ? (teams[Number(path.split("/").pop())]?.name || "Team Detail") : path.startsWith("/employees/") ? (EMPLOYEE_DIRECTORY.find(e=>slugify(e.name)===path.slice(11))?.name || "Matilda Ipeh Anashie") : path.startsWith("/documents/") ? ([...DOCUMENT_TEMPLATES,...COMPANY_DOCUMENTS].find(([n])=>slugify(n)===path.slice(11))?.[0] || "Document") : (routeMeta[path]?.[0] || "Dashboard");
   const searchHits=employees.filter(e=>e[0].toLowerCase().includes(globalQ.toLowerCase())).slice(0,4);
-  return <div className={`app-shell ${collapsed?"sidebar-collapsed":""}`}>
-    <aside className={`sidebar ${drawer ? "open" : ""}`}>  <svg width="0" height="0" style={{position:"absolute"}} aria-hidden="true"><symbol id="mc-logo" viewBox="0 0 247 68">    <rect width="16.8494" height="67.3976" fill="currentColor"/><rect x="25.2734" width="16.8494" height="67.3976" fill="currentColor"/><rect x="50.5469" width="16.8494" height="67.3976" fill="#018038"/>    <path d="M159.727 38.4254V21.4706H153.263V16.5684H172.114V21.4706H165.68V38.4254H159.727Z" fill="currentColor"/><path d="M143.582 38.4256C141.866 38.4256 140.211 38.2123 138.614 37.7859C137.038 37.3391 135.751 36.7704 134.754 36.0799L136.699 31.6322C137.637 32.2415 138.714 32.7492 139.931 33.1554C141.168 33.5412 142.395 33.7342 143.612 33.7342C144.43 33.7342 145.089 33.6631 145.587 33.5209C146.086 33.3585 146.445 33.1554 146.665 32.9117C146.904 32.6476 147.024 32.343 147.024 31.9978C147.024 31.5103 146.804 31.1245 146.365 30.8401C145.926 30.5558 145.358 30.3223 144.66 30.1395C143.961 29.9567 143.183 29.7739 142.325 29.5911C141.487 29.4083 140.639 29.1748 139.782 28.8905C138.944 28.6061 138.176 28.2406 137.477 27.7938C136.779 27.3267 136.21 26.7275 135.771 25.9964C135.332 25.245 135.113 24.3006 135.113 23.1633C135.113 21.8838 135.452 20.7262 136.131 19.6904C136.829 18.6547 137.866 17.822 139.243 17.1924C140.619 16.5628 142.335 16.248 144.39 16.248C145.767 16.248 147.114 16.4105 148.43 16.7355C149.767 17.0401 150.954 17.4971 151.992 18.1063L150.166 22.5845C149.168 22.0361 148.181 21.63 147.203 21.3659C146.226 21.0816 145.278 20.9395 144.36 20.9395C143.542 20.9395 142.884 21.0308 142.385 21.2136C141.886 21.3761 141.527 21.5995 141.308 21.8838C141.088 22.1681 140.979 22.4931 140.979 22.8587C140.979 23.3258 141.188 23.7015 141.607 23.9858C142.046 24.2498 142.615 24.4732 143.313 24.656C144.031 24.8185 144.809 24.9911 145.647 25.1739C146.505 25.3567 147.353 25.5902 148.191 25.8746C149.049 26.1386 149.827 26.5041 150.525 26.9713C151.223 27.4181 151.782 28.0172 152.201 28.7686C152.64 29.4997 152.859 30.4238 152.859 31.5408C152.859 32.7797 152.51 33.9271 151.812 34.9832C151.134 36.019 150.106 36.8516 148.73 37.4812C147.373 38.1108 145.657 38.4256 143.582 38.4256Z" fill="currentColor"/><path d="M122.363 38.4249C119.271 38.4249 116.857 37.5617 115.121 35.8355C113.385 34.1092 112.518 31.6619 112.518 28.4937V16.6738H118.443V28.3109C118.443 30.1388 118.792 31.4487 119.49 32.2408C120.209 33.0328 121.186 33.4288 122.423 33.4288C123.66 33.4288 124.628 33.0328 125.326 32.2408C126.024 31.4487 126.374 30.1388 126.374 28.3109V16.6738H132.209V28.4937C132.209 31.6619 131.341 34.1092 129.606 35.8355C127.87 37.5617 125.456 38.4249 122.363 38.4249Z" fill="currentColor"/><path d="M83.8672 38.4254V16.5684H88.7363L97.3993 31.4311H94.8303L103.254 16.5684H108.123L108.183 38.4254H102.746L102.687 25.2175H103.613L97.3096 36.2709H94.6809L88.1986 25.2175H89.3338V38.4254H83.8672Z" fill="currentColor"/><path d="M233.216 67.4746V58.5368L234.576 62.13L225.319 46.3379H231.501L238.185 57.7819H234.606L241.32 46.3379H246.998L237.771 62.13L239.072 58.5368V67.4746H233.216Z" fill="currentColor"/><path d="M203.911 67.4746V46.3379H208.753L220.218 60.4089H217.931V46.3379H223.693V67.4746H218.851L207.386 53.4036H209.673V67.4746H203.911Z" fill="currentColor"/><path d="M178.17 67.4746L187.325 46.3379H193.103L202.287 67.4746H196.184L189.014 49.2668H191.325L184.155 67.4746H178.17ZM183.177 63.368L184.688 58.9595H194.821L196.332 63.368H183.177Z" fill="currentColor"/><path d="M160.013 67.4746V46.3379H169.495C171.391 46.3379 173.021 46.6499 174.384 47.2739C175.767 47.898 176.834 48.8038 177.585 49.9915C178.335 51.1591 178.711 52.5481 178.711 54.1585C178.711 55.7487 178.335 57.1277 177.585 58.2952C176.834 59.4628 175.767 60.3686 174.384 61.0128C173.021 61.6368 171.391 61.9488 169.495 61.9488H163.272L165.88 59.352V67.4746H160.013ZM165.88 59.9862L163.272 57.2384H169.139C170.364 57.2384 171.273 56.9666 171.866 56.4231C172.478 55.8796 172.784 55.1247 172.784 54.1585C172.784 53.1721 172.478 52.4071 171.866 51.8636C171.273 51.3201 170.364 51.0484 169.139 51.0484H163.272L165.88 48.3006V59.9862Z" fill="currentColor"/><path d="M131.831 67.4746V46.3379H136.66L145.253 60.7108H142.705L151.06 46.3379H155.889L155.949 67.4746H150.556L150.497 54.702H151.415L145.164 65.3911H142.557L136.127 54.702H137.253V67.4746H131.831Z" fill="currentColor"/><path d="M117.167 67.7699C115.505 67.7699 113.972 67.5025 112.567 66.9678C111.162 66.433 109.935 65.6803 108.886 64.7097C107.857 63.7194 107.056 62.5706 106.482 61.2633C105.908 59.9561 105.621 58.52 105.621 56.9553C105.621 55.3905 105.908 53.9545 106.482 52.6472C107.056 51.34 107.857 50.2011 108.886 49.2305C109.935 48.2402 111.162 47.4776 112.567 46.9428C113.972 46.408 115.505 46.1406 117.167 46.1406C118.849 46.1406 120.383 46.408 121.768 46.9428C123.173 47.4776 124.39 48.2402 125.419 49.2305C126.448 50.2011 127.25 51.34 127.823 52.6472C128.417 53.9545 128.714 55.3905 128.714 56.9553C128.714 58.52 128.417 59.966 127.823 61.293C127.25 62.6003 126.448 63.7392 125.419 64.7097C124.39 65.6803 123.173 66.433 121.768 66.9678C120.383 67.5025 118.849 67.7699 117.167 67.7699ZM117.167 62.8974C117.959 62.8974 118.691 62.7588 119.364 62.4815C120.057 62.2042 120.65 61.808 121.145 61.293C121.659 60.7582 122.055 60.1244 122.332 59.3916C122.629 58.6587 122.777 57.8466 122.777 56.9553C122.777 56.0442 122.629 55.2321 122.332 54.519C122.055 53.7862 121.659 53.1622 121.145 52.6472C120.65 52.1125 120.057 51.7064 119.364 51.4291C118.691 51.1518 117.959 51.0132 117.167 51.0132C116.376 51.0132 115.634 51.1518 114.941 51.4291C114.269 51.7064 113.675 52.1125 113.16 52.6472C112.666 53.1622 112.27 53.7862 111.973 54.519C111.696 55.2321 111.558 56.0442 111.558 56.9553C111.558 57.8466 111.696 58.6587 111.973 59.3916C112.27 60.1244 112.666 60.7582 113.16 61.293C113.675 61.808 114.269 62.2042 114.941 62.4815C115.634 62.7588 116.376 62.8974 117.167 62.8974Z" fill="currentColor"/><path d="M95.2988 67.7699C93.6564 67.7699 92.1327 67.5124 90.7277 66.9975C89.3425 66.4627 88.1354 65.71 87.1065 64.7395C86.0973 63.7689 85.3057 62.63 84.7319 61.3227C84.158 59.9957 83.8711 58.5398 83.8711 56.9553C83.8711 55.3707 84.158 53.9248 84.7319 52.6175C85.3057 51.2905 86.0973 50.1417 87.1065 49.1711C88.1354 48.2006 89.3425 47.4578 90.7277 46.9428C92.1327 46.408 93.6564 46.1406 95.2988 46.1406C97.2182 46.1406 98.9299 46.4773 100.434 47.1508C101.957 47.8242 103.224 48.7948 104.233 50.0624L100.493 53.4494C99.8204 52.6571 99.0783 52.053 98.267 51.6371C97.4755 51.2211 96.585 51.0132 95.5956 51.0132C94.7447 51.0132 93.9631 51.1518 93.2507 51.4291C92.5383 51.7064 91.9249 52.1125 91.4104 52.6472C90.9157 53.1622 90.5199 53.7862 90.2231 54.519C89.9461 55.2519 89.8075 56.064 89.8075 56.9553C89.8075 57.8466 89.9461 58.6587 90.2231 59.3916C90.5199 60.1244 90.9157 60.7582 91.4104 61.293C91.9249 61.808 92.5383 62.2042 93.2507 62.4815C93.9631 62.7588 94.7447 62.8974 95.5956 62.8974C96.585 62.8974 97.4755 62.6894 98.267 62.2735C99.0783 61.8575 99.8204 61.2534 100.493 60.4611L104.233 63.8481C103.224 65.096 101.957 66.0665 100.434 66.7598C98.9299 67.4332 97.2182 67.7699 95.2988 67.7699Z" fill="currentColor"/>  </symbol><symbol id="mc-mark" viewBox="0 0 67.4 67.4"><rect width="16.8494" height="67.3976" fill="currentColor"/><rect x="25.2734" width="16.8494" height="67.3976" fill="currentColor"/><rect x="50.5469" width="16.8494" height="67.3976" fill="#018038"/></symbol></svg><div className="brand"><a className="brandmark" href="/dashboard" onClick={e=>{e.preventDefault();go("/dashboard")}}><svg className="logo-full"><use href="#mc-logo"/></svg><svg className="logo-mark"><use href="#mc-mark"/></svg></a><IconButton icon={PanelLeftClose} label="Close menu" onClick={() => setDrawer(false)}/></div><div className="nav-scroll">{navGroups.filter(([group])=>roleRules[role].includes(group)).map(([group, items]) => <div className="nav-group" key={group}><span>{group}</span>{items.filter(([label])=>role!=="Employee"||!["My Team","Approvals"].includes(label)).map(([label,to,Icon]) => <button title={label} key={to} className={(path === to || (to === "/employees" && path.startsWith("/employees/")) || (to === "/teams" && path.startsWith("/teams/")) || (to === "/settings" && (path.startsWith("/settings/")||path==="/activity-logs"||path==="/feedback-form-builder"))) ? "active" : ""} onClick={() => { go(to); setDrawer(false); }}><Icon size={18}/><span>{label}</span></button>)}</div>)}</div><div className="sidebar-foot"><div className="side-user"><Avatar initials="MA"/><div className="who"><strong>Matilda Ipeh Anashie</strong><small>{role}</small></div></div><button onClick={()=>setCollapsed(!collapsed)}><PanelLeftClose size={16}/><span>{collapsed?"Expand":"Collapse"}</span></button></div></aside>
-    {drawer && <button className="scrim" aria-label="Close menu" onClick={() => setDrawer(false)}/>}
-    <div className="workspace"><header className="topbar"><button className="menu-btn" aria-label="Open menu" onClick={() => setDrawer(true)}><Menu size={20}/></button><svg className="mobile-logo"><use href="#mc-logo"/></svg><div className="breadcrumbs"><span>Pages</span><b>/</b><strong>{crumb}</strong></div><div className="top-search"><Search size={17}/><input aria-label="Search employees globally" placeholder="Search employees…" value={globalQ} onChange={e=>setGlobalQ(e.target.value)}/>{globalQ&&<div className="global-results">{searchHits.length?searchHits.map(e=><button key={e[0]} onClick={()=>{go("/employees/matilda");setGlobalQ("")}}><Avatar initials={e[5]} small/><span><strong>{e[0]}</strong><small>{e[1]}</small></span></button>):<p>No employees found</p>}</div>}</div><div className="top-actions"><div className="quick-create"><Button icon={Plus} onClick={()=>{setQuickCreate(!quickCreate);setNotices(false);setAccount(false)}}>Create</Button>{quickCreate&&<div className="quick-create-menu"><button onClick={()=>{open?.("employee");setQuickCreate(false)}}><UserPlus size={14}/>Add Employee</button><button onClick={()=>{open?.("team");setQuickCreate(false)}}><Network size={14}/>Create Team</button><button onClick={()=>{open?.("user");setQuickCreate(false)}}><UserCog size={14}/>Invite User</button><button onClick={()=>{open?.("announcement");setQuickCreate(false)}}><Megaphone size={14}/>Post Announcement</button></div>}</div><span className="notif-wrap"><IconButton icon={Bell} label="Notifications" onClick={()=>{setNotices(!notices);setQuickCreate(false);setAccount(false)}}/><span className="notif-count">3</span></span><button className="account" title={`Matilda Ipeh Anashie — ${role}`} aria-label={`Account menu for Matilda Ipeh Anashie, ${role}`} onClick={()=>{setAccount(!account);setQuickCreate(false);setNotices(false)}}><Avatar initials="MA"/><ChevronDown size={14}/></button></div>{notices&&<div className="header-popover notifications"><h3>Needs your attention</h3><p>2 approvals and 1 reported issue need review.</p><button onClick={()=>{go("/leaves");setNotices(false)}}>Review now</button></div>}{account&&<div className="header-popover account-menu"><div className="account-menu-id"><Avatar initials="MA"/><span><strong>Matilda Ipeh Anashie</strong><small>{role}</small></span></div><label className="account-menu-lang"><Globe2 size={14}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>English</option><option>한국어</option></select><ChevronDown size={12}/></label><strong>Preview access</strong>{Object.keys(roleRules).map(item=><button className={role===item?"selected":""} key={item} onClick={()=>{setRole(item);setAccount(false);go(item==="Super Admin"||item==="Admin"?"/dashboard":"/my-dashboard");announce(`Viewing as ${item}`)}}>{item}</button>)}<button onClick={()=>go("/my-profile")}>My profile</button><button onClick={()=>announce("Signed out in prototype")}>Sign out</button></div>}</header><main className="content">{children}</main></div>
-    <button className="report-issue" onClick={()=>announce("Issue report opened — describe the problem and attach evidence")}><MessageSquareText size={16}/>Report an issue</button>{toast&&<div className={`toast ${toast.tone||"success"}`} role="status">{toast.message}<button aria-label="Dismiss notification" onClick={()=>setToast(null)}><X size={14}/></button></div>}
+  return <div className={`app-shell role-${slugify(role)} ${collapsed?"sidebar-collapsed":""}`}>
+    <LogoDefs/>{isPreviewRole ? <PreviewSidebar path={path} go={go} role={role} drawer={drawer} setDrawer={setDrawer}/> : <aside className={`sidebar ${drawer ? "open" : ""}`}><div className="brand"><a className="brandmark" href="/dashboard" onClick={e=>{e.preventDefault();go("/dashboard")}}><svg className="logo-full"><use href="#mc-logo"/></svg><svg className="logo-mark"><use href="#mc-mark"/></svg></a><IconButton icon={PanelLeftClose} label={drawer?"Close menu":collapsed?"Expand sidebar":"Collapse sidebar"} onClick={()=>drawer?setDrawer(false):setCollapsed(!collapsed)}/></div><div className="nav-scroll">{navGroups.filter(([group])=>roleRules[role].includes(group)).map(([group, items]) => <div className="nav-group" key={group}><button className="nav-group-toggle" aria-expanded={!closedGroups.has(group)} onClick={()=>toggleGroup(group)}><span>{group}</span><ChevronDown size={13} className={closedGroups.has(group)?"closed-arrow":""}/></button><div className={`nav-group-items ${closedGroups.has(group)?"closed":""}`}><div>{items.filter(([label])=>role!=="Employee"||!["My Team","Approvals"].includes(label)).map(([label,to,Icon]) => <button title={label} key={to} className={(path === to || (to === "/employees" && (path.startsWith("/employees/")||path==="/teams"||path.startsWith("/teams/")||path==="/org-chart")) || (to === "/leaves" && (path==="/leave-balances"||path==="/all-requests")) || (to === "/my-profile" && (path==="/my-salary"||path==="/my-documents"||path==="/my-feedbacks")) || (to === "/my-leaves" && (path==="/requests"||path==="/approvals")) || (to === "/settings" && (path.startsWith("/settings/")||path==="/activity-logs"||path==="/feedback-form-builder"))) ? "active" : ""} onClick={() => { go(to); setDrawer(false); }}><Icon size={18}/><span>{label}</span></button>)}</div></div></div>)}</div></aside>}
+    {drawer && <button className="scrim" aria-label="Close menu" onClick={() => setDrawer(false)}/>} 
+    <div className="workspace"><header className="topbar"><button className="menu-btn" aria-label="Open menu" onClick={() => setDrawer(true)}><Menu size={20}/></button><svg className="mobile-logo"><use href="#mc-logo"/></svg>{crumbParent&&<div className="breadcrumbs"><span>{crumbParent}</span><b>/</b><strong>{crumb}</strong></div>}<div className="top-search"><Search size={17}/><input aria-label="Search employees globally" placeholder={isPreviewRole ? "Search employees, documents…" : "Search employees…"} value={globalQ} onChange={e=>setGlobalQ(e.target.value)}/>{globalQ&&<div className="global-results">{searchHits.length?searchHits.map(e=><button key={e[0]} onClick={()=>{go("/employees/matilda");setGlobalQ("")}}><Avatar initials={e[5]} small/><span><strong>{e[0]}</strong><small>{e[1]}</small></span></button>):<p>No employees found</p>}</div>}</div><div className="top-actions"><label className="language" title="Language"><Globe2 size={16}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>English</option><option>한국어</option></select><ChevronDown size={12}/></label><div className="quick-create">{path==="/approvals"?null:showRequest?<Button icon={Plus} onClick={()=>open?.("new-request")}>Request</Button>:<><Button icon={Plus} onClick={()=>{setQuickCreate(!quickCreate);setNotices(false);setAccount(false)}}>Create</Button>{quickCreate&&<div className="quick-create-menu"><button onClick={()=>{open?.("employee");setQuickCreate(false)}}><UserPlus size={14}/>Add Employee</button><button onClick={()=>{open?.("team");setQuickCreate(false)}}><Network size={14}/>Create Team</button><button onClick={()=>{open?.("user");setQuickCreate(false)}}><UserCog size={14}/>Invite User</button><button onClick={()=>{open?.("announcement");setQuickCreate(false)}}><Megaphone size={14}/>Post Announcement</button></div>}</>}</div><span className="notif-wrap"><IconButton icon={Bell} label="Notifications" onClick={()=>{setNotices(!notices);setQuickCreate(false);setAccount(false)}}/><span className="notif-count">3</span></span><button className="account" title={`${identity.name} — ${role}`} aria-label={`Account menu for ${identity.name}, ${role}`} onClick={()=>{setAccount(!account);setQuickCreate(false);setNotices(false)}}><Avatar initials={identity.initials}/><ChevronDown size={14}/></button></div>{notices&&<div className="header-popover notifications"><h3>Needs your attention</h3><p>{role==="Employee"?"3 announcements and reminders need your attention.":role==="Team Lead"?"2 approvals and 1 reminder need your attention.":"2 approvals and 1 reported issue need review."}</p><button onClick={()=>{go(role==="Employee"?"/my-dashboard":role==="Team Lead"?"/approvals":"/leaves");setNotices(false)}}>Review now</button></div>}{account&&<div className="header-popover account-menu"><div className="account-menu-id"><Avatar initials={identity.initials}/><span><strong>{identity.name}</strong><small>{role}</small></span></div><strong>Quick links</strong><div className="profile-switch-list">{[["My Salary","/my-salary",CircleDollarSign],["My Documents","/my-documents",FileText],["My Feedback","/my-feedbacks",MessageSquareText]].map(([label,to,Icon])=><button className="profile-row" key={to} onClick={()=>{go(to);setAccount(false)}}><Icon size={16}/><span className="profile-row-copy"><strong>{label}</strong></span></button>)}</div><div className="preview-switch"><strong>{isPreviewRole?"Switch profile":"Preview access"}</strong><p>Prototype preview — lets you demo other role views. Not shipped to real users.</p><div className="profile-switch-list">{Object.keys(roleRules).map(item=>{const p=roleProfile(item); const displayName=(isPreviewRole&&PREVIEW_DISPLAY_NAME[item])?PREVIEW_DISPLAY_NAME[item]:p.name; return <button className={`profile-row ${role===item?"selected":""}`} key={item} onClick={()=>{setRole(item);setAccount(false);go(roleHome(item));announce(`Viewing as ${item}`)}}><Avatar initials={p.initials} small/><span className="profile-row-copy"><strong>{item}</strong><small>{displayName} · {p.title}</small></span>{role===item&&<Check size={16}/>}</button>})}</div></div><button onClick={()=>{const key=role==="Team Lead"?"team-lead":role==="Employee"?"employee":"admin";setAccount(false);go(`/login/${key}`)}}>Sign out</button></div>}</header><main className="content">{children}</main></div>
+    <AskHris role={role} go={go} identity={identity} scrolling={scrolling} setScrolling={setScrolling}/>
+    <button className={`report-issue ${scrolling?"docked":""}`} aria-label="Report an issue" onClick={()=>{setScrolling(false);announce("Issue report opened — describe the problem and attach evidence")}}><MessageSquareText size={16}/>Report an issue</button>{toast&&<div className={`toast ${toast.tone||"success"}`} role="status">{toast.message}<button aria-label="Dismiss notification" onClick={()=>setToast(null)}><X size={14}/></button></div>}
   </div>;
 }
 
+function DashboardIllustration() {
+  return <svg className="dash-illustration" viewBox="0 0 200 210" fill="none" aria-hidden="true">
+    <circle cx="100" cy="104" r="92" fill="#E6F4EC"/>
+    <ellipse cx="98" cy="204" rx="52" ry="7" fill="#01803814"/>
+    <path d="M60 210V158C60 128 77 114 99 114C121 114 138 128 138 158V210Z" fill="#016A2D"/>
+    <path d="M60 210V158C60 132 74 118 92 115C78 121 68 135 68 158V210Z" fill="#014F22"/>
+    <rect x="85" y="122" width="28" height="18" rx="6" fill="#F2C293"/>
+    <circle cx="99" cy="88" r="35" fill="#F7D2A6"/>
+    <path d="M65 84C65 61 80 46 99 46C118 46 133 61 133 84C124 71 116 67 99 67C82 67 74 71 65 84Z" fill="#2B2320"/>
+    <circle cx="87" cy="90" r="3.6" fill="#2B2320"/>
+    <circle cx="111" cy="90" r="3.6" fill="#2B2320"/>
+    <path d="M91 101C94 104 104 104 107 101" stroke="#2B2320" strokeWidth="2.6" strokeLinecap="round"/>
+    <rect x="89" y="135" width="20" height="9" rx="3" fill="#fff"/>
+    <path d="M136 148C150 141 160 122 157 104" stroke="#016A2D" strokeWidth="17" strokeLinecap="round"/>
+    <circle cx="159" cy="100" r="13" fill="#F7D2A6"/>
+    <path d="M62 190C68 178 78 172 92 172" stroke="#014F22" strokeWidth="10" strokeLinecap="round"/>
+  </svg>;
+}
 function Dashboard({ go, open, role }) {
   const pipMembers = EMPLOYEE_DIRECTORY.filter(e=>e.status==="On PIP");
   const departments = DEPARTMENTS;
   const pendingApprovals = 2 + 3;
   const metrics = [
     ["Open issues",3,"red","1 high priority"],
-    ["Pending approvals",pendingApprovals,"amber","2 leave · 3 HRM"],
+    ["Pending approvals",pendingApprovals,"amber","2 leave · 3 services"],
     ["Members on PIP",pipMembers.length,pipMembers.length?"amber":"neutral",pipMembers.length?"Review needed":"All clear"],
     ["On leave today",9,"neutral","Across 6 teams"],
     ["Active today",284,"green","99% of workforce"],
@@ -535,19 +737,22 @@ function Dashboard({ go, open, role }) {
   ];
   return <>
     <div className="dash-banner">
-      <div className="dash-banner-eyebrow">{(role||"Super Admin").toUpperCase()} · PEOPLE OPERATIONS</div>
-      <h1>Good morning, <span>Matilda</span></h1>
-      <p>Here’s what needs attention across MUST today — 12 August 2026.</p>
-      <div className="dash-banner-actions">
-        <Button icon={UserPlus} onClick={() => open("employee")}>Add Employee</Button>
-        <Button kind="secondary" icon={Megaphone} onClick={() => open("announcement")}>Post Announcement</Button>
-        <Button kind="secondary" icon={UserCog} onClick={() => open("user")}>Invite User</Button>
-        <Button kind="secondary" icon={BarChart3} onClick={() => go("/reports")}>Run Report</Button>
+      <div className="dash-banner-copy">
+        <div className="dash-banner-eyebrow">{(role||"Super Admin").toUpperCase()} · PEOPLE OPERATIONS</div>
+        <h1>Good morning, <span>Matilda</span> 👋</h1>
+        <p>Here’s what needs attention across MUST today — 12 August 2026.</p>
+        <div className="dash-banner-actions">
+          <Button icon={UserPlus} onClick={() => open("employee")}>Add Employee</Button>
+          <Button kind="secondary" icon={Megaphone} onClick={() => open("announcement")}>Post Announcement</Button>
+          <Button kind="secondary" icon={UserCog} onClick={() => open("user")}>Invite User</Button>
+          <Button kind="secondary" icon={BarChart3} onClick={() => go("/reports")}>Run Report</Button>
+        </div>
       </div>
+      <DashboardIllustration/>
     </div>
     <div className="metric-grid">{metrics.map(([label,value,tone,caption]) => <Card className="metric" key={label}><span className="metric-label">{label}</span><strong className={`metric-value ${tone}`}>{value}</strong><small className={`metric-caption ${tone}`}>{caption}</small></Card>)}</div>
     <div className="admin-dashboard-grid lower">
-      <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your action</h2><p>Approvals, reminders and system health</p></div><button onClick={()=>go("/leaves")}>Review all <ChevronRight size={15}/></button></div>{[["2","Leave requests","One request overlaps with a teammate","Review","/leaves"],["3","HRM requests","Equipment and document requests","Review","/all-requests"],["1","Reported issue","Employee profile export failed","Open","/settings/platform"],["94","Feedback responses","Open across active cycles","Remind","/feedbacks"],["3","Missing manager","Employees with no reporting line set","Assign","/employees"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>
+      <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your action</h2><p>Approvals, reminders and system health</p></div><button onClick={()=>go("/leaves")}>Review all <ChevronRight size={15}/></button></div>{[["2","Leave requests","One request overlaps with a teammate","Review","/leaves"],["3","Employee Services requests","Equipment and document requests","Review","/all-requests"],["1","Reported issue","Employee profile export failed","Open","/settings/platform"],["94","Feedback responses","Open across active cycles","Remind","/feedbacks"],["3","Missing manager","Employees with no reporting line set","Assign","/employees"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>
       <Card><div className="card-head"><div><h2><History size={18}/>Activity</h2><p>Recent actions across the system</p></div><button onClick={()=>go("/activity-logs")}>View all <ChevronRight size={15}/></button></div><div className="people-list">{[0,3,4,5,6].map(i=>ACTIVITY_LOG[i]).map((r,i)=><button key={i} onClick={()=>go("/activity-logs")}><Avatar initials={r[1]} small/><div><strong>{r[2]}</strong><span>{r[4]}</span></div><time>{r[0].split(",")[0]}</time></button>)}</div></Card>
     </div>
     <div className="admin-dashboard-grid lower">
@@ -571,32 +776,49 @@ const myActivities = [["Annual Leave","12–14 Aug · 3 days","Pending"],["Casua
 function MySpacePage({path,go,role,open}) {
   const isLead=role==="Team Lead"; const title=routeMeta[path]?.[1]||"My Dashboard";
   if(path==="/my-dashboard") return <><PageTitle className="greeting-title" title={<>Good morning, <span>{isLead?"Ethan":"Matilda"}</span></>} subtitle="Here’s what’s happening at MUST today — 12 August 2026." actions={<Button kind="secondary" icon={FileText} onClick={()=>go("/my-salary")}>View payslip</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>per hour</p></Card><Card className="simple-metric"><span>Latest payslip</span><strong>$588.00</strong><p>June 2026 · 392 hrs</p></Card><Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card></div><div className="employee-dashboard-grid">{isLead?<Card className="attention-card"><div className="card-head"><div><h2><span className="count-badge">2</span>Requests awaiting your approval</h2></div><button onClick={()=>go("/approvals")}>View all <ChevronRight size={15}/></button></div>{[["SG","Sophie Grant","Annual Leave","12–14 Aug · 3 days","2 overlapping teammates"],["FH","Felix Harper","Overtime","14 Aug · 2 hrs",""]].map(([ini,name,type,date,overlap])=><button className="approval-row" key={name} onClick={()=>go("/approvals")}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{type} · {date}</small>{overlap&&<em>{overlap}</em>}</span><b>Review</b></button>)}<div className="active-request"><strong>Your active request</strong><span>Annual Leave · 12–14 Aug</span><Status>Pending</Status></div></Card>:<ActivityCard go={go}/>}<AttentionPanel go={go}/></div><div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div></>;
-  if(path==="/my-profile") return <><PageTitle title="My Profile" subtitle="Your personal and employment information" actions={<Button kind="secondary" icon={Edit3}>Request a change</Button>}/><div className="detail-grid"><Card><h2>Personal information</h2><Info rows={[["Full name","Matilda Ipeh Anashie"],["Work email","matilda.anashie@must.company"],["Country","Ghana"],["Phone","+233 24 000 0000"]]}/></Card><Card><h2>Employment information</h2><Info rows={[["Job title","Senior Product Designer"],["Team","BLK-UXI"],["Reports to","Ismail Gorkem Kara"],["Start date","26 Feb 2025"]]}/></Card><LeaveBalanceCard go={go}/></div></>;
+  if(path==="/my-profile") return <RoleProfile role={role} go={go}/>;
   if(path==="/my-salary") return <><PageTitle title="My Salary" subtitle="Payslips and salary history" actions={<Button icon={Download}>Download latest</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Latest net pay</span><strong>$588.00</strong><p>June 2026</p></Card><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>effective Feb 2025</p></Card><Card className="simple-metric"><span>Hours</span><strong>392</strong><p>June 2026</p></Card></div><Card><DataTable columns={["Pay period","Hours","Gross","Deductions","Net","Status"]} rows={[["June 2026","392","$628.00","$40.00","$588.00","Completed"],["May 2026","376","$601.00","$38.00","$563.00","Completed"]]} renderActions={()=> <IconButton icon={Download} label="Download payslip"/>}/></Card></>;
   if(path==="/my-documents") return <><PageTitle title="My Documents" subtitle="Documents shared with you"/><Card><DataTable columns={["Document","Category","Shared","Status"]} rows={[["Employment Contract","Contract","26 Feb 2025","Completed"],["Employee Handbook","Policy","1 Aug 2026","Active"],["NDA","Legal","26 Feb 2025","Completed"]]} renderActions={()=> <IconButton icon={Download} label="Download document"/>}/></Card></>;
   if(path==="/my-team") return <><PageTitle title="My Team" subtitle="Your reporting line and team members"/><Card><div className="card-head"><div><h2>BLK-UXI · UX/UI Team</h2><p>2 members · Ismail Gorkem Kara, team lead</p></div></div><div className="people-list">{[["MA","Matilda Ipeh Anashie","Senior Product Designer"],["SG","Sneha Gupta","Product Designer"]].map(([ini,name,job])=><button key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{job}</span></div></button>)}</div></Card></>;
-  if(path==="/my-feedbacks") return <><PageTitle title="My Feedback" subtitle="Feedback cycles and responses"/><Card><DataTable columns={["Cycle","Reviewer","Due date","Progress","Status"]} rows={[["Q3 Performance Review","Ismail Gorkem Kara","20 Aug 2026","3 of 5 answers","Pending"],["Probation Review","Sneha Gupta","26 May 2025","Completed","Completed"]]} renderActions={()=> <Button kind="secondary">Continue</Button>}/></Card></>;
+  if(path==="/my-feedbacks") return <><PageTitle title="My Feedback" subtitle="Feedback cycles and responses"/><Card><DataTable columns={["Cycle","Reviewer","Due date","Progress","Status"]} rows={[["Q3 Performance Review","Ismail Gorkem Kara","20 Aug 2026","3 of 5 answers","Pending"],["Probation Review","Sneha Gupta","26 May 2025","5 of 5 answers","Completed"]]} renderActions={(r)=> <Button kind="secondary">{r[4]==="Completed"?"View":"Continue"}</Button>}/></Card></>;
   if(path==="/my-leaves") return <MyLeavesPage open={open}/>;
   if(path==="/requests") return <MyRequestsPage open={open}/>;
-  return <TeamApprovalsPage open={open} role={role}/>;
+  if(path==="/sops") return <><PageTitle title="SOPs & Policies" subtitle="Company standard operating procedures and policies"/><Card><Empty icon={FileText} title="No SOPs published yet" text="Standard operating procedures and policy documents will appear here once published."/></Card></>;
+  return <TeamApprovalsPage open={open} role={role} path={path}/>;
 }
 function ActivityCard({go}) { return <Card><div className="card-head"><div><h2>Latest activity</h2><p>Your most recent requests</p></div><button onClick={()=>go("/my-leaves")}>See all <ChevronRight size={15}/></button></div>{myActivities.slice(0,2).map(([name,date,status])=><div className="activity-item" key={name}><span><CalendarDays size={18}/></span><div><strong>{name}</strong><small>{date}</small></div><Status>{status}</Status></div>)}</Card> }
 function AttentionPanel({go}) { return <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your attention</h2><p>Announcements and reminders</p></div><button onClick={()=>announce("All reminders marked as read")}>Mark all read</button></div>{[["OKRs pending to fill","Complete your objectives","Due Jul 20"],["New document to sign","Awaiting your signature","Sign"],["Give peers feedback","Take a moment for your team","Feedback"]].map(([title,text,cta])=><button className="attention-row" key={title}><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card> }
 function TeamAvailability(){ return <Card><div className="card-head"><div><h2>Who’s out</h2><p>Your team, this week</p></div><button>Team calendar</button></div><div className="week-strip">{[["Mon","10"],["Tue","11"],["Wed","12"],["Thu","13"],["Fri","14"]].map(([day,date])=><span className={day==="Wed"?"active":""} key={day}><small>{day}</small><strong>{date}</strong></span>)}</div><div className="people-list">{[["SG","Sophie Grant","Annual · 12–14 Aug"],["FH","Felix Harper","Sick · Today"],["AM","Adam Mercer","WFH · Today"]].map(([ini,name,note])=><button key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{note}</span></div></button>)}</div></Card> }
 function LeaveBalanceCard({go}) { return <Card className="leave-balance-card"><div className="card-head"><h2><CalendarDays size={19}/>Annual Leave</h2><button onClick={()=>go?.("/my-leaves")}><ChevronRight size={16}/></button></div><div className="leave-summary"><strong>7</strong><span>days left<br/>of 15 days</span><b>47% available</b></div><div className="progress"><i/></div></Card> }
 
+function ProfileField({icon:Icon,label,value}) { return <div className="self-profile-field"><span><Icon size={18}/></span><div><small>{label}</small><strong>{value}</strong></div></div>; }
+function RoleProfile({role,go}) {
+  const person=roleProfile(role); const isLead=role==="Team Lead";
+  return <div className="self-profile">
+    <PageTitle title={`Welcome, ${person.name.split(" ")[0]}`} subtitle="Your personal information" actions={<Button kind="secondary" icon={Edit3} onClick={()=>announce("Profile change request opened")}>Request a change</Button>}/>
+    <Card className="self-profile-hero"><Avatar initials={person.initials}/><div><h1>{person.name}</h1><p>{person.title} · Blockchain Dp.</p><span><Status>Active</Status><b>{isLead?"Team Lead":"Regular"}</b></span></div></Card>
+    <Card className="self-profile-section"><h2>Personal information</h2><div className="self-profile-grid"><ProfileField icon={Mail} label="Email" value={person.email}/><ProfileField icon={Phone} label="Phone" value={person.phone}/><ProfileField icon={Building2} label="Department" value="Blockchain Dp."/><ProfileField icon={BriefcaseBusiness} label="Company entity" value="MUST SG"/><ProfileField icon={BriefcaseBusiness} label="Designation" value={person.title}/><ProfileField icon={CalendarDays} label="Joining date" value={person.start}/><ProfileField icon={Clock3} label="Tenure" value={person.tenure}/><ProfileField icon={Globe2} label="Time zone" value="17:00 ~ 02:00 (KST)"/></div><div className="skill-list"><small>Tech stack</small><div>{["Maze","Visual Studio Code","GitHub","Adobe Illustrator","Rive","Figma"].map(x=><span key={x}>{x}</span>)}</div></div></Card>
+    <Card className="self-profile-section"><h2>Emergency contact & address</h2><div className="self-profile-grid"><ProfileField icon={IdCard} label="Emergency contact" value="Mildred Anashie"/><ProfileField icon={Phone} label="Emergency phone" value="+234 814 350 9138"/><ProfileField icon={MapPin} label="City" value="FCT Abuja"/><ProfileField icon={Globe2} label="Country" value="Nigeria"/><ProfileField icon={MapPin} label="Address" value="FCT Abuja, Nigeria"/></div></Card>
+    <Card className="self-profile-section"><h2>Team & reporting</h2><div className="reporting-copy"><span>Department & team</span><strong>Blockchain Dp. <ChevronRight size={14}/> UX/UI Team <b>BLK-UXI</b></strong></div><ProfileField icon={Users} label="Reports to" value={person.manager}/>{isLead&&<button className="profile-team-link" onClick={()=>go("/my-team")}>View your team <ChevronRight size={15}/></button>}</Card>
+    <Card className="self-profile-section"><div className="card-head"><h2>Leave balances · 2026</h2><button onClick={()=>go("/my-leaves")}>View leave history <ChevronRight size={15}/></button></div><div className="profile-balance-grid">{[["Annual Leave","7","15","47%"],["Family Leave","5","5","100%"],["Vacation Leave","3","3","100%"],["Tenure Leave","1","5","20%"]].map(([name,left,total,pct])=><div key={name}><strong>{name}</strong><p><b>{left}</b> / {total} days left</p><i><em style={{width:pct}}/></i></div>)}</div></Card>
+    <div className="self-profile-split"><Card className="self-profile-section"><h2>ID & passport</h2><Empty icon={IdCard} title="No identity documents" text="Nothing has been recorded yet."/></Card><Card className="self-profile-section"><h2>Education</h2><Empty icon={GraduationCap} title="No education records" text="Nothing has been added yet."/></Card></div>
+    <Card className="self-profile-section"><div className="card-head"><div><h2><Landmark size={18}/>Bank details</h2><p>Recipient information — must match the bank’s records.</p></div><button onClick={()=>announce("Bank detail change request opened")}><Edit3 size={14}/>Request change</button></div><Info rows={[["Bank name","Guaranty Trust Bank (GTB) PLC"],["Account number","•••• •••• 4634"],["Account type","Single sole owner"],["Branch","Lagos, Nigeria"],["SWIFT code","GTBINGLAXXX"],["Account holder","Anashie Matilda Ipeh"]]}/></Card>
+    <Card className="self-profile-section"><h2>Assigned assets</h2><Empty icon={PackagePlus} title="No assets issued to you" text="No assignment history yet."/></Card>
+  </div>;
+}
+
 // Employee self-service leave list — one card per request with type, status, exact time window,
 // timezone, hours, reason, current stage, attachment indicator and status-driven recovery actions.
 function MyLeavesPage({open}) {
   const [rows,setRows]=useState(MY_LEAVES);
-  const [tab,setTab]=useState("All Requests");
+  const [tab,setTab]=useState("All Leaves");
   const cancel=(rec)=>setRows(rows.map(r=>r.id===rec.id?{...r,status:"Cancelled",stage:"Done",progress:null,history:[...r.history,{label:"Cancelled",detail:"by Matilda Ipeh Anashie",time:"Just now",tone:"cancelled"}]}:r)) || announce(`${rec.type} request cancelled`);
   const pendingCount=rows.filter(r=>r.status==="Pending").length;
-  const visible=rows.filter(r=>tab==="All Requests"||(tab==="Completed"?r.status!=="Pending":r.status==="Pending"));
+  const visible=rows.filter(r=>tab==="All Leaves"||(tab==="Completed"?r.status!=="Pending":r.status==="Pending"));
   return <>
     <PageTitle title="My Leaves" subtitle="Apply for leave and track your requests" actions={<Button icon={Plus} onClick={()=>open("apply-leave")}>Apply for Leave</Button>}/>
     <LeaveBalanceCard/>
-    <div className="tabs-scroll"><div className="tabs line-tabs">{["Pending","Completed","All Requests"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}<span>{x==="Pending"?pendingCount:x==="Completed"?rows.length-pendingCount:rows.length}</span></button>)}</div></div>
+    <div className="tabs-scroll"><div className="tabs pill-tabs">{["Pending","Completed","All Leaves"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}<span>{x==="Pending"?pendingCount:x==="Completed"?rows.length-pendingCount:rows.length}</span></button>)}</div></div>
     <Card>{visible.length?<div className="leave-card-list">{visible.map(d=><div className="record-card" key={d.id}>
       <div className="record-card-head"><h3><i className={`tone-dot ${d.tone}`}/>{d.type}</h3><Status>{d.status}</Status></div>
       <div className="record-card-meta">
@@ -652,8 +874,8 @@ function MyRequestsPage({open}) {
 
 // Team-lead approvals: awaiting-decision queue (with live Approve/Reject and full context) plus a
 // decision-history tab, covering both leave and HRM requests reporting to the previewed lead.
-function TeamApprovalsPage({open,role}) {
-  const [tab,setTab]=useState("Awaiting decision");
+function TeamApprovalsPage({open,role,path}) {
+  const [tab,setTab]=useState(path==="/decision-history"?"Decision history":"Awaiting decision");
   const [leaves,setLeaves]=useState(()=>LEAVE_REQUESTS.filter(d=>d.manager==="Matilda Ipeh Anashie"));
   const [requests,setRequests]=useState(()=>REQUESTS.filter(d=>d.manager==="Matilda Ipeh Anashie"));
   const decide=(kind,rec,status)=>{
@@ -668,7 +890,7 @@ function TeamApprovalsPage({open,role}) {
   const pendingCount=combined.filter(d=>d.status==="Pending").length;
   return <>
     <PageTitle title="Approvals" subtitle="Requests awaiting your decision and your decision history"/>
-    <div className="tabs line-tabs">{["Awaiting decision","Decision history"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}{x==="Awaiting decision"&&<span>{pendingCount}</span>}</button>)}</div>
+    <div className="tabs pill-tabs">{["Awaiting decision","Decision history"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}{x==="Awaiting decision"&&<span>{pendingCount}</span>}</button>)}</div>
     <Card>{visible.length?<div className="leave-card-list">{visible.map(d=><div className="record-card" key={d.id}>
       <div className="record-card-head"><h3><Avatar initials={d.initials} small/>{d.employee}</h3><Status>{d.status}</Status></div>
       <div className="record-card-meta">
@@ -696,9 +918,16 @@ function TeamApprovalsPage({open,role}) {
 function EmployeesPage({ go, open }) {
   const directory=EMPLOYEE_DIRECTORY;
   const [q,setQ]=useState(""); const [status,setStatus]=useState("Active"); const [view,setView]=useState("grid");
-  const list=directory.filter(e=>`${e.name} ${e.email} ${e.department} ${e.title}`.toLowerCase().includes(q.toLowerCase())); const visible=status==="All"?list:list.filter(e=>(e.status||"Active")===status);
+  const [department,setDepartment]=useState("All Departments"); const [country,setCountry]=useState("All Countries"); const [team,setTeam]=useState("All Teams");
+  const countries=[...new Set(directory.map(e=>countryFromMobile(e.mobile)))].sort();
+  const teamNames=[...new Set(directory.map(e=>e.team))].sort();
+  const list=directory.filter(e=>`${e.name} ${e.email} ${e.department} ${e.title}`.toLowerCase().includes(q.toLowerCase())
+    && (department==="All Departments"||e.department===department)
+    && (team==="All Teams"||e.team===team)
+    && (country==="All Countries"||countryFromMobile(e.mobile)===country));
+  const visible=status==="All"?list:list.filter(e=>(e.status||"Active")===status);
   const statuses=["Active","On PIP","On IDA","Inactive","Terminated","Resigned","Laid Off","All"];
-  return <><div className="live-page-title employee-title"><div><h1>Employee Directory</h1><p>Showing {visible.length} of {directory.length} employees</p></div><div className="page-actions"><Button kind="secondary" icon={Download}>Export Excel</Button><Button icon={Plus} onClick={()=>open("employee")}>Add Employee</Button></div></div><div className="employee-toolbar"><SearchBox placeholder="Search by name, email, or department…" value={q} onChange={setQ}/><Select><option>All Departments</option>{["AGN","BIC","BLK","CEO","FIN","HQ","HR","MNC","UNASSIGNED","VP"].map(x=><option key={x}>{x}</option>)}</Select><Select><option>All Countries</option></Select><div className="view-switch"><button className={view==="grid"?"active":""} onClick={()=>setView("grid")}><LayoutDashboard size={15}/>Grid</button><button className={view==="table"?"active":""} onClick={()=>setView("table")}><ListChecks size={15}/>Table</button></div></div><div className="tabs-scroll"><div className="tabs line-tabs">{statuses.map(x=><button key={x} className={status===x?"active":""} onClick={()=>setStatus(x)}>{x}</button>)}</div></div>{!visible.length?<Card><Empty icon={Users} title={`No ${status.toLowerCase()} employees`} text={q?"No employee matches your search.":`Employees with ${status.toLowerCase()} status will appear here.`}/></Card>:view==="grid"?<div className="employee-card-grid">{visible.map((e,i)=><button className="employee-directory-card" key={e.name} onClick={()=>go(`/employees/${slugify(e.name)}`)}><div className="employee-card-person"><Avatar initials={e.initials}/><div><h3>{e.name}</h3><p>{e.title}</p></div></div><Status>{e.status||"Active"}</Status><div className="employee-card-meta"><span><Building2 size={13}/>{e.department}</span><span><CalendarDays size={13}/>{e.joined}</span><strong>$ <b>25.00/hr</b></strong></div></button>)}</div>:<div className="employee-wide-table"><table><thead><tr>{["#","Name","Email","Mobile","Department","Teams","Designation","Employment Type","Reports To","Joining Date","Date of Birth","Status","Separation Date","Hourly Rate"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map((e,i)=><tr key={e.name} onClick={()=>go(`/employees/${slugify(e.name)}`)}><td>{i+1}</td><td><strong>{e.name}</strong></td><td>{e.email}</td><td>{e.mobile}</td><td>{e.department}</td><td>{e.team}</td><td>{e.title}</td><td>Full-Time</td><td>{e.manager}</td><td>{e.joined}</td><td>{e.dob}</td><td><Status>{e.status||"Active"}</Status></td><td>{e.separationDate||"—"}</td><td>25.00</td></tr>)}</tbody></table></div>}</>;
+  return <><PageTitle className="employee-title" title="Employee Directory" subtitle={`Showing ${visible.length} of ${directory.length} employees`} actions={<><Button kind="secondary" icon={Download}>Export Excel</Button><Button icon={Plus} onClick={()=>open("employee")}>Add Employee</Button></>}/><div className="employee-toolbar"><SearchBox placeholder="Search by name, email, or department…" value={q} onChange={setQ}/><Select value={department} onChange={setDepartment}><option>All Departments</option>{["AGN","BIC","BLK","CEO","FIN","HQ","HR","MNC","UNASSIGNED","VP"].map(x=><option key={x}>{x}</option>)}</Select><Select value={team} onChange={setTeam}><option>All Teams</option>{teamNames.map(x=><option key={x}>{x}</option>)}</Select><Select value={country} onChange={setCountry}><option>All Countries</option>{countries.map(x=><option key={x}>{x}</option>)}</Select><div className="view-switch"><button className={view==="grid"?"active":""} onClick={()=>setView("grid")}><LayoutDashboard size={15}/>Grid</button><button className={view==="table"?"active":""} onClick={()=>setView("table")}><ListChecks size={15}/>Table</button></div></div><div className="tabs-scroll"><div className="tabs pill-tabs">{statuses.map(x=><button key={x} className={status===x?"active":""} onClick={()=>setStatus(x)}>{x}</button>)}</div></div>{!visible.length?<Card><Empty icon={Users} title={`No ${status.toLowerCase()} employees`} text={q?"No employee matches your search.":`Employees with ${status.toLowerCase()} status will appear here.`}/></Card>:view==="grid"?<div className="employee-card-grid">{visible.map((e,i)=><button className="employee-directory-card" key={e.name} onClick={()=>go(`/employees/${slugify(e.name)}`)}><div className="employee-card-person"><Avatar initials={e.initials}/><div><h3>{e.name}</h3><p>{e.title}</p></div></div><Status>{e.status||"Active"}</Status><div className="employee-card-meta"><span><Building2 size={13}/>{e.department}</span><span><CalendarDays size={13}/>{e.joined}</span><strong>$ <b>{hourlyRate(e.name)}/hr</b></strong></div></button>)}</div>:<div className="employee-compact-table"><table><thead><tr>{["Employee","Role","Dept","Joined","Rate","Status"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map(e=><tr key={e.name} onClick={()=>go(`/employees/${slugify(e.name)}`)}><td><span className="employee-cell"><Avatar initials={e.initials} small/><strong>{e.name}</strong></span></td><td>{e.title}</td><td>{e.department}</td><td>{e.joined}</td><td className="rate-cell">${hourlyRate(e.name)}/hr</td><td><Status>{e.status||"Active"}</Status></td></tr>)}</tbody></table></div>}</>;
 }
 
 const employeeTabs = [["overview","Overview",Users],["documents","Documents",FileText],["education","Education",GraduationCap],["identity","ID & Passport",IdCard],["notes","HR Notes",NotebookPen],["pip","PIP",AlertTriangle],["ida","IDA",ShieldCheck],["salary","Salary",CircleDollarSign],["leaves","Leaves",CalendarDays],["hours","Working Hours",Clock3],["bank","Bank Details",WalletCards],["assets","Assets",Boxes],["history","Edit History",History]];
@@ -764,7 +993,7 @@ function WorkingHours(){ const [mode,setMode]=useState("Monthly"); return <Card>
 
 function TeamCard({team,go}) { return <button className="live-team-card" onClick={()=>go(`/teams/${team.index}`)}><span className="team-topline"/><span className="live-team-icon"><Users size={22}/></span><ChevronRight className="team-arrow" size={17}/><h3>{team.name}</h3><span className="team-code">{team.code}</span><span className="team-spacer"/><div className="team-card-foot"><div className="avatar-stack">{team.avatars.map((a,i)=><span key={`${a}-${i}`} className={a.startsWith("+")?"more":""} style={a.startsWith("+")?undefined:{background:avatarColor(a)}}>{a}</span>)}</div><span className="member-count">{team.count} {team.count===1?"member":"members"}</span>{team.leader!=="—"?<strong><Crown size={13}/>{team.leader}</strong>:<span className="no-leader">No leader assigned</span>}</div></button> }
 
-function TeamsPage({go,open}) { const [q,setQ]=useState(""); const list=teams.filter(t=>`${t.name} ${t.code} ${t.leader}`.toLowerCase().includes(q.toLowerCase())); return <><div className="live-page-title"><div><h1>Teams</h1><p>{list.length} teams</p></div><Button icon={Plus} onClick={()=>open("team")}>Create Team</Button></div><div className="team-search"><SearchBox placeholder="Search by team name, description, leader, or member…" value={q} onChange={setQ}/></div>{list.length?<div className="live-team-grid">{list.map(team=><TeamCard key={`${team.code}-${team.index}`} team={team} go={go}/>)}</div>:<Empty icon={Users} title="No teams found" text="No team matches this search."/>}</> }
+function TeamsPage({go,open}) { const [q,setQ]=useState(""); const list=teams.filter(t=>`${t.name} ${t.code} ${t.leader}`.toLowerCase().includes(q.toLowerCase())); return <><PageTitle title="Teams" subtitle={`${list.length} teams`} actions={<Button icon={Plus} onClick={()=>open("team")}>Create Team</Button>}/><div className="team-search"><SearchBox placeholder="Search by team name, description, leader, or member…" value={q} onChange={setQ}/></div>{list.length?<div className="live-team-grid">{list.map(team=><TeamCard key={`${team.code}-${team.index}`} team={team} go={go}/>)}</div>:<Empty icon={Users} title="No teams found" text="No team matches this search."/>}</> }
 
 function MemberRow({name,initials,leader=false,reports,role}) { return <div className="live-member-row"><Avatar initials={initials} small/><div className="member-copy"><div><strong>{name}</strong>{leader&&<span className="leader-badge"><Crown size={11}/>Leader</span>}<Status>Active</Status></div><p>{role||"Team member"}</p></div><div className="reports-to"><span>REPORTS TO</span><button onClick={()=>announce(`Reporting line editor opened for ${name}`)}>{reports||"None"}<ChevronDown size={14}/></button></div><IconButton icon={UserMinus} label="Remove from team" onClick={()=>announce(`${name} removed from the team`)}/></div> }
 
@@ -772,41 +1001,127 @@ function TeamDetail({go,open,path}) { const idx=Number(path.split("/").pop()); c
 
 function LeavesPage({open}) {
   const [tab,setTab]=useState("Pending"); const [state,setState]=useState("Data"); const [allRows,setAllRows]=useState(LEAVE_REQUESTS);
-  const decide=(rec,status)=>{setAllRows(allRows.map(item=>item.id!==rec.id?item:{...item,status,stage:"Done",
+  const [selected,setSelected]=useState(()=>new Set());
+  const decide=(recs,status)=>{const ids=new Set(recs.map(r=>r.id));setAllRows(allRows.map(item=>!ids.has(item.id)?item:{...item,status,stage:"Done",
     progress:item.progress?item.progress.map(s=>s.tone==="pending"?{...s,tone:status==="Approved"?"done":"rejected"}:s):item.progress,
     history:[...item.history,{label:status,detail:"by Admin",time:"Just now",tone:status==="Approved"?"done":"rejected"}]}));
-    announce(`${rec.employee}'s leave ${status.toLowerCase()} and added to decision history`)};
+    announce(recs.length>1?`${recs.length} leave requests ${status.toLowerCase()} and added to decision history`:`${recs[0].employee}'s leave ${status.toLowerCase()} and added to decision history`);setSelected(new Set())};
   let rows=allRows.filter(r=>tab==="All Requests" || (tab==="Completed" ? r.status!=="Pending" : r.status==="Pending"));
   const pending=allRows.filter(r=>r.status==="Pending").length;
   const cells=rows.map(d=>[d.employee,d.team,d.type,d.dates,d.hours,d.overlap?"Overlap":d.attachments?`${d.attachments} file${d.attachments>1?"s":""}`:"—",d.status]);
-  return <><PageTitle className="leave-page-title" eyebrow="Leave Management" title="Leave Management" subtitle="Review and manage employee leave requests" actions={<><Button kind="secondary" icon={CalendarDays}>Leave Sheet</Button><Button icon={Plus} onClick={()=>open("leave")}>Apply for Employee</Button></>}/><div className="tabs-scroll"><div className="tabs line-tabs">{["Pending","Completed","All Requests"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}<span>{x==="Pending"?pending:x==="Completed"?allRows.length-pending:allRows.length}</span></button>)}</div></div><Card><Toolbar><SearchBox placeholder="Search employee"/><Select><option>All leave types</option><option>Annual Leave</option><option>Sick Leave</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select><Button kind="secondary" icon={Filter}>Filters</Button></Toolbar>{state==="Loading error"?<ErrorState message="The leave request service returned an unexpected database response."/>:state==="Empty"?<Empty title="No leave requests" text={`There are no ${tab.toLowerCase()} leave requests.`}/>:<DataTable columns={["Employee","Team","Leave type","Dates","Hours","Flags","Status"]} rows={cells} renderActions={(r,i)=>{const rec=rows[i]; return <div className="row-actions"><IconButton icon={Eye} label="View request" onClick={()=>open("leave-detail",rec)}/>{rec.status==="Pending"&&<><IconButton icon={Check} label="Approve" success onClick={()=>decide(rec,"Approved")}/><IconButton icon={X} label="Reject" danger onClick={()=>decide(rec,"Rejected")}/></>}</div>}}/>}</Card></> }
+  const toggleOne=(id)=>setSelected(prev=>{const next=new Set(prev);next.has(id)?next.delete(id):next.add(id);return next});
+  const toggleAll=()=>setSelected(prev=>prev.size===rows.length?new Set():new Set(rows.map(r=>r.id)));
+  return <><PageTitle className="leave-page-title" title="Leave Management" subtitle="Review and manage employee leave requests" actions={<><Button kind="secondary" icon={CalendarDays}>Leave Sheet</Button><Button icon={Plus} onClick={()=>open("leave")}>Apply for Employee</Button></>}/><div className="tabs-scroll"><div className="tabs pill-tabs">{["Pending","Completed","All Requests"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>{setTab(x);setSelected(new Set())}}>{x}<span>{x==="Pending"?pending:x==="Completed"?allRows.length-pending:allRows.length}</span></button>)}</div></div><Card><Toolbar><SearchBox placeholder="Search employee"/><Select><option>All leave types</option><option>Annual Leave</option><option>Sick Leave</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select><Button kind="secondary" icon={Filter}>Filters</Button></Toolbar>{tab==="Pending"&&selected.size>0&&<div className="bulk-action-bar"><strong>{selected.size} selected</strong><Button icon={Check} onClick={()=>decide(rows.filter(r=>selected.has(r.id)),"Approved")}>Approve</Button><Button kind="danger" icon={X} onClick={()=>decide(rows.filter(r=>selected.has(r.id)),"Rejected")}>Reject</Button><button className="bulk-clear" onClick={()=>setSelected(new Set())}>Clear</button></div>}{state==="Loading error"?<ErrorState message="The leave request service returned an unexpected database response."/>:state==="Empty"?<Empty title="No leave requests" text={`There are no ${tab.toLowerCase()} leave requests.`}/>:<DataTable columns={["Employee","Team","Leave type","Dates","Hours","Flags","Status"]} rows={cells} selectable={tab==="Pending"} selected={selected} onToggle={toggleOne} onToggleAll={toggleAll} getKey={(row,i)=>rows[i].id} renderActions={(r,i)=>{const rec=rows[i]; return <div className="row-actions"><IconButton icon={Eye} label="View request" onClick={()=>open("leave-detail",rec)}/>{rec.status==="Pending"&&<><IconButton icon={Check} label="Approve" success onClick={()=>decide([rec],"Approved")}/><IconButton icon={X} label="Reject" danger onClick={()=>decide([rec],"Rejected")}/></>}</div>}}/>}</Card></> }
 
-function LeaveBalancesPage({open}) { return <><PageTitle eyebrow="Leave Balances" title="Leave Balances" subtitle="View and adjust employee leave balances" actions={<Button kind="secondary" icon={Download}>Export Balances</Button>}/><Card><Toolbar><SearchBox placeholder="Search employees"/><Select><option>All entities</option><option>MUST Company Ghana</option></Select><Select><option>2026</option><option>2025</option></Select><Select><option>All leave types</option></Select></Toolbar><DataTable columns={["Employee","Leave type","Allowance","Used","Pending","Balance"]} rows={employees.slice(0,5).map((e,i)=>[e[0],i%2?"Sick Leave":"Annual Leave",i%2?"10 days":"15 days",`${i+1} days`,i%2?"0 days":"2 days",i%2?`${9-i} days`:`${12-i} days`])} renderActions={()=> <IconButton icon={Edit3} label="Edit balance" onClick={()=>open("balance")}/>} /></Card></> }
+function leaveSeed(str) { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }
+function leaveBalanceRows() {
+  const rows=[];
+  employees.forEach(e => {
+    LEAVE_TYPES.forEach(t => {
+      const m=/(\d+)h/.exec(t.entitlement);
+      if (m) {
+        const total=parseInt(m[1],10);
+        const seed=leaveSeed(e[0]+t.key);
+        const used=Math.min(total,Math.round((total*(seed%101)/100)/4)*4);
+        const pending=(seed%5===0)?Math.min(8,total-used):0;
+        const balance=Math.max(0,total-used-pending);
+        rows.push([e[0],t.name,`${total}h`,`${used}h`,`${pending}h`,`${balance}h`]);
+      } else {
+        rows.push([e[0],t.name,"Unlimited","—","—","Unlimited"]);
+      }
+    });
+  });
+  return rows;
+}
+function LeaveBalancesPage({open}) { return <><PageTitle title="Leave Balances" subtitle="View and adjust employee leave balances" actions={<Button kind="secondary" icon={Download}>Export Balances</Button>}/><Card><Toolbar><SearchBox placeholder="Search employees"/><Select><option>All entities</option><option>MUST Company Ghana</option></Select><Select><option>2026</option><option>2025</option></Select><Select><option>All leave types</option>{LEAVE_TYPES.map(t=><option key={t.key}>{t.name}</option>)}</Select></Toolbar><DataTable columns={["Employee","Leave type","Allowance","Used","Pending","Balance"]} rows={leaveBalanceRows()} renderActions={()=> <IconButton icon={Edit3} label="Edit balance" onClick={()=>open("balance")}/>} /></Card></> }
 
 function RequestsPage({open}) {
   const [state,setState]=useState("Data");
   const cells=REQUESTS.map(d=>[d.employee,d.team,d.type,d.summary,d.submitted,d.status]);
-  return <><PageTitle eyebrow="All HRM Requests" title="All HRM Requests" subtitle="Track and manage employee requests"/><Card><Toolbar><SearchBox placeholder="Search requests"/><Select><option>All request types</option>{REQUEST_TYPES.map(t=><option key={t.key}>{t.name}</option>)}</Select><Select><option>All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Cancelled</option><option>Expired</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select></Toolbar>{state==="Loading error"?<ErrorState message="Requests could not be loaded because the service response is incomplete."/>:state==="Empty"?<Empty title="No HRM requests" text="No requests match the selected filters."/>:<DataTable columns={["Employee","Team","Request type","Details","Submitted","Status"]} rows={cells} renderActions={(r,i)=> <IconButton icon={Eye} label="View request" onClick={()=>open("request-detail",REQUESTS[i])}/>} />}</Card></> }
+  return <><PageTitle title="All Employee Services Requests" subtitle="Track and manage employee requests"/><Card><Toolbar><SearchBox placeholder="Search requests"/><Select><option>All request types</option>{REQUEST_TYPES.map(t=><option key={t.key}>{t.name}</option>)}</Select><Select><option>All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Cancelled</option><option>Expired</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select></Toolbar>{state==="Loading error"?<ErrorState message="Requests could not be loaded because the service response is incomplete."/>:state==="Empty"?<Empty title="No Employee Services requests" text="No requests match the selected filters."/>:<DataTable columns={["Employee","Team","Request type","Details","Submitted","Status"]} rows={cells} renderActions={(r,i)=> <IconButton icon={Eye} label="View request" onClick={()=>open("request-detail",REQUESTS[i])}/>} />}</Card></> }
 
-function AssetsPage({open}) { const [state,setState]=useState("Data"); const rows=[["MacBook Pro 14\"","Laptop","MUST-LT-0142","Matilda Ipeh Anashie","Assigned"],["Dell Latitude 7440","Laptop","MUST-LT-0188","—","Available"],["iPhone 15 Pro","Mobile Phone","MUST-PH-0041","Ismail Gorkem Kara","Assigned"],["Samsung 27\" Monitor","Monitor","MUST-MN-0097","—","Available"]]; return <><PageTitle eyebrow="Assets" title="Assets" subtitle="Manage company assets and assignments" actions={<Button icon={PackagePlus} onClick={()=>open("asset")}>Add Asset</Button>}/><Card><Toolbar><SearchBox placeholder="Search assets"/><Select><option>All asset types</option><option>Laptop</option><option>Mobile Phone</option></Select><Select><option>All statuses</option><option>Available</option><option>Assigned</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select></Toolbar>{state==="Loading error"?<ErrorState message="Asset records could not be read because a required value is unavailable."/>:state==="Empty"?<Empty icon={Boxes} title="No assets found" text="Try changing the filters or add a new asset."/>:<DataTable columns={["Asset","Type","Asset ID","Assigned to","Status"]} rows={rows} renderActions={()=> <div className="row-actions"><IconButton icon={Edit3} label="Edit" onClick={()=>open("asset")}/><IconButton icon={MoreHorizontal} label="More"/></div>}/>}</Card></> }
+function AssetsPage({open}) {
+  const [state,setState]=useState("Data");
+  const [rows,setRows]=useState([["MacBook Pro 14\"","Laptop","MUST-LT-0142","Matilda Ipeh Anashie","Assigned"],["Dell Latitude 7440","Laptop","MUST-LT-0188","—","Available"],["iPhone 15 Pro","Mobile Phone","MUST-PH-0041","Ismail Gorkem Kara","Assigned"],["Samsung 27\" Monitor","Monitor","MUST-MN-0097","—","Available"]]);
+  const toggleStatus=(i)=>setRows(rows.map((r,idx)=>{if(idx!==i)return r;const next=r[4]==="Assigned"?"Available":"Assigned";announce(`${r[0]} marked ${next}`);return [r[0],r[1],r[2],r[3],next];}));
+  const deleteRow=(i)=>{announce(`${rows[i][0]} removed from asset inventory`);setRows(rows.filter((_,idx)=>idx!==i))};
+  return <><PageTitle title="Assets" subtitle="Manage company assets and assignments" actions={<Button icon={PackagePlus} onClick={()=>open("asset")}>Add Asset</Button>}/><Card><Toolbar><SearchBox placeholder="Search assets"/><Select><option>All asset types</option><option>Laptop</option><option>Mobile Phone</option></Select><Select><option>All statuses</option><option>Available</option><option>Assigned</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select></Toolbar>{state==="Loading error"?<ErrorState message="Asset records could not be read because a required value is unavailable."/>:state==="Empty"||!rows.length?<Empty icon={Boxes} title="No assets found" text="Try changing the filters or add a new asset."/>:<DataTable columns={["Asset","Type","Asset ID","Assigned to","Status"]} rows={rows} renderActions={(r,i)=> <div className="row-actions"><IconButton icon={Edit3} label="Edit" onClick={()=>open("asset")}/><MoreMenu actions={[["Reassign",UserCog,()=>open("asset")],[r[4]==="Assigned"?"Mark available":"Mark assigned",RotateCcw,()=>toggleStatus(i)],["Delete asset",Trash2,()=>deleteRow(i),true]]}/></div>}/>}</Card></>;
+}
 
 const DEPT_ORDER = ["AGN","BIC","BLK","CEO","FIN","HQ","HR","MNC","VP"];
 function teamsByDept() { const map={}; teams.forEach(t=>{const d=t.code.split("-")[0]; (map[d]=map[d]||[]).push(t)}); return map; }
+
+const ORG_HIERARCHY = {
+  name:"Arshman Afzal", initials:"AA", title:"Chief Executive Officer", status:"Active",
+  reports:[
+    { name:"Sneha Gupta", initials:"SG", title:"People Operations Manager", status:"Active", reports:[
+      { name:"Erwin Llanera", initials:"EL", title:"Recruitment Team Lead", status:"Active", reports:[
+        { name:"Adaramoye Oluwaseun", initials:"AO", title:"Technical Recruiter", status:"Active", reports:[] },
+        { name:"Adha Washington", initials:"AW", title:"Technical Recruiter", status:"Active", reports:[] },
+      ] },
+    ] },
+    { name:"Ismail Gorkem Kara", initials:"IG", title:"Head of Product", status:"Active", reports:[
+      { name:"Matilda Ipeh Anashie", initials:"MA", title:"Senior Product Designer", status:"Active", reports:[] },
+      { name:"Ethan Walker", initials:"EW", title:"Product Design Team Lead", status:"Active", reports:[] },
+    ] },
+    { name:"Sharoon Raza", initials:"SR", title:"Director of Sales", status:"Active", reports:[
+      { name:"Abdul Rehman", initials:"AR", title:"Recruitment Content-Team Leader", status:"On PIP", reports:[] },
+    ] },
+    { name:"Andre Ricardo", initials:"AR2", title:"Backend Engineer", status:"Inactive", reports:[] },
+  ],
+};
+function collectHierarchyIds(node, id, set) { set.add(id); (node.reports||[]).forEach((child,i)=>collectHierarchyIds(child,`${id}/${i}`,set)); }
+function countHierarchy(node) { return 1 + (node.reports||[]).reduce((sum,c)=>sum+countHierarchy(c),0); }
+function hierarchyMatches(node, q) { if(!q) return true; if(node.name.toLowerCase().includes(q)||node.title.toLowerCase().includes(q)) return true; return (node.reports||[]).some(c=>hierarchyMatches(c,q)); }
+function HierarchyNode({ node, id, openIds, toggle, q, isRoot }) {
+  const hasReports = node.reports && node.reports.length>0;
+  const isOpen = openIds.has(id);
+  const selfMatch = q && (node.name.toLowerCase().includes(q)||node.title.toLowerCase().includes(q));
+  const branchMatches = hierarchyMatches(node,q);
+  return <div className="hier-node">
+    <div className={`hier-card ${isRoot?"is-root":""} ${selfMatch?"match":""} ${q&&!branchMatches?"dim":""}`}>
+      <Avatar initials={node.initials}/>
+      <div><strong>{node.name}</strong><span>{node.title}</span></div>
+      <Status>{node.status}</Status>
+    </div>
+    {hasReports && <button className="hier-toggle" onClick={()=>toggle(id)}><b>{node.reports.length}</b><ChevronDown size={12} style={{transform:isOpen?"rotate(180deg)":"none",transition:".2s"}}/></button>}
+    {hasReports && isOpen && <div className="hier-children"><div className="hier-children-row">{node.reports.map((child,i)=><HierarchyNode key={i} node={child} id={`${id}/${i}`} openIds={openIds} toggle={toggle} q={q}/>)}</div></div>}
+  </div>;
+}
 function OrgChart() {
   const [zoom,setZoom]=useState(1);
+  const [view,setView]=useState("Hierarchy");
   const [openDepts,setOpenDepts]=useState(()=>new Set(["AGN"]));
+  const [openIds,setOpenIds]=useState(()=>{const s=new Set();collectHierarchyIds(ORG_HIERARCHY,"root",s);return s;});
   const [q,setQ]=useState("");
   const [deptFilter,setDeptFilter]=useState("All departments");
   const byDept = teamsByDept();
-  const toggle = (d) => setOpenDepts(prev=>{const next=new Set(prev); next.has(d)?next.delete(d):next.add(d); return next;});
+  const toggleDept = (d) => setOpenDepts(prev=>{const next=new Set(prev); next.has(d)?next.delete(d):next.add(d); return next;});
+  const toggleNode = (id) => setOpenIds(prev=>{const next=new Set(prev); next.has(id)?next.delete(id):next.add(id); return next;});
   const depts = deptFilter==="All departments" ? DEPT_ORDER : [deptFilter];
-  return <><PageTitle eyebrow="" title="Organization Chart" subtitle={`9 departments · ${teams.length} teams`}/><div className="org-live-toolbar"><SearchBox placeholder="Search team or code…" value={q} onChange={setQ}/><Select value={deptFilter} onChange={setDeptFilter}><option>All departments</option>{DEPT_ORDER.map(d=><option key={d}>{d}</option>)}</Select><Button kind="secondary" onClick={()=>setOpenDepts(new Set())}>Collapse</Button><Button kind="secondary" onClick={()=>setOpenDepts(new Set(DEPT_ORDER))}>Expand all</Button><div className="zoom"><IconButton icon={ZoomOut} label="Zoom out" onClick={()=>setZoom(Math.max(.6,zoom-.1))}/><span>{Math.round(zoom*100)}%</span><IconButton icon={ZoomIn} label="Zoom in" onClick={()=>setZoom(Math.min(1.4,zoom+.1))}/><IconButton icon={RotateCcw} label="Reset zoom" onClick={()=>setZoom(1)}/></div></div><div className="org-live-canvas"><div className="department-tree" style={{transform:`scale(${zoom})`}}>{depts.map(d=>{const deptTeams=(byDept[d]||[]).filter(t=>!q||`${t.name} ${t.code}`.toLowerCase().includes(q.toLowerCase())); const isOpen=openDepts.has(d); if(q&&!deptTeams.length) return null; return <div className="org-dept-block" key={d}><div className="department-card"><span className="department-icon"><Building2 size={20}/></span><div><small>DEPARTMENT</small><h3>{d}</h3></div><MoreHorizontal size={16}/><b>{d}</b><span>{(byDept[d]||[]).length} team{(byDept[d]||[]).length===1?"":"s"}</span><button onClick={()=>toggle(d)}><ChevronDown size={14} style={{transform:isOpen?"rotate(180deg)":"none",transition:".2s"}}/></button></div>{isOpen&&<><div className="tree-connector"/><div className="team-tree-row">{deptTeams.map(t=><OrgTeam key={t.code} name={t.name} code={t.code} leader={t.leader} count={t.count}/>)}</div></>}</div>;})}</div></div></> }
+  const isHierarchy = view==="Hierarchy";
+  const collapseAll = () => isHierarchy ? setOpenIds(new Set()) : setOpenDepts(new Set());
+  const expandAll = () => isHierarchy ? setOpenIds((()=>{const s=new Set();collectHierarchyIds(ORG_HIERARCHY,"root",s);return s;})()) : setOpenDepts(new Set(DEPT_ORDER));
+  return <><PageTitle eyebrow="" title="Organization Chart" subtitle={isHierarchy?`${countHierarchy(ORG_HIERARCHY)} people in the reporting line`:`9 departments · ${teams.length} teams`}/>
+    <div className="org-live-toolbar">
+      <div className="view-switch org-view-switch"><button className={view==="Departments"?"active":""} onClick={()=>setView("Departments")}>Departments</button><button className={view==="Hierarchy"?"active":""} onClick={()=>setView("Hierarchy")}>Hierarchy</button></div>
+      <SearchBox placeholder={isHierarchy?"Jump to an employee…":"Search team or code…"} value={q} onChange={setQ}/>
+      {!isHierarchy && <Select value={deptFilter} onChange={setDeptFilter}><option>All departments</option>{DEPT_ORDER.map(d=><option key={d}>{d}</option>)}</Select>}
+      <Button kind="secondary" onClick={collapseAll}>Collapse</Button><Button kind="secondary" onClick={expandAll}>Expand all</Button>
+      <div className="zoom"><IconButton icon={ZoomOut} label="Zoom out" onClick={()=>setZoom(Math.max(.6,zoom-.1))}/><span>{Math.round(zoom*100)}%</span><IconButton icon={ZoomIn} label="Zoom in" onClick={()=>setZoom(Math.min(1.4,zoom+.1))}/><IconButton icon={RotateCcw} label="Reset zoom" onClick={()=>setZoom(1)}/></div>
+    </div>
+    <div className="org-live-canvas">
+      {isHierarchy
+        ? <div className="hierarchy-tree" style={{transform:`scale(${zoom})`}}><HierarchyNode node={ORG_HIERARCHY} id="root" openIds={openIds} toggle={toggleNode} q={q.trim().toLowerCase()} isRoot/></div>
+        : <div className="department-tree" style={{transform:`scale(${zoom})`}}>{depts.map(d=>{const deptTeams=(byDept[d]||[]).filter(t=>!q||`${t.name} ${t.code}`.toLowerCase().includes(q.toLowerCase())); const isOpen=openDepts.has(d); if(q&&!deptTeams.length) return null; return <div className="org-dept-block" key={d}><div className="department-card"><span className="department-icon"><Building2 size={20}/></span><div><small>DEPARTMENT</small><h3>{d}</h3></div><MoreHorizontal size={16}/><b>{d}</b><span>{(byDept[d]||[]).length} team{(byDept[d]||[]).length===1?"":"s"}</span><button onClick={()=>toggleDept(d)}><ChevronDown size={14} style={{transform:isOpen?"rotate(180deg)":"none",transition:".2s"}}/></button></div>{isOpen&&<><div className="tree-connector"/><div className="team-tree-row">{deptTeams.map(t=><OrgTeam key={t.code} name={t.name} code={t.code} leader={t.leader} count={t.count}/>)}</div></>}</div>;})}</div>}
+    </div>
+  </>; }
 function OrgTeam({name,code,leader,count}) { return <div className="org-team-card"><div><strong>{name}</strong><Users size={16}/></div><b>{code}</b><span>{leader&&leader!=="—"?leader:"No leader"} <em>{count} {count===1?"member":"members"}</em></span></div> }
 
 const trendData = [241,246,245,253,256,264,269,275,281,287].map((value,index)=>({month:["Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"][index],value}));
-const sparkData = [2,4,3,6,5,8,7,9].map((value,index)=>({index,value}));
-function MiniReportChart(){return <div className="mini-chart"><ResponsiveContainer width="100%" height="100%"><ReportBarChart data={sparkData} barCategoryGap="24%"><Bar dataKey="value" fill="#018038" radius={[3,3,0,0]}/></ReportBarChart></ResponsiveContainer></div>}
-function WorkforceTrend(){return <div className="line-chart"><ResponsiveContainer width="100%" height="100%"><ReportLineChart data={trendData} margin={{top:8,right:12,left:-22,bottom:0}}><CartesianGrid stroke="#edf0ee" vertical={false}/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize:10,fill:'#8f9290'}}/><YAxis domain={[230,300]} axisLine={false} tickLine={false} tick={{fontSize:10,fill:'#8f9290'}}/><Tooltip/><Line dataKey="value" type="monotone" stroke="#018038" strokeWidth={3} dot={false}/></ReportLineChart></ResponsiveContainer></div>}
+const TENURE_BUCKETS=[["< 6 mo",26],["6–12 mo",97],["1–2 yr",64],["2–5 yr",97],["5+ yr",3]];
+function WorkforceTrend(){return <div className="line-chart"><ResponsiveContainer width="100%" height="100%"><ReportLineChart data={trendData} margin={{top:8,right:12,left:-22,bottom:0}}><CartesianGrid stroke="#edf0ee" vertical={false}/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize:10,fill:'#8f9290'}}/><YAxis domain={[230,300]} axisLine={false} tickLine={false} tick={{fontSize:10,fill:'#8f9290'}}/><Tooltip contentStyle={{fontSize:12,borderRadius:8,border:"1px solid #e5e8e6"}}/><Line dataKey="value" type="monotone" stroke="#018038" strokeWidth={3} dot={false} activeDot={{r:5}}/></ReportLineChart></ResponsiveContainer></div>}
+function TenureChart(){return <div className="tenure-chart"><ResponsiveContainer width="100%" height="100%"><ReportBarChart data={TENURE_BUCKETS.map(([bucket,value])=>({bucket,value}))} margin={{top:8,right:4,left:-22,bottom:0}}><CartesianGrid stroke="#edf0ee" vertical={false}/><XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{fontSize:10,fill:'#8f9290'}}/><YAxis axisLine={false} tickLine={false} tick={{fontSize:10,fill:'#8f9290'}}/><Tooltip cursor={{fill:"#f4f6f4"}} contentStyle={{fontSize:12,borderRadius:8,border:"1px solid #e5e8e6"}}/><Bar dataKey="value" fill="#018038" radius={[4,4,0,0]} maxBarSize={44}/></ReportBarChart></ResponsiveContainer></div>}
 function ReportsPage() {
   const departments=DEPARTMENTS;
   const onPip=EMPLOYEE_DIRECTORY.filter(e=>e.status==="On PIP");
@@ -818,9 +1133,10 @@ function ReportsPage() {
     ["On PIP",onPip.length,onPip.length?"amber":"neutral",onPip.length?"Review needed":"All clear"],
     ["Departures YTD",departed.length,departed.length?"red":"neutral",departed.length?"Resignations & terminations":"None recorded"],
   ];
-  return <><PageTitle eyebrow="Analytics" title="Reports" subtitle="Comprehensive HR analytics and insights" actions={<div className="report-downloads">{["Headcount","Salary","Tenure","Pip"].map(x=><Button key={x} kind="secondary" icon={Download}>{x}</Button>)}</div>}/>
+  return <><PageTitle className="reports-page-title" title="Reports" subtitle="Comprehensive HR analytics and insights" actions={<div className="report-downloads">{["Headcount","Salary","Tenure","Pip"].map(x=><Button key={x} kind="secondary" icon={Download}>{x}</Button>)}</div>}/>
     <div className="metric-grid four">{summary.map(([label,value,tone,caption])=><Card className="metric" key={label}><span className="metric-label">{label}</span><strong className={`metric-value ${tone}`}>{value}</strong><small className={`metric-caption ${tone}`}>{caption}</small></Card>)}</div>
     <div className="report-live-grid">
+      <Card className="span-2 workforce-report"><div className="card-head"><h2><TrendingUp size={18}/>Workforce Growth</h2><p>Total headcount over the last 10 months</p></div><WorkforceTrend/></Card>
       <Card className="payroll-report"><div className="card-head"><h2>Payroll Summary</h2></div><Empty icon={WalletCards} title="Payroll not connected" text="Connect a payroll provider to see gross pay, deductions and net pay by department."/></Card>
       <Card className="department-report"><div className="card-head"><h2><BriefcaseBusiness size={18}/>Headcount by Department</h2><button onClick={()=>announce("Headcount CSV export prepared")}><Download size={13}/>CSV</button></div>{departments.map(([name,value])=><div className="department-bar" key={name}><span>{name}<b>{value} ({value}A / 0I)</b></span><i><em style={{width:`${Math.max(8,value/84*100)}%`}}/></i></div>)}</Card>
       <Card className="employment-report"><div className="card-head"><h2><Users size={18}/>Employment Type</h2></div><div className="employment-row"><strong>{totalHeadcount}</strong><div><b>Full-time</b><span>100% of workforce</span></div><i/></div><h3>AVG HOURLY RATE BY DEPARTMENT</h3>{departments.map(([n])=><p key={n}>{n}<b>{n==="UNASSIGNED"?"$0/hr":"$25/hr"}</b></p>)}</Card>
@@ -829,16 +1145,16 @@ function ReportsPage() {
       <Card><div className="card-head"><h2>PIP Report</h2></div>{onPip.length?<div className="people-list">{onPip.map(e=><div className="person-row" key={e.name}><Avatar initials={e.initials} small/><div><strong>{e.name}</strong><span>{e.title}</span></div></div>)}</div>:<Empty icon={AlertTriangle} title="0" text="No active PIPs"/>}</Card>
       <Card><div className="card-head"><h2><ShieldCheck size={18}/>Document Compliance</h2></div><Empty icon={ShieldCheck} title="Not tracked yet" text="Connect e-signature status to see contract completion by employee here."/></Card>
       <Card><div className="card-head"><h2><BarChart3 size={18}/>Saved Reports</h2></div>{[["Headcount by department","Headcount CSV export prepared"],["Payroll summary","Payroll CSV export prepared"],["Members on PIP","PIP CSV export prepared"]].map(([label,msg])=><div className="mini-row" key={label}><span><strong>{label}</strong></span><button onClick={()=>announce(msg)}>Run →</button></div>)}</Card>
-      <Card className="span-2"><div className="card-head"><h2>Tenure Analysis</h2></div><div className="tenure-head"><strong>19 mo</strong><span>Average Tenure</span></div>{[["< 6 months",26],["6–12 months",97],["1–2 years",64],["2–5 years",97],["5+ years",3]].map(([a,b])=><p className="tenure-row" key={a}>{a}<b>{b}</b></p>)}<h3 className="tenure-longest-head">LONGEST TENURED</h3><div className="people-list">{LONGEST_TENURED.map(([name,dept,years])=><div className="person-row" key={name}><Avatar initials={name.split(" ").slice(0,2).map(w=>w[0]).join("")} small/><div><strong>{name}</strong><span>{dept}</span></div><span className="tenure-longest-tag">{years}</span></div>)}</div></Card>
+      <Card className="span-2"><div className="card-head"><h2>Tenure Analysis</h2><p>Distribution of employees by time in company</p></div><div className="tenure-head"><strong>19 mo</strong><span>Average Tenure</span></div><TenureChart/><h3 className="tenure-longest-head">LONGEST TENURED</h3><div className="people-list">{LONGEST_TENURED.map(([name,dept,years])=><div className="person-row" key={name}><Avatar initials={name.split(" ").slice(0,2).map(w=>w[0]).join("")} small/><div><strong>{name}</strong><span>{dept}</span></div><span className="tenure-longest-tag">{years}</span></div>)}</div></Card>
     </div>
   </> }
 
 function AnnouncementsPage({open}) {
-  return <><PageTitle eyebrow="People" title="Announcements" subtitle="Broadcast updates to the whole company or specific teams." actions={<Button icon={Megaphone} onClick={()=>open("announcement")}>New Announcement</Button>}/>
+  return <><PageTitle title="Announcements" subtitle="Broadcast updates to the whole company or specific teams." actions={<Button icon={Megaphone} onClick={()=>open("announcement")}>New Announcement</Button>}/>
     <Card><div className="card-head"><h2>All announcements</h2></div><div className="people-list">{ANNOUNCEMENTS.map(([title,audience,by,when,status])=><div className="person-row" key={title}><span className="team-icon"><Megaphone size={18}/></span><div><strong>{title}</strong><span>{audience} · posted by {by}</span></div><time>{when}<small>{status}</small></time></div>)}</div></Card>
   </> }
 function DocumentsPage({open,go}) {
-  return <><PageTitle eyebrow="Assets & Reports" title="Documents & Templates" subtitle="Company templates and org-wide document management." actions={<Button kind="secondary" icon={Upload} onClick={()=>open("document")}>Upload</Button>}/>
+  return <><PageTitle className="docs-page-title" title="Documents & Templates" subtitle="Company templates and org-wide document management." actions={<Button kind="secondary" icon={Upload} onClick={()=>open("document")}>Upload</Button>}/>
     <div className="doc-template-grid">{DOCUMENT_TEMPLATES.map(([name,desc,bg,fg])=><button className="card doc-template-card" key={name} onClick={()=>go(`/documents/${slugify(name)}`)}><span className="doc-template-icon" style={{background:bg,color:fg}}><FileText size={20}/></span><h3>{name}</h3><p>{desc}</p><span className="doc-template-link">Template · edit →</span></button>)}</div>
     <Card><div className="card-head"><h2>Company documents</h2></div><div className="people-list">{COMPANY_DOCUMENTS.map(([name,meta,status])=><button className="person-row" key={name} onClick={()=>go(`/documents/${slugify(name)}`)}><span className="team-icon"><FileText size={18}/></span><div><strong>{name}</strong><span>{meta}</span></div><Status>{status}</Status></button>)}</div></Card>
   </> }
@@ -852,7 +1168,12 @@ function DocumentDetail({go,path}) {
     <Card className="team-detail-hero"><span className="team-detail-line"/><span className="live-team-icon large" style={{background:`linear-gradient(135deg,${fg},#111)`}}><FileText size={26}/></span><div className="team-detail-copy"><small>{tpl?"TEMPLATE":"COMPANY DOCUMENT"}</small><div><h1>{name}</h1>{status&&<span className="team-code">{status}</span>}</div><p>{desc}</p></div><div className="team-detail-actions"><Button kind="secondary" icon={Download} onClick={()=>announce(`${name} downloaded`)}>Download</Button>{tpl&&<Button kind="secondary" icon={Edit3} onClick={()=>announce(`${name} template editor opened`)}>Edit Template</Button>}</div></Card>
     <Card><div className="card-head"><h2>Details</h2></div><Info rows={tpl?[["Type","Template"],["Used for",desc],["Last updated","May 7, 2026"],["Owner","HR Operations"]]:[["Type","Company document"],["Description",desc],["Status",status],["Last updated","May 7, 2026"]]}/></Card>
   </> }
-function FeedbacksPage({open}) { const rows=[["H1 2026 Performance Review","Jan 15 – Jun 30, 2026","All employees","Completed"],["Q3 Leadership Feedback","Jul 1 – Sep 30, 2026","Team leads","Active"],["Probation Review","Ongoing","New employees","Active"]]; return <><PageTitle eyebrow="Feedback Cycles" title="Feedback Cycles" subtitle="Create and manage employee feedback cycles" actions={<Button icon={Plus} onClick={()=>open("feedback-cycle")}>Create Cycle</Button>}/><div className="metric-grid three">{[["Active cycles","2"],["Open responses","94"],["Completion rate","76%"]].map(x=><Card className="simple-metric" key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></Card>)}</div><Card><Toolbar><SearchBox placeholder="Search cycles"/><Select><option>All statuses</option><option>Active</option><option>Completed</option></Select></Toolbar><DataTable columns={["Cycle","Period","Audience","Status"]} rows={rows} renderActions={()=> <div className="row-actions"><IconButton icon={Eye} label="View"/><IconButton icon={MoreHorizontal} label="More"/></div>}/></Card></> }
+function FeedbacksPage({open}) {
+  const [rows,setRows]=useState([["H1 2026 Performance Review","Jan 15 – Jun 30, 2026","All employees","Completed"],["Q3 Leadership Feedback","Jul 1 – Sep 30, 2026","Team leads","Active"],["Probation Review","Ongoing","New employees","Active"]]);
+  const duplicate=(i)=>{const r=rows[i];setRows([...rows,[`${r[0]} (copy)`,r[1],r[2],"Active"]]);announce(`${r[0]} duplicated`)};
+  const archive=(i)=>{announce(`${rows[i][0]} archived`);setRows(rows.filter((_,idx)=>idx!==i))};
+  return <><PageTitle title="Feedback Cycles" subtitle="Create and manage employee feedback cycles" actions={<Button icon={Plus} onClick={()=>open("feedback-cycle")}>Create Cycle</Button>}/><div className="metric-grid three">{[["Active cycles","2"],["Open responses","94"],["Completion rate","76%"]].map(x=><Card className="simple-metric" key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></Card>)}</div><Card><Toolbar><SearchBox placeholder="Search cycles"/><Select><option>All statuses</option><option>Active</option><option>Completed</option></Select></Toolbar><DataTable columns={["Cycle","Period","Audience","Status"]} rows={rows} renderActions={(r,i)=> <div className="row-actions"><IconButton icon={Eye} label="View" onClick={()=>open("feedback-cycle",r)}/><MoreMenu actions={[["Edit cycle",Edit3,()=>open("feedback-cycle",r)],["Duplicate",Copy,()=>duplicate(i)],["Archive",Archive,()=>archive(i),true]]}/></div>}/></Card></>;
+}
 
 const SETTINGS_TABS = [
   ["Departments", "/settings/departments"],
@@ -864,30 +1185,103 @@ const SETTINGS_TABS = [
   ["Activity Logs", "/activity-logs"],
   ["Platform Settings", "/settings/platform"],
 ];
-function SettingsShell({path, go, children}) {
+function SettingsShell({path, go, children, role}) {
   const active = path==="/settings" ? "/settings/departments" : path;
-  return <><div className="tabs-scroll"><div className="tabs line-tabs settings-tabs">{SETTINGS_TABS.map(([label,to])=><button key={to} className={active===to?"active":""} onClick={()=>go(to)}>{label}</button>)}</div></div>{children}</>;
+  return <><div className="tabs-scroll"><div className="tabs line-tabs settings-tabs">{SETTINGS_TABS.map(([label,to])=>{const locked=to==="/settings/platform"&&role!=="Super Admin"; return <button key={to} className={active===to?"active":""} disabled={locked} title={locked?"Super Admin only":undefined} onClick={()=>!locked&&go(to)}>{label}{locked&&<LockKeyhole size={11}/>}</button>})}</div></div>{children}</>;
 }
 function SettingsList({kind,open}) {
-  const [departmentItems,setDepartmentItems]=useState(["AGN","BIC","BLK","CEO","FIN","HQ","HR","MNC","VP"]); const [entityItems,setEntityItems]=useState(["MUST Company PK","MUST Engage","MUST U"]); const [newName,setNewName]=useState(""); const [newCode,setNewCode]=useState(""); const [confirming,setConfirming]=useState("");
-  if(kind==="requestTypes") return <><PageTitle title="Request Types" subtitle="Define HRM request forms and their approval workflows" actions={<Button icon={Plus} onClick={()=>open("request-type")}>Add Request Type</Button>}/><Card className="live-empty-card"><Empty icon={ListChecks} title="No Request Types" text="Create your first request type (e.g. Overtime, Shift Adjustment)."/></Card></>;
+  const [departmentItems,setDepartmentItems]=useState(()=>["AGN","BIC","BLK","CEO","FIN","HQ","HR","MNC","VP"].map(c=>({name:c,code:c})));
+  const [entityItems,setEntityItems]=useState(["MUST Company PK","MUST Engage","MUST U"]);
+  const [newName,setNewName]=useState(""); const [newCode,setNewCode]=useState(""); const [confirming,setConfirming]=useState("");
+  if(kind==="requestTypes") return <><PageTitle title="Request Types" subtitle="Define Employee Services request forms and their approval workflows" actions={<Button icon={Plus} onClick={()=>open("request-type")}>Add Request Type</Button>}/><Card className="live-empty-card"><Empty icon={ListChecks} title="No Request Types" text="Create your first request type (e.g. Overtime, Shift Adjustment)."/></Card></>;
   if(kind==="feedbackForms") return <><PageTitle title="Feedback Forms" subtitle="Create and manage feedback form templates used in cycles" actions={<Button icon={Plus} onClick={()=>open("feedback-form")}>New form</Button>}/><Card className="feedback-form-row"><div><h3>Next Level Growth – Monthly 360° Reflection <span>System</span></h3><p>Monthly 360° reflection covering collaboration, communication, growth, problem-solving, and ownership.</p><small>5 steps · 25 questions · updated May 7, 2026</small></div><div><IconButton icon={Edit3} label="Edit" onClick={()=>open("feedback-form")}/><IconButton icon={Copy} label="Duplicate" onClick={()=>announce("Feedback form duplicated")}/></div></Card></>;
-  if(kind==="leaveTypes") return <><PageTitle title="Leave Types" subtitle="Configure the types of leave employees can apply for" actions={<Button icon={Plus} onClick={()=>open("leave-type")}>Add Leave Type</Button>}/><div className="leave-type-list">{[["Overtime","Overtime","Extra hours worked beyond your normal schedule","amber"],["Paid Time Off","PTO · working hours","Paid hours for company work done outside the office (e.g. market visit, supplies gathering)","purple"]].map(([name,code,desc,tone])=><Card className="leave-type-row" key={name}><span className={tone}><CalendarDays size={20}/></span><div><h3>{name} <b>{code}</b><em>Paid</em></h3><p>{desc} <small>· Unlimited · any duration · shown during probation</small></p></div><div className="row-actions"><IconButton icon={Archive} label={`Deactivate ${name}`} onClick={()=>announce(`${name} deactivated`)}/><IconButton icon={Edit3} label="Edit" onClick={()=>open("leave-type")}/><IconButton icon={Trash2} label="Delete" danger onClick={()=>open("delete")}/></div></Card>)}</div></>;
-  const isDept=kind==="departments"; const title=isDept?"Departments":"Company Entities"; const sub=isDept?"The top of the org hierarchy — Department → Team → Team Code.":"The legal/brand entities employees belong to (e.g. MUST Company PK, MUST U, MUST Engage)."; const items=isDept?departmentItems:entityItems; const addItem=()=>{const value=(isDept?newCode:newName).trim();if(!value){announce(`Enter a ${isDept?"department code":"company entity"}`,"error");return}if(items.some(x=>x.toLowerCase()===value.toLowerCase())){announce("This record already exists","error");return}if(isDept)setDepartmentItems([...items,value.toUpperCase()]);else setEntityItems([...items,value]);setNewName("");setNewCode("");announce(`${isDept?"Department":"Company entity"} added`)}; const removeItem=(item)=>{if(isDept)setDepartmentItems(items.filter(x=>x!==item));else setEntityItems(items.filter(x=>x!==item));setConfirming("");announce(`${item} deleted and recorded in Activity Logs`)};
-  return <><PageTitle title={title} subtitle={sub}/><Card className="settings-create"><div className={isDept?"department-create":"entity-create"}>{isDept?<><Field label="Department Title"><input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="e.g. Human Resource"/></Field><Field label="Department Code"><input value={newCode} onChange={e=>setNewCode(e.target.value)} placeholder="e.g. HR"/></Field><Button icon={Plus} onClick={addItem}>Add Department</Button></>:<><Field label="New Company Entity"><input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="e.g. MUST Engage"/></Field><Button icon={Plus} onClick={addItem}>Add</Button></>}</div></Card><Card className="settings-rows">{items.map(x=><React.Fragment key={x}><div className="settings-row"><span><Building2 size={17}/></span><strong>{x}</strong>{isDept&&<b>{x}</b>}<IconButton icon={Edit3} label={isDept?"Edit":"Rename"} onClick={()=>open(isDept?"department":"entity")}/><IconButton icon={Trash2} label="Delete" danger onClick={()=>setConfirming(x)}/></div>{confirming===x&&<div className="settings-confirm"><AlertTriangle size={18}/><div><strong>Delete {x}?</strong><p>{isDept?"Teams and employees using this department must be reassigned first.":"Employees linked to this entity must be reassigned first."}</p></div><Button kind="secondary" onClick={()=>setConfirming("")}>Cancel</Button><Button kind="danger" onClick={()=>removeItem(x)}>Delete</Button></div>}</React.Fragment>)}</Card></>;
+  if(kind==="leaveTypes") return <><PageTitle title="Leave Types" subtitle="Configure the types of leave employees can apply for — mirrors what employees see in Apply for Leave" actions={<Button icon={Plus} onClick={()=>open("leave-type")}>Add Leave Type</Button>}/><div className="leave-type-list">{LEAVE_TYPES.map(t=><Card className="leave-type-row" key={t.key}><span className={t.tone}><CalendarDays size={20}/></span><div><h3>{t.name} <b>{t.entitlement} · {t.unit}</b><em className={t.paid?"":"unpaid"}>{t.paid?"Paid":"Unpaid"}</em></h3><p>{t.policy}</p></div><div className="row-actions"><IconButton icon={Archive} label={`Deactivate ${t.name}`} onClick={()=>announce(`${t.name} deactivated`)}/><IconButton icon={Edit3} label="Edit" onClick={()=>open("leave-type")}/><IconButton icon={Trash2} label="Delete" className="danger-hover" onClick={()=>open("delete")}/></div></Card>)}</div></>;
+  const isDept=kind==="departments"; const title=isDept?"Departments":"Company Entities"; const sub=isDept?"The top of the org hierarchy — Department → Team → Team Code.":"The legal/brand entities employees belong to (e.g. MUST Company PK, MUST U, MUST Engage)."; const items=isDept?departmentItems:entityItems;
+  const addItem=()=>{
+    if(isDept){ const code=newCode.trim().toUpperCase(); if(!code){announce("Enter a department code","error");return} if(items.some(d=>d.code===code)){announce("This record already exists","error");return} setDepartmentItems([...items,{name:newName.trim()||code,code}]); }
+    else { const name=newName.trim(); if(!name){announce("Enter a company entity","error");return} if(items.some(x=>x.toLowerCase()===name.toLowerCase())){announce("This record already exists","error");return} setEntityItems([...items,name]); }
+    setNewName("");setNewCode("");announce(`${isDept?"Department":"Company entity"} added`);
+  };
+  const removeItem=(key)=>{ if(isDept)setDepartmentItems(items.filter(d=>d.code!==key)); else setEntityItems(items.filter(x=>x!==key)); setConfirming("");announce(`${key} deleted and recorded in Activity Logs`); };
+  return <><PageTitle title={title} subtitle={sub}/><div className="settings-layout"><Card className="settings-create"><h2>{isDept?"Add Department":"Add Company Entity"}</h2><div className={isDept?"department-create":"entity-create"}>{isDept?<><Field label="Department Title"><input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="e.g. Human Resource"/></Field><Field label="Department Code"><input value={newCode} onChange={e=>setNewCode(e.target.value)} placeholder="e.g. HR"/></Field><Button icon={Plus} onClick={addItem}>Add Department</Button></>:<><Field label="New Company Entity"><input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="e.g. MUST Engage"/></Field><Button icon={Plus} onClick={addItem}>Add</Button></>}</div></Card><Card className="settings-rows">{items.map(item=>{const key=isDept?item.code:item; const name=isDept?item.name:item; const code=isDept?item.code:null; return <React.Fragment key={key}><div className="settings-row"><span><Building2 size={17}/></span><strong>{name}</strong>{code&&code!==name&&<b>{code}</b>}<IconButton icon={Edit3} label={isDept?"Edit":"Rename"} onClick={()=>open(isDept?"department":"entity")}/><IconButton icon={Trash2} label="Delete" className="danger-hover" onClick={()=>setConfirming(key)}/></div>{confirming===key&&<div className="settings-confirm"><AlertTriangle size={18}/><div><strong>Delete {name}?</strong><p>{isDept?"Teams and employees using this department must be reassigned first.":"Employees linked to this entity must be reassigned first."}</p></div><Button kind="secondary" onClick={()=>setConfirming("")}>Cancel</Button><Button kind="danger" onClick={()=>removeItem(key)}>Delete</Button></div>}</React.Fragment>})}</Card></div></>;
 }
 
 function UsersPage({open}) {
   const [tab,setTab]=useState("Users"); const [filter,setFilter]=useState("Active"); const [q,setQ]=useState("");
-  const names=[["SA","Super Admin","admin@must.company","Super Admin","Arshman Afzal","BIC"],["RL","Ri Le Tan","ritan@must.company","Employee","Ri Le Tan","BLK"],["AJ","Afroas Jameela","roazy@must.company","Employee","Afroas Jameela","HR"],["AA","Ateeq Ahmed","u.arham@must.company","Employee","Ateeq Ahmed","HR"],["EL","Erwin Llanera","l.erwin@must.company","Employee","Erwin Llanera","HR"],["IG","Ismail Gorkem Kara","k.ismail@must.company","Employee","Ismail Gorkem Kara","BLK"]];
+  const [rows,setRows]=useState([
+    {ini:"SA",name:"Super Admin",email:"admin@must.company",role:"Super Admin",team:"BIC",lastActive:"Active 2m ago",status:"Active"},
+    {ini:"RL",name:"Ri Le Tan",email:"ritan@must.company",role:"Employee",team:"BLK",lastActive:"Active 1h ago",status:"Active"},
+    {ini:"AJ",name:"Afroas Jameela",email:"roazy@must.company",role:"Employee",team:"HR",lastActive:"Active yesterday",status:"Active"},
+    {ini:"AA",name:"Ateeq Ahmed",email:"u.arham@must.company",role:"Employee",team:"HR",lastActive:"Active 3d ago",status:"Active"},
+    {ini:"EL",name:"Erwin Llanera",email:"l.erwin@must.company",role:"Employee",team:"HR",lastActive:"Active 1w ago",status:"Active"},
+    {ini:"IG",name:"Ismail Gorkem Kara",email:"k.ismail@must.company",role:"Employee",team:"BLK",lastActive:"Never signed in",status:"Active"},
+    {ini:"AR",name:"Andre Ricardo",email:"a.ricardo@must.company",role:"Employee",team:"Platform",lastActive:"Blocked 2w ago",status:"Blocked"},
+  ]);
+  const [selected,setSelected]=useState(()=>new Set());
+  const [roleFilter,setRoleFilter]=useState("All Roles");
+  const [confirmBlock,setConfirmBlock]=useState(null);
   const roles=[["Admin","Administrative access; cannot manage users or roles",24,0,"admin","purple"],["Employee","Self-service access only — applies to leave, feedback, profile",0,283,"employee","gray"],["Super Admin","Full access to every feature in the system",44,5,"super_admin","dark"]];
-  const visible=filter==="Blocked"?[]:names.filter(x=>x.join(" ").toLowerCase().includes(q.toLowerCase()));
-  return <><PageTitle title="User & Role Management" subtitle="Manage user accounts, create custom roles, and control granular permissions" actions={<Button icon={tab==="Users"?UserPlus:Plus} onClick={()=>open(tab==="Users"?"user":"role")}>{tab==="Users"?"Create User":"Create Role"}</Button>}/><div className="tabs line-tabs live-user-tabs"><button className={tab==="Users"?"active":""} onClick={()=>setTab("Users")}>Users (288)</button><button className={tab==="Roles"?"active":""} onClick={()=>setTab("Roles")}>Roles & Permissions (3)</button></div>{tab==="Users"?<><div className="user-filters"><SearchBox placeholder="Search by name, email, or role…" value={q} onChange={setQ}/>{["Active","Blocked","All"].map(x=><button key={x} className={filter===x?"active":""} onClick={()=>setFilter(x)}>{x}</button>)}</div>{visible.length?<div className="user-live-table table-scroll responsive-table"><table><thead><tr>{["User","Role","Linked Employee","Access","Created","Actions"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map(([ini,name,email,role,linked,dept])=><tr key={email}><td data-label="User"><span className="person-cell"><Avatar initials={ini} small/><span><strong>{name}</strong><small>{email}</small></span></span></td><td data-label="Role"><button className="role-select" onClick={()=>open("role")}>{role}<ChevronDown size={12}/></button></td><td data-label="Linked Employee"><span className="linked-employee-cell"><strong>{linked}</strong><small>{dept}</small><button onClick={()=>announce(`Employee link editor opened for ${name}`)}>Change</button></span></td><td data-label="Access"><Status>Active</Status></td><td data-label="Created">May 7, 2026</td><td data-label="Actions"><div className="row-actions"><IconButton icon={LockKeyhole} label="Reset password" onClick={()=>announce(`Password reset instructions sent to ${email}`)}/><IconButton icon={UserMinus} label="Revoke Access" danger onClick={()=>open("delete")}/></div></td></tr>)}</tbody></table></div>:<Card><Empty icon={UserMinus} title={filter==="Blocked"?"No blocked users":"No users found"} text={filter==="Blocked"?"Blocked accounts will appear here.":"Try a different name, email, or role."}/></Card>}</>:<div className="role-card-grid">{roles.map(([name,desc,permissions,users,key,tone])=><Card className={`role-card ${tone}`} key={name}><h3>{name} <span><LockKeyhole size={10}/>System</span></h3><p>{desc}</p><div><span>PERMISSIONS<strong>{permissions}</strong></span><span>USERS<strong>{users}</strong></span><span>KEY<code>{key}</code></span></div><button onClick={()=>open("role")}>Manage Permissions →</button></Card>)}</div>}</>;
+  const visible=rows.filter(r=>(filter==="All"||r.status===filter)&&(roleFilter==="All Roles"||r.role===roleFilter)&&`${r.name} ${r.email} ${r.role}`.toLowerCase().includes(q.toLowerCase()));
+  const filterCounts={Active:rows.filter(r=>r.status==="Active").length,Blocked:rows.filter(r=>r.status==="Blocked").length,All:rows.length};
+  const roleCounts={"All Roles":rows.length,Employee:rows.filter(r=>r.role==="Employee").length,Admin:rows.filter(r=>r.role==="Admin").length,"Super Admin":rows.filter(r=>r.role==="Super Admin").length};
+  const changeRole=(email,role)=>{setRows(rows.map(r=>r.email===email?{...r,role}:r));announce(`${email} moved to ${role}`)};
+  const toggleOne=(email)=>setSelected(prev=>{const next=new Set(prev);next.has(email)?next.delete(email):next.add(email);return next});
+  const toggleAll=()=>setSelected(prev=>prev.size===visible.length?new Set():new Set(visible.map(r=>r.email)));
+  const bulkRole=(role)=>{setRows(rows.map(r=>selected.has(r.email)?{...r,role}:r));announce(`${selected.size} user${selected.size>1?"s":""} moved to ${role}`);setSelected(new Set())};
+  const setStatus=(emails,status)=>{setRows(rows.map(r=>emails.includes(r.email)?{...r,status,lastActive:status==="Blocked"?"Blocked just now":r.lastActive}:r));announce(`${emails.length>1?`${emails.length} users`:emails[0]} ${status==="Blocked"?"blocked — they can no longer sign in":"restored — they can sign in again"}`)};
+  const selectedAllBlocked=selected.size>0&&[...selected].every(email=>rows.find(r=>r.email===email)?.status==="Blocked");
+  return <><PageTitle title="User & Role Management" subtitle="Manage user accounts, create custom roles, and control granular permissions" actions={<Button icon={tab==="Users"?UserPlus:Plus} onClick={()=>open(tab==="Users"?"user":"role")}>{tab==="Users"?"Create User":"Create Role"}</Button>}/><div className="tabs pill-tabs live-user-tabs"><button className={tab==="Users"?"active":""} onClick={()=>setTab("Users")}>Users (288)</button><button className={tab==="Roles"?"active":""} onClick={()=>setTab("Roles")}>Roles & Permissions (3)</button></div>{tab==="Users"?<><div className="user-filters"><SearchBox placeholder="Search by name, email, or role…" value={q} onChange={setQ}/><FilterMenu value={filter} options={["Active","Blocked","All"]} counts={filterCounts} onChange={x=>{setFilter(x);setSelected(new Set())}}/><FilterMenu value={roleFilter} options={["All Roles","Employee","Admin","Super Admin"]} counts={roleCounts} onChange={setRoleFilter}/></div>{selected.size>0&&<div className="bulk-action-bar"><strong>{selected.size} selected</strong><Button kind="secondary" onClick={()=>bulkRole("Admin")}>Set as Admin</Button><Button kind="secondary" onClick={()=>bulkRole("Employee")}>Set as Employee</Button>{selectedAllBlocked?<Button icon={UserCheck} onClick={()=>{setStatus([...selected],"Active");setSelected(new Set())}}>Restore access</Button>:<Button kind="danger" icon={UserMinus} onClick={()=>{setStatus([...selected],"Blocked");setSelected(new Set())}}>Block access</Button>}<button className="bulk-clear" onClick={()=>setSelected(new Set())}>Clear</button></div>}{visible.length?<><ScrollFadeTable className="user-live-table table-scroll responsive-table"><table><thead><tr><th className="checkbox-cell"><input type="checkbox" checked={selected.size>0&&selected.size===visible.length} onChange={toggleAll} aria-label="Select all users"/></th>{["User","Role","Team","Last Active","Actions"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map(r=><React.Fragment key={r.email}><tr><td className="checkbox-cell" data-label=""><input type="checkbox" checked={selected.has(r.email)} onChange={()=>toggleOne(r.email)} aria-label={`Select ${r.name}`}/></td><td data-label="User"><span className="person-cell"><Avatar initials={r.ini} small/><span><strong>{r.name}</strong><small>{r.email}</small>{r.status==="Blocked"&&<em className="blocked-tag">Blocked</em>}</span></span></td><td data-label="Role"><label className={`role-select ${r.role==="Super Admin"?"super":""}`}><select value={r.role} onChange={e=>changeRole(r.email,e.target.value)} aria-label={`Role for ${r.name}`}><option>Employee</option><option>Admin</option><option>Super Admin</option></select><ChevronDown size={12}/></label></td><td data-label="Team">{r.team}</td><td data-label="Last Active">{r.lastActive}</td><td data-label="Actions"><div className="row-actions"><Button kind="secondary" icon={LockKeyhole} onClick={()=>announce(`Password reset instructions sent to ${r.email}`)}>Reset</Button>{r.status==="Active"?<Button kind="danger" icon={UserMinus} onClick={()=>setConfirmBlock(r.email)}>Block</Button>:<Button kind="secondary" icon={UserCheck} onClick={()=>setStatus([r.email],"Active")}>Restore</Button>}</div></td></tr>{confirmBlock===r.email&&<tr className="confirm-row"><td colSpan={6}><div className="settings-confirm"><AlertTriangle size={18}/><div><strong>Block {r.name}'s access?</strong><p>They won't be able to sign in until you restore access. Their employee record and history are kept.</p></div><Button kind="secondary" onClick={()=>setConfirmBlock(null)}>Cancel</Button><Button kind="danger" onClick={()=>{setStatus([r.email],"Blocked");setConfirmBlock(null)}}>Block access</Button></div></td></tr>}</React.Fragment>)}</tbody></table></ScrollFadeTable><p className="users-footer-note">Showing {visible.length} of 288 total users</p></>:<Card><Empty icon={UserMinus} title={filter==="Blocked"?"No blocked users":"No users found"} text={filter==="Blocked"?"Blocked accounts will appear here.":"Try a different name, email, or role."}/></Card>}</>:<div className="role-card-grid">{roles.map(([name,desc,permissions,users,key,tone])=><Card className={`role-card ${tone}`} key={name}><h3>{name} <span><LockKeyhole size={10}/>System</span></h3><p>{desc}</p><div><span>PERMISSIONS<strong>{permissions}</strong></span><span>USERS<strong>{users}</strong></span><span>KEY<code>{key}</code></span></div><button onClick={()=>open("role")}>Manage Permissions →</button></Card>)}</div>}</>;
 }
 
-function ActivityLogsPage() { const [detail,setDetail]=useState(false); const [action,setAction]=useState("All"); const [moreFilters,setMoreFilters]=useState(false); const rows=ACTIVITY_LOG; const visible=action==="All"?rows:rows.filter(r=>r[3]===action); return <><PageTitle title="Activity Logs" subtitle="Every action across the system — who did what, to whom, and when."/><div className="activity-filters"><div className="activity-filters-row"><SearchBox placeholder="Search by person, action, or resource…"/><div className="activity-actions">{["All","Approved","Rejected","Created","Updated","Deleted","Viewed"].map(x=><button className={action===x?"active":""} key={x} onClick={()=>setAction(x)}>{x}</button>)}</div><button className={`filters-toggle ${moreFilters?"active":""}`} onClick={()=>setMoreFilters(v=>!v)}><SlidersHorizontal size={15}/>Filters</button></div><div className={`activity-filters-row activity-filters-secondary ${moreFilters?"open":""}`}><Select><option>Anyone</option></Select><Select><option>All records</option><option>Employees</option><option>Leave Requests</option><option>HRM Requests</option><option>Salary</option><option>Bank Details</option><option>Leave Balances</option><option>HR Notes</option><option>Users</option></Select><Button kind="secondary">Changes only</Button><div className="date-range"><input type="date"/><span>to</span><input type="date"/></div></div></div><p className="activity-count">Showing {visible.length} of 2676 entries</p>{visible.length?<div className="activity-table table-scroll responsive-table"><table><thead><tr>{["When","Who","Action","On","Status","IP","Details"] .map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map((r,i)=><tr key={i} className="clickable" onClick={()=>setDetail(true)}><td data-label="When">{r[0]}</td><td data-label="Who"><span className="person-cell"><Avatar initials={r[1]} small/><strong>{r[2]}</strong></span></td><td data-label="Action"><span className="action-cell"><Status>{r[3]}</Status>{r[4]}</span></td><td data-label="On">{r[5]}</td><td data-label="Status">{r[6]}</td><td data-label="IP">{r[7]}</td><td data-label="Details" onClick={e=>e.stopPropagation()}><IconButton icon={Eye} label="View details" onClick={()=>setDetail(true)}/></td></tr>)}</tbody></table></div>:<Card><Empty icon={ListChecks} title={`No ${action.toLowerCase()} activity`} text="No audit entries match this action filter."/></Card>}{detail&&<Modal title="Activity detail" subtitle="A complete record of this change" onClose={()=>setDetail(false)}><Info rows={[["Action","Updated User"],["Actor","Arshman Afzal"],["Date and time","11 Aug 2026, 12:36"],["IP address","10.8.9.24"],["Record","User #6f00f3d5"]]}/></Modal>}</> }
+const ACTIVITY_ACTIONS=["All","Created","Updated","Approved","Rejected","Deleted","Viewed","Logged in"];
+const MUTATING_ACTIONS=["Created","Updated","Deleted","Approved","Rejected"];
+function ActivityLogsPage() {
+  const [detail,setDetail]=useState(null); const [action,setAction]=useState("All"); const [moreFilters,setMoreFilters]=useState(false);
+  const [actor,setActor]=useState("Anyone"); const [recordType,setRecordType]=useState("All records"); const [changesOnly,setChangesOnly]=useState(false);
+  const [dateFrom,setDateFrom]=useState(""); const [dateTo,setDateTo]=useState("");
+  const rows=ACTIVITY_LOG;
+  const actors=["Anyone",...new Set(rows.map(r=>r[2]))];
+  const recordTypes=["All records",...new Set(rows.map(r=>r[5]).filter(v=>v!=="—"))];
+  const visible=rows.filter(r=>
+    (action==="All"||r[3]===action) &&
+    (actor==="Anyone"||r[2]===actor) &&
+    (recordType==="All records"||r[5]===recordType) &&
+    (!changesOnly||MUTATING_ACTIONS.includes(r[3])) &&
+    (!dateFrom||new Date(r[0])>=new Date(dateFrom)) &&
+    (!dateTo||new Date(r[0])<=new Date(`${dateTo}T23:59:59`))
+  );
+  const actionCounts=Object.fromEntries(ACTIVITY_ACTIONS.map(a=>[a,a==="All"?rows.length:rows.filter(r=>r[3]===a).length]));
+  const activeFilterCount=[actor!=="Anyone",recordType!=="All records",changesOnly,!!dateFrom,!!dateTo].filter(Boolean).length;
+  return <><PageTitle title="Activity Logs" subtitle="Every action across the system — who did what, to whom, and when."/><div className="activity-filters"><div className="activity-filters-row"><SearchBox placeholder="Search by person, action, or resource…"/><FilterMenu value={action} options={ACTIVITY_ACTIONS} counts={actionCounts} onChange={setAction}/><button className={`filters-toggle ${moreFilters?"active":""}`} onClick={()=>setMoreFilters(v=>!v)}><SlidersHorizontal size={15}/>More filters{activeFilterCount>0&&<b>{activeFilterCount}</b>}</button></div><div className={`activity-filters-row activity-filters-secondary ${moreFilters?"open":""}`}>
+    <div className="activity-filter-field"><span>Actor</span><Select value={actor} onChange={setActor}>{actors.map(a=><option key={a}>{a}</option>)}</Select></div>
+    <div className="activity-filter-field"><span>Record type</span><Select value={recordType} onChange={setRecordType}>{recordTypes.map(r=><option key={r}>{r}</option>)}</Select></div>
+    <div className="activity-filter-field"><span>&nbsp;</span><button type="button" className={`changes-only-toggle ${changesOnly?"active":""}`} onClick={()=>setChangesOnly(v=>!v)} title="Hide sign-ins and record views — show only actions that changed data (created, updated, deleted, approved, rejected)"><Check size={14}/>Data changes only</button></div>
+    <div className="activity-filter-field date-range"><span>Date range</span><div className="date-range"><input type="date" aria-label="From date" value={dateFrom} onChange={e=>setDateFrom(e.target.value)}/><span>to</span><input type="date" aria-label="To date" value={dateTo} onChange={e=>setDateTo(e.target.value)}/></div></div>
+  </div></div><p className="activity-count">Showing {visible.length} of {rows.length} entries{activeFilterCount>0?` — ${activeFilterCount} filter${activeFilterCount>1?"s":""} applied`:""}</p>{visible.length?<div className="activity-table table-scroll responsive-table"><table><thead><tr>{["When","Who","Action","On","Status","IP","Details"] .map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map((r,i)=><tr key={i} className="clickable" onClick={()=>setDetail(r)}><td data-label="When">{r[0]}</td><td data-label="Who"><span className="person-cell"><Avatar initials={r[1]} small/><strong>{r[2]}</strong></span></td><td data-label="Action"><span className="action-cell"><Status>{r[3]}</Status>{r[4]}</span></td><td data-label="On">{r[5]}</td><td data-label="Status">{r[6]}</td><td data-label="IP">{r[7]}</td><td data-label="Details" onClick={e=>e.stopPropagation()}><IconButton icon={Eye} label="View details" onClick={()=>setDetail(r)}/></td></tr>)}</tbody></table></div>:<Card><Empty icon={ListChecks} title="No matching activity" text="No audit entries match these filters. Try clearing one and searching again."/></Card>}{detail&&<Modal title="Activity detail" subtitle="A complete record of this change" onClose={()=>setDetail(null)}><Info rows={[["Action",detail[3]],["Description",detail[4]],["Actor",detail[2]],["Date and time",detail[0]],["On",detail[5]],["IP address",detail[7]]]}/></Modal>}</> }
 
-function PlatformSettings({open}) { const [member,setMember]=useState(""); const [confirm,setConfirm]=useState(""); const [issueFilter,setIssueFilter]=useState("open"); const admins=[["SA","Super Admin","admin@must.company"],["SG","Sneha Gupta","g.sneha@must.company"],["AA","Arshman Afzal","a.arshman@must.company"],["RC","Rohma Chaudhary","dustyrose@must.company"],["MI","Matilda Ipeh Anashie","darkmagenta@must.company"]]; const candidates=[["RL","Ri Le Tan","ritan@must.company"],["AJ","Afroas Jameela","roazy@must.company"],["AA","Ateeq Ahmed","u.arham@must.company"],["EL","Erwin Llanera","l.erwin@must.company"]]; return <><PageTitle title="Platform Settings" subtitle="Super-admin-only controls for the platform"/><Card className="platform-card"><div className="platform-heading"><Crown size={20}/><div><h2>Super Admins</h2><p>Only a Super Admin can grant or revoke the Super Admin role.</p></div></div><h3>CURRENT SUPER ADMINS (5)</h3><div className="platform-people">{admins.map(([ini,name,email])=><div key={email}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{email}</small></span><button disabled={ini==="MI"} onClick={()=>open("remove-admin")}><UserMinus size={14}/>Remove</button></div>)}</div><h3>PROMOTE A USER</h3><SearchBox placeholder="Search users by name or email…"/><div className="platform-people candidates">{candidates.map(([ini,name,email])=><div key={email}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{email}</small></span><button onClick={()=>open("super-admin")}><UserPlus size={14}/>Make Super Admin</button></div>)}</div></Card><Card className="platform-card"><div className="platform-heading"><AlertTriangle size={20}/><div><h2>Crashes & Reported Issues</h2><p>Server & client crashes plus problems reported by users.</p></div></div><div className="employee-statuses">{["open","resolved","all"].map(x=><button key={x} className={issueFilter===x?"active":""} onClick={()=>setIssueFilter(x)}>{x}</button>)}</div>{issueFilter==="resolved"&&<Empty icon={Check} title="No resolved issues" text="Resolved crashes and reports will appear here."/>}</Card><Card className="platform-card danger-zone"><div className="platform-heading"><Settings size={20}/><div><h2>Danger Zone & System Flags</h2><p>Platform-wide toggles. Wired up as they're defined.</p></div></div><h3>Clear HRIS Slack notifications</h3><p>Removes the notification DMs this app has sent, from people's Slack. Cannot be undone.</p><div className="danger-controls"><Select value={member} onChange={setMember}><option value="">Select a member…</option><option>Ri Le Tan</option><option>Afroas Jameela</option></Select><Button kind="danger" disabled={!member} onClick={()=>{announce(`Slack notifications cleared for ${member}`);setMember("")}}>Clear</Button><input aria-label="Type CLEAR to confirm" placeholder="CLEAR" value={confirm} onChange={e=>setConfirm(e.target.value)}/><Button kind="danger" disabled={confirm!=="CLEAR"} onClick={()=>{announce("Slack notifications cleared for everyone");setConfirm("")}}>Clear</Button></div></Card></> }
+function PlatformSettings({open}) {
+  const [member,setMember]=useState(""); const [confirm,setConfirm]=useState(""); const [issueFilter,setIssueFilter]=useState("open");
+  const [issues,setIssues]=useState([
+    {id:1,title:"Employee profile export failed",detail:"Export to Excel times out for departments with 50+ employees.",severity:"high",status:"open",reporter:"Arshman Afzal",reported:"Aug 11, 2026"},
+    {id:2,title:"Leave balance rounding mismatch",detail:"Half-day leave shows 0.4 days instead of 0.5 on the balance card.",severity:"medium",status:"open",reporter:"Sneha Gupta",reported:"Aug 9, 2026"},
+    {id:3,title:"Duplicate Slack reminder sent",detail:"Some users received the leave-approval reminder twice in one day.",severity:"low",status:"resolved",reporter:"System",reported:"Aug 3, 2026"},
+  ]);
+  const [flags,setFlags]=useState({maintenance:false,require2fa:false,selfRegister:false});
+  const admins=[["SA","Super Admin","admin@must.company"],["SG","Sneha Gupta","g.sneha@must.company"],["AA","Arshman Afzal","a.arshman@must.company"],["RC","Rohma Chaudhary","dustyrose@must.company"],["MI","Matilda Ipeh Anashie","darkmagenta@must.company"]]; const candidates=[["RL","Ri Le Tan","ritan@must.company"],["AJ","Afroas Jameela","roazy@must.company"],["AA","Ateeq Ahmed","u.arham@must.company"],["EL","Erwin Llanera","l.erwin@must.company"]];
+  const toggleIssue=(id)=>setIssues(issues.map(i=>i.id===id?{...i,status:i.status==="open"?"resolved":"open"}:i));
+  const toggleFlag=(key,label)=>setFlags(f=>{announce(`${label} ${!f[key]?"enabled":"disabled"}`);return {...f,[key]:!f[key]}});
+  const visibleIssues=issueFilter==="all"?issues:issues.filter(i=>i.status===issueFilter);
+  return <><PageTitle title="Platform Settings" subtitle="Super-admin-only controls for the platform"/><Card className="platform-card"><div className="platform-heading"><Crown size={20}/><div><h2>Super Admins</h2><p>Only a Super Admin can grant or revoke the Super Admin role.</p></div></div><h3>CURRENT SUPER ADMINS (5)</h3><div className="platform-people">{admins.map(([ini,name,email])=><div key={email}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{email}</small></span><button disabled={ini==="MI"} onClick={()=>open("remove-admin")}><UserMinus size={14}/>Remove</button></div>)}</div><h3>PROMOTE A USER</h3><SearchBox placeholder="Search users by name or email…"/><div className="platform-people candidates">{candidates.map(([ini,name,email])=><div key={email}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{email}</small></span><button onClick={()=>open("super-admin")}><UserPlus size={14}/>Make Super Admin</button></div>)}</div></Card>
+    <Card className="platform-card"><div className="platform-heading"><AlertTriangle size={20}/><div><h2>Crashes & Reported Issues</h2><p>Server & client crashes plus problems reported by users.</p></div></div><div className="employee-statuses">{["open","resolved","all"].map(x=><button key={x} className={issueFilter===x?"active":""} onClick={()=>setIssueFilter(x)}>{x} <b>{x==="all"?issues.length:issues.filter(i=>i.status===x).length}</b></button>)}</div><div className="issue-list">{visibleIssues.length?visibleIssues.map(i=><div className="issue-row" key={i.id}><span className={`issue-severity ${i.severity}`}/><div><strong>{i.title}</strong><p>{i.detail}</p><small>Reported by {i.reporter} · {i.reported}</small></div><Button kind="secondary" onClick={()=>toggleIssue(i.id)}>{i.status==="open"?"Mark resolved":"Reopen"}</Button></div>):<Empty icon={Check} title={`No ${issueFilter==="all"?"":issueFilter+" "}issues`} text={issueFilter==="resolved"?"Resolved crashes and reports will appear here.":"Nothing to review right now."}/>}</div></Card>
+    <Card className="platform-card"><div className="platform-heading"><Settings size={20}/><div><h2>System Flags</h2><p>Platform-wide toggles — changes apply immediately for everyone.</p></div></div><div className="flag-list">
+      <label className="flag-toggle"><input type="checkbox" checked={flags.maintenance} onChange={()=>toggleFlag("maintenance","Maintenance mode")}/><span className="flag-toggle-track"><span className="flag-toggle-thumb"/></span><span className="flag-toggle-copy"><strong>Maintenance mode</strong><small>Shows a maintenance banner and blocks sign-in for everyone except Super Admins.</small></span></label>
+      <label className="flag-toggle"><input type="checkbox" checked={flags.require2fa} onChange={()=>toggleFlag("require2fa","Two-factor authentication requirement")}/><span className="flag-toggle-track"><span className="flag-toggle-thumb"/></span><span className="flag-toggle-copy"><strong>Require 2FA for Admin &amp; Super Admin</strong><small>Admin-level accounts must set up two-factor authentication before they can sign in.</small></span></label>
+      <label className="flag-toggle"><input type="checkbox" checked={flags.selfRegister} onChange={()=>toggleFlag("selfRegister","Self-registration")}/><span className="flag-toggle-track"><span className="flag-toggle-thumb"/></span><span className="flag-toggle-copy"><strong>Allow self-registration</strong><small>Let people with a @must.company email create their own account instead of being invited.</small></span></label>
+    </div></Card>
+    <Card className="platform-card danger-zone"><div className="platform-heading"><AlertTriangle size={20}/><div><h2>Danger Zone</h2><p>Destructive actions that can't be undone — review carefully before confirming.</p></div></div>
+      <div className="danger-block"><h3>Clear notifications for one person</h3><p>Removes every Slack DM this app has sent to the selected person — they'll stop seeing old reminders, but new ones will still be delivered normally. Cannot be undone.</p><div className="danger-controls"><Select value={member} onChange={setMember}><option value="">Select a member…</option><option>Ri Le Tan</option><option>Afroas Jameela</option></Select><Button kind="danger" disabled={!member} onClick={()=>{announce(`Slack notifications cleared for ${member}`);setMember("")}}>Clear for this person</Button></div></div>
+      <div className="danger-block danger-block-severe"><h3><AlertTriangle size={13}/>Clear notifications for everyone</h3><p>Removes every Slack DM this app has ever sent, for <strong>all 288 employees</strong> at once. This cannot be undone and cannot be limited to one person after the fact — type <strong>CLEAR</strong> below to confirm you understand the scope.</p><div className="danger-controls"><input aria-label="Type CLEAR to confirm" placeholder="Type CLEAR to confirm" value={confirm} onChange={e=>setConfirm(e.target.value)}/><Button kind="danger" disabled={confirm!=="CLEAR"} onClick={()=>{announce("Slack notifications cleared for everyone");setConfirm("")}}>Clear for everyone</Button></div></div>
+    </Card></> }
 
 function FeedbackBuilder({open,go}) { const [questions,setQuestions]=useState(["What went well during this review period?","Where could this employee improve?","How would you rate overall performance?"]); const [section,setSection]=useState(0); const sections=["Performance","Growth & Development","Values"]; return <><button className="back-link" onClick={()=>go("/settings/feedback-forms")}><ArrowLeft size={16}/>Back to feedback forms</button><PageTitle eyebrow="Feedback Form" title="Performance Review" subtitle="Build sections and questions for this feedback form" actions={<><Button kind="secondary" icon={Eye}>Preview</Button><Button icon={Check}>Save Form</Button></>}/><div className="builder-layout"><Card className="builder-sidebar"><h2>Sections</h2>{sections.map((name,i)=><button key={name} className={section===i?"active":""} onClick={()=>setSection(i)}>{i+1}. {name}</button>)}<Button kind="secondary" icon={Plus}>Add Section</Button></Card><Card><Field label="Section title"><input value={sections[section]} readOnly/></Field><Field label="Description"><input defaultValue="Review the employee's delivery, strengths and development areas."/></Field><div className="question-list">{questions.map((q,i)=><div className="question" key={`${i}-${q}`}><span className="drag">⋮⋮</span><div><small>Question {i+1}</small><input value={q} onChange={e=>setQuestions(questions.map((x,j)=>j===i?e.target.value:x))}/><Select><option>{i===2?"Rating scale":"Long answer"}</option><option>Short answer</option><option>Multiple choice</option></Select></div><IconButton icon={Trash2} label="Delete question" danger onClick={()=>setQuestions(questions.filter((_,j)=>j!==i))}/></div>)}</div><Button kind="secondary" icon={Plus} onClick={()=>setQuestions([...questions,"New question"])}>Add Question</Button></Card></div></> }
 
@@ -896,28 +1290,27 @@ function FeedbackBuilder({open,go}) { const [questions,setQuestions]=useState(["
 // Step 1: compact, searchable list — name + the one or two facts that matter for picking (paid
 // status, balance). Step 2: the type you picked, its full policy tucked behind a disclosure so it
 // doesn't compete with the actual form, then the date/time/reason/attachment fields.
-function ApplyLeaveForm() {
-  const [selected, setSelected] = useState(null);
-  const [query, setQuery] = useState("");
+function LeaveTypePicker({ query, onQuery, onSelect, onBack, backLabel }) {
+  const filtered = LEAVE_TYPES.filter(t=>t.name.toLowerCase().includes(query.toLowerCase()));
+  return <>
+    {onBack && <button type="button" className="back-link" onClick={onBack}><ArrowLeft size={15}/>{backLabel}</button>}
+    <p>Choose the leave type that matches your situation.</p>
+    <input type="hidden" required readOnly aria-hidden="true" style={{display:"none"}} value=""/>
+    <SearchBox placeholder="Search leave types…" value={query} onChange={onQuery}/>
+    <div className="type-list">{filtered.length?filtered.map(t=><button type="button" key={t.key} className="type-list-row" onClick={()=>onSelect(t.key)}>
+      <i className={`tone-dot ${t.tone}`}/>
+      <span className="type-list-row-copy"><strong>{t.name}</strong><small>{t.paid?"Paid":"Unpaid"} · {t.entitlement} · {t.unit}</small></span>
+      <span className="type-list-row-balance">{t.balance}</span>
+      <ChevronRight size={16}/>
+    </button>):<p className="type-empty">No leave types match "{query}".</p>}</div>
+  </>;
+}
+
+function LeaveDetailForm({ type, onBack, backLabel }) {
   const [start, setStart] = useState(""); const [end, setEnd] = useState("");
-  if (!selected) {
-    const filtered = LEAVE_TYPES.filter(t=>t.name.toLowerCase().includes(query.toLowerCase()));
-    return <>
-      <p>Choose the leave type that matches your situation.</p>
-      <input type="hidden" required readOnly aria-hidden="true" style={{display:"none"}} value=""/>
-      <SearchBox placeholder="Search leave types…" value={query} onChange={setQuery}/>
-      <div className="type-list">{filtered.length?filtered.map(t=><button type="button" key={t.key} className="type-list-row" onClick={()=>setSelected(t.key)}>
-        <i className={`tone-dot ${t.tone}`}/>
-        <span className="type-list-row-copy"><strong>{t.name}</strong><small>{t.paid?"Paid":"Unpaid"} · {t.entitlement} · {t.unit}</small></span>
-        <span className="type-list-row-balance">{t.balance}</span>
-        <ChevronRight size={16}/>
-      </button>):<p className="type-empty">No leave types match "{query}".</p>}</div>
-    </>;
-  }
-  const type = LEAVE_TYPES.find(t=>t.key===selected);
   const ready = start && end;
   return <>
-    <button type="button" className="back-link" onClick={()=>setSelected(null)}><ArrowLeft size={15}/>Back to leave types</button>
+    <button type="button" className="back-link" onClick={onBack}><ArrowLeft size={15}/>{backLabel}</button>
     <div className="type-detail-head">
       <div className="type-detail-title"><i className={`tone-dot ${type.tone}`}/><h3>{type.name}</h3><span className={`type-paid-tag ${type.paid?"paid":"unpaid"}`}>{type.paid?"Paid":"Unpaid"}</span></div>
       <div className="type-detail-stats">
@@ -946,21 +1339,49 @@ function ApplyLeaveForm() {
   </>;
 }
 
-// Same searchable list → focused form pattern as ApplyLeaveForm, for HRM requests.
-function NewRequestForm() {
+function ApplyLeaveForm() {
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
+  if (!selected) return <LeaveTypePicker query={query} onQuery={setQuery} onSelect={setSelected}/>;
+  const type = LEAVE_TYPES.find(t=>t.key===selected);
+  return <LeaveDetailForm type={type} onBack={()=>setSelected(null)} backLabel="Back to leave types"/>;
+}
+
+// Same searchable list → focused form pattern as ApplyLeaveForm, for HRM requests — with Leave
+// itself as the first entry point, so the top-nav Request CTA can reach the leave flow too.
+function NewRequestForm() {
+  const [selected, setSelected] = useState(null);
+  const [leaveType, setLeaveType] = useState(null);
+  const [query, setQuery] = useState("");
+  const [leaveQuery, setLeaveQuery] = useState("");
+
+  if (selected === "leave") {
+    if (!leaveType) return <LeaveTypePicker query={leaveQuery} onQuery={setLeaveQuery} onSelect={setLeaveType} onBack={()=>setSelected(null)} backLabel="Back to request types"/>;
+    const type = LEAVE_TYPES.find(t=>t.key===leaveType);
+    return <LeaveDetailForm type={type} onBack={()=>setLeaveType(null)} backLabel="Back to leave types"/>;
+  }
+
   if (!selected) {
-    const filtered = REQUEST_TYPES.filter(t=>t.name.toLowerCase().includes(query.toLowerCase()));
+    const q = query.trim().toLowerCase();
+    const filtered = REQUEST_TYPES.filter(t=>t.name.toLowerCase().includes(q));
+    const showLeave = !q || "leave".includes(q) || "time off".includes(q);
     return <>
       <p>Choose what you'd like to request.</p>
       <input type="hidden" required readOnly aria-hidden="true" style={{display:"none"}} value=""/>
       <SearchBox placeholder="Search request types…" value={query} onChange={setQuery}/>
-      <div className="type-list">{filtered.length?filtered.map(t=><button type="button" key={t.key} className="type-list-row" onClick={()=>setSelected(t.key)}>
-        <i className={`tone-dot ${t.tone}`}/>
-        <span className="type-list-row-copy"><strong>{t.name}</strong><small>Approval: {t.approval}</small></span>
-        <ChevronRight size={16}/>
-      </button>):<p className="type-empty">No request types match "{query}".</p>}</div>
+      <div className="type-list">
+        {showLeave && <button type="button" className="type-list-row" onClick={()=>setSelected("leave")}>
+          <i className="tone-dot green"/>
+          <span className="type-list-row-copy"><strong>Leave</strong><small>Time off & all leave types · Approval: Manager → HR</small></span>
+          <ChevronRight size={16}/>
+        </button>}
+        {filtered.map(t=><button type="button" key={t.key} className="type-list-row" onClick={()=>setSelected(t.key)}>
+          <i className={`tone-dot ${t.tone}`}/>
+          <span className="type-list-row-copy"><strong>{t.name}</strong><small>Approval: {t.approval}</small></span>
+          <ChevronRight size={16}/>
+        </button>)}
+        {!showLeave && !filtered.length && <p className="type-empty">No request types match "{query}".</p>}
+      </div>
     </>;
   }
   const type = REQUEST_TYPES.find(t=>t.key===selected);
@@ -1027,7 +1448,7 @@ function ModalContent({type, data, role}) {
   if (type==="request-type") return <><div className="form-grid"><Field label="Request type name" required/><Field label="Description" full><textarea/></Field></div><div className="subsection"><h3>Form fields</h3><div className="mini-row">Reason <Status>Required</Status><IconButton icon={MoreHorizontal} label="More"/></div><Button kind="secondary" icon={Plus}>Add Field</Button></div><div className="subsection"><h3>Approval stages</h3><div className="mini-row">1. Team lead approval <IconButton icon={MoreHorizontal} label="More"/></div><Button kind="secondary" icon={Plus}>Add Stage</Button></div></>;
   if (type==="announcement") return <div className="form-grid"><Field label="Title" required full><input placeholder="e.g. Public holiday on Monday"/></Field><Field label="Audience" required><Select><option>All employees</option><option>Specific department</option><option>Specific team</option></Select></Field><Field label="Pin to top"><Select><option>No</option><option>Yes</option></Select></Field><Field label="Message" required full><textarea placeholder="Write the announcement…"/></Field></div>;
   if (type==="feedback-cycle") return <div className="form-grid"><Field label="Cycle name" required/><Field label="Feedback form" required><Select><option>Performance Review</option><option>Probation Review</option></Select></Field><Field label="Start date" required><input type="date"/></Field><Field label="End date" required><input type="date"/></Field><Field label="Audience" required><Select><option>All employees</option><option>Selected teams</option></Select></Field><Field label="Reviewers"><Select><option>Manager and self</option><option>360 feedback</option></Select></Field><Field label="Allow negative ratings"><Select><option>No</option><option>Yes</option></Select></Field><Field label="Lock responses after end date"><Select><option>Yes</option><option>No</option></Select></Field></div>;
-  if (type==="role") return <><div className="form-grid"><Field label="Role name" required/><Field label="Description" full><textarea/></Field></div><h3>Permissions</h3><SearchBox placeholder="Search 44 permissions"/><div className="permission-list">{["Employees","Leave management","HRM requests","Salary & bank","Assets","Reports","Configuration","Platform"].map((x,i)=><label key={x}><input type="checkbox" defaultChecked={i<5}/><span><strong>{x}</strong><small>{i%2?"View and manage":"View, create, edit and delete"}</small></span></label>)}</div></>;
+  if (type==="role") return <><div className="form-grid"><Field label="Role name" required/><Field label="Description" full><textarea/></Field></div><h3>Permissions</h3><SearchBox placeholder="Search 44 permissions"/><div className="permission-list">{["Employees","Leave management","Employee Services requests","Salary & bank","Assets","Reports","Configuration","Platform"].map((x,i)=><label key={x}><input type="checkbox" defaultChecked={i<5}/><span><strong>{x}</strong><small>{i%2?"View and manage":"View, create, edit and delete"}</small></span></label>)}</div></>;
   if (type==="feedback-form") return <div className="form-grid"><Field label="Form name" required/><Field label="Description" full><textarea/></Field></div>;
   if (type==="super-admin") return <><Field label="Select user" required><Select><option>Sneha Gupta</option><option>Erwin Llanera</option></Select></Field><div className="warning-box"><AlertTriangle size={19}/><p>This gives unrestricted access to all employee data, settings and platform controls.</p></div></>;
   if (type==="team-delete") return <div className="warning-box"><AlertTriangle size={20}/><p>Delete “UX/UI Team”? Members will be unassigned but not deleted.</p></div>;
@@ -1037,47 +1458,100 @@ function ModalContent({type, data, role}) {
   return <div className="warning-box"><AlertTriangle size={20}/><p>This action may affect employee records and cannot always be undone. Review the target carefully before continuing.</p></div>;
 }
 
-const modalNames={employee:"Add / edit employee",team:"Create / edit team",asset:"Add / edit asset",user:"Create / edit user",leave:"Apply leave for employee",department:"Add / edit department",entity:"Add / edit company entity",document:"Upload document",qualification:"Add qualification",identity:"Add identity document",note:"Add HR note",pip:"Start performance improvement plan",ida:"Start disciplinary action",salary:"Add salary record",bank:"Edit bank details",balance:"Edit leave balance",announcement:"Post announcement","leave-detail":"Leave request details","request-detail":"HRM request details","apply-leave":"Apply for Leave","new-request":"New Request","leave-type":"Add / edit leave type","request-type":"Add / edit request type","feedback-cycle":"Create feedback cycle",role:"Manage role permissions","feedback-form":"Create feedback form","super-admin":"Add Super Admin",member:"Add team member",terminate:"Terminate employee",delete:"Delete record","team-delete":"Delete Team","remove-admin":"Remove Super Admin"};
+const modalNames={employee:"Add / edit employee",team:"Create / edit team",asset:"Add / edit asset",user:"Create / edit user",leave:"Apply leave for employee",department:"Add / edit department",entity:"Add / edit company entity",document:"Upload document",qualification:"Add qualification",identity:"Add identity document",note:"Add HR note",pip:"Start performance improvement plan",ida:"Start disciplinary action",salary:"Add salary record",bank:"Edit bank details",balance:"Edit leave balance",announcement:"Post announcement","leave-detail":"Leave request details","request-detail":"Employee Services request details","apply-leave":"Apply for Leave","new-request":"New Request","leave-type":"Add / edit leave type","request-type":"Add / edit request type","feedback-cycle":"Create feedback cycle",role:"Manage role permissions","feedback-form":"Create feedback form","super-admin":"Add Super Admin",member:"Add team member",terminate:"Terminate employee",delete:"Delete record","team-delete":"Delete Team","remove-admin":"Remove Super Admin"};
+
+const LOGIN_CONTENT = {
+  admin: { role:"Super Admin", headline:"Welcome Back Super Admin!", subtitle:"HRIS Super Admin Console",
+    desc:"One home for your work life at MUST — track your leave, view payslips, sign documents, and stay close to your team." },
+  employee: { role:"Employee", headline:"Welcome Back!", subtitle:"HRIS Employee Console",
+    desc:"Your home for work at MUST — track your leave, view payslips, sign documents, and stay close to your team." },
+  "team-lead": { role:"Team Lead", headline:"Welcome Back Team Lead!", subtitle:"HRIS Team Lead Console",
+    desc:"Approve requests, track your team’s leave, and stay close to everyone at MUST — all in one place." },
+};
+const LOGIN_TABS = [["admin","Admin"],["employee","Employee"],["team-lead","Team Lead"]];
+function GoogleMark() {
+  return <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62Z"/>
+    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.94v2.33A9 9 0 0 0 9 18Z"/>
+    <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.7V4.97H.94A9 9 0 0 0 0 9c0 1.45.35 2.83.94 4.03l3.01-2.33Z"/>
+    <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.42 0 9 0A9 9 0 0 0 .94 4.97l3.01 2.33C4.66 5.17 6.65 3.58 9 3.58Z"/>
+  </svg>;
+}
+function LoginScreen({ roleKey, go, setRole }) {
+  const key = LOGIN_CONTENT[roleKey] ? roleKey : "admin";
+  const content = LOGIN_CONTENT[key];
+  const signIn = () => { setRole(content.role); announce(`Signed in as ${content.role}`); go(roleHome(content.role)); };
+  return <div className="login-screen">
+    <LogoDefs/>
+    <label className="login-lang"><Globe2 size={14}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>English</option><option>한국어</option></select><ChevronDown size={12}/></label>
+    <div className="login-wrap">
+      <div className="login-left">
+        <div className="login-brand"><svg className="logo-full"><use href="#mc-logo"/></svg></div>
+        <h1>{content.headline}</h1>
+        <h2>{content.subtitle}</h2>
+        <p>{content.desc}</p>
+        <div className="login-avatars">
+          <div className="login-avatar-stack"><Avatar initials="MA" small/><Avatar initials="EL" small/><Avatar initials="IG" small/><span className="login-avatar-more">+284</span></div>
+          <span><strong>287 teammates</strong> across MUST</span>
+        </div>
+      </div>
+      <div className="login-card">
+        <svg className="logo-mark login-card-mark"><use href="#mc-mark"/></svg>
+        <h2>Sign in</h2>
+        <p>Use your MUST account to continue.</p>
+        <button className="google-btn" onClick={signIn}><GoogleMark/>Continue with Google</button>
+        <p className="login-lock"><LockKeyhole size={13}/>Only <b>@must.company</b> accounts.</p>
+        <p className="login-help">Trouble signing in? <a href="#" onClick={e=>{e.preventDefault();announce("Message sent to your people team");}}>Talk to your people team.</a></p>
+        <div className="login-tagline"><span>CHALLENGE</span><span>TOGETHER</span><span>ACHIEVE</span></div>
+        <div className="login-preview-switch-wrap"><small>Prototype preview</small><div className="login-preview-switch">{LOGIN_TABS.map(([k,label])=><button key={k} className={k===key?"active":""} onClick={()=>go(`/login/${k}`)}>{label}</button>)}</div></div>
+      </div>
+    </div>
+  </div>;
+}
 
 export function App() {
-  const [path,go]=useRoute(); const [modal,setModal]=useState(null); const [modalData,setModalData]=useState(null); const [role,setRole]=useState("Super Admin");
+  const [path,go]=useRoute(); const [modal,setModal]=useState(null); const [modalData,setModalData]=useState(null); const [role,setRole]=useState(()=>window.localStorage.getItem("hris-preview-role")||"Super Admin");
   const openModal=(type,rowData)=>{setModal(type);setModalData(rowData||null)};
   const closeModal=()=>{setModal(null);setModalData(null)};
   useEffect(()=>{ if(path==="/") go("/dashboard") },[]);
-  const isMySpace=["/my-dashboard","/my-profile","/my-salary","/my-documents","/my-team","/my-feedbacks","/my-leaves","/requests","/approvals"].includes(path);
+  useEffect(()=>{window.localStorage.setItem("hris-preview-role",role);if((role==="Employee"||role==="Team Lead")&&path==="/dashboard")go("/my-dashboard")},[role,path]);
+  if(path.startsWith("/login")) return <LoginScreen roleKey={path.split("/")[2]} go={go} setRole={setRole}/>;
+  const isMySpace=["/my-dashboard","/my-profile","/my-salary","/my-documents","/my-team","/my-feedbacks","/my-leaves","/requests","/approvals","/sops","/decision-history"].includes(path);
+  const isPreviewRole = role==="Team Lead"||role==="Employee";
   const isAdministration=path.startsWith("/settings")||path==="/activity-logs"||path==="/feedback-form-builder";
   const isManagement=!isMySpace&&!isAdministration;
-  const denied=(role==="Employee"&&path==="/approvals")||(role==="Employee"&&path==="/my-team")||((role==="Employee"||role==="Team Lead")&&isManagement)||(role!=="Super Admin"&&isAdministration);
+  const capabilities=roleCapabilities[role];
+  const denied=(!capabilities.approvals&&(path==="/approvals"||path==="/decision-history"))||(!capabilities.myTeam&&path==="/my-team")||(!capabilities.managePeople&&isManagement)||(!capabilities.administer&&isAdministration)||(role!=="Super Admin"&&path==="/settings/platform");
   let page;
   if(denied) page=<PermissionDenied go={go}/>;
-  else if(isMySpace) page=<MySpacePage path={path} go={go} role={role} open={openModal}/>;
+  else if(isMySpace) { const myProfileTabPaths=["/my-profile","/my-salary","/my-documents","/my-feedbacks"]; const myRequestsTabPaths=["/my-leaves","/requests","/approvals"]; const spaceTabs=isPreviewRole?null:myProfileTabPaths.includes(path)?MY_PROFILE_TABS:myRequestsTabPaths.includes(path)?myRequestsTabs(role):null; page=<>{spaceTabs&&<SectionTabs tabs={spaceTabs} path={path} go={go}/>}<MySpacePage path={path} go={go} role={role} open={openModal}/></>; }
   else if(path==="/dashboard") page=<Dashboard go={go} open={openModal} role={role}/>;
-  else if(path==="/employees") page=<EmployeesPage go={go} open={openModal}/>;
+  else if(path==="/employees") page=<><SectionTabs tabs={EMPLOYEE_DIRECTORY_TABS} path={path} go={go} line/><EmployeesPage go={go} open={openModal}/></>;
   else if(path.startsWith("/employees/")) page=<EmployeePage go={go} open={openModal} path={path}/>;
-  else if(path==="/teams") page=<TeamsPage go={go} open={openModal}/>;
+  else if(path==="/teams") page=<><SectionTabs tabs={EMPLOYEE_DIRECTORY_TABS} path={path} go={go} line/><TeamsPage go={go} open={openModal}/></>;
   else if(path.startsWith("/teams/")) page=<TeamDetail go={go} open={openModal} path={path}/>;
-  else if(path==="/leaves") page=<LeavesPage open={openModal}/>;
-  else if(path==="/leave-balances") page=<LeaveBalancesPage open={openModal}/>;
-  else if(path==="/all-requests") page=<RequestsPage open={openModal}/>;
+  else if(path==="/leaves") page=<><SectionTabs tabs={LEAVE_REQUESTS_TABS} path={path} go={go} line/><LeavesPage open={openModal}/></>;
+  else if(path==="/leave-balances") page=<><SectionTabs tabs={LEAVE_REQUESTS_TABS} path={path} go={go} line/><LeaveBalancesPage open={openModal}/></>;
+  else if(path==="/all-requests") page=<><SectionTabs tabs={LEAVE_REQUESTS_TABS} path={path} go={go} line/><RequestsPage open={openModal}/></>;
   else if(path==="/assets") page=<AssetsPage open={openModal}/>;
-  else if(path==="/org-chart") page=<OrgChart/>;
+  else if(path==="/org-chart") page=<><SectionTabs tabs={EMPLOYEE_DIRECTORY_TABS} path={path} go={go} line/><OrgChart/></>;
   else if(path==="/announcements") page=<AnnouncementsPage open={openModal}/>;
   else if(path==="/documents") page=<DocumentsPage open={openModal} go={go}/>;
   else if(path.startsWith("/documents/")) page=<DocumentDetail go={go} path={path}/>;
   else if(path==="/reports") page=<ReportsPage/>;
   else if(path==="/feedbacks") page=<FeedbacksPage open={openModal}/>;
-  else if(path==="/settings"||path==="/settings/departments") page=<SettingsShell path={path} go={go}><SettingsList kind="departments" open={openModal}/></SettingsShell>;
-  else if(path==="/settings/company-entities") page=<SettingsShell path={path} go={go}><SettingsList kind="entities" open={openModal}/></SettingsShell>;
-  else if(path==="/settings/leave-types") page=<SettingsShell path={path} go={go}><SettingsList kind="leaveTypes" open={openModal}/></SettingsShell>;
-  else if(path==="/settings/request-types") page=<SettingsShell path={path} go={go}><SettingsList kind="requestTypes" open={openModal}/></SettingsShell>;
+  else if(path==="/settings"||path==="/settings/departments") page=<SettingsShell path={path} go={go} role={role}><SettingsList kind="departments" open={openModal}/></SettingsShell>;
+  else if(path==="/settings/company-entities") page=<SettingsShell path={path} go={go} role={role}><SettingsList kind="entities" open={openModal}/></SettingsShell>;
+  else if(path==="/settings/leave-types") page=<SettingsShell path={path} go={go} role={role}><SettingsList kind="leaveTypes" open={openModal}/></SettingsShell>;
+  else if(path==="/settings/request-types") page=<SettingsShell path={path} go={go} role={role}><SettingsList kind="requestTypes" open={openModal}/></SettingsShell>;
   else if(path.startsWith("/settings/feedback-forms/")||path==="/feedback-form-builder") page=<FeedbackBuilder open={openModal} go={go}/>;
-  else if(path==="/settings/feedback-forms") page=<SettingsShell path={path} go={go}><SettingsList kind="feedbackForms" open={(m)=>m==="feedback-form"?go("/feedback-form-builder"):setModal(m)}/></SettingsShell>;
-  else if(path==="/settings/users") page=<SettingsShell path={path} go={go}><UsersPage open={openModal}/></SettingsShell>;
-  else if(path==="/activity-logs") page=<SettingsShell path={path} go={go}><ActivityLogsPage/></SettingsShell>;
-  else if(path==="/settings/platform") page=<SettingsShell path={path} go={go}><PlatformSettings open={openModal}/></SettingsShell>;
+  else if(path==="/settings/feedback-forms") page=<SettingsShell path={path} go={go} role={role}><SettingsList kind="feedbackForms" open={(m)=>m==="feedback-form"?go("/feedback-form-builder"):setModal(m)}/></SettingsShell>;
+  else if(path==="/settings/users") page=<SettingsShell path={path} go={go} role={role}><UsersPage open={openModal}/></SettingsShell>;
+  else if(path==="/activity-logs") page=<SettingsShell path={path} go={go} role={role}><ActivityLogsPage/></SettingsShell>;
+  else if(path==="/settings/platform") page=<SettingsShell path={path} go={go} role={role}><PlatformSettings open={openModal}/></SettingsShell>;
   else page=<><PageTitle eyebrow="Not Found" title="Page not found" subtitle="This Admin page does not exist."/><Empty action={<Button onClick={()=>go("/dashboard")}>Go to dashboard</Button>}/></>;
   const isDecision=modal&&["delete","team-delete","terminate","remove-admin"].includes(modal);
   const isDetail=modal&&["leave-detail","request-detail"].includes(modal);
   const onSave=modal==="apply-leave"?()=>announce("Leave request submitted for approval"):modal==="new-request"?()=>announce("Request submitted for approval"):undefined;
-  return <Shell path={path} go={go} role={role} setRole={setRole} open={openModal}>{page}{modal&&<Modal title={modalNames[modal]} subtitle={modal==="leave"?"This Admin action bypasses standard employee leave validation.":undefined} onClose={closeModal} onSave={onSave} wide={["employee","asset","request-type","role","apply-leave","new-request"].includes(modal)} footer={isDetail?<DetailFooter data={modalData} role={role} onClose={closeModal}/>:isDecision?<><Button kind="secondary" onClick={closeModal}>Cancel</Button><Button kind={modal==="team-delete"?"primary":"danger"} icon={Trash2} onClick={()=>{announce("Action completed and recorded in Activity Logs");closeModal()}}>{modal==="team-delete"?"Delete Team":"Confirm action"}</Button></>:undefined}><ModalContent type={modal} data={modalData} role={role}/></Modal>}</Shell>;
+  return <Shell path={path} go={go} role={role} setRole={setRole} open={openModal} isMySpace={isMySpace}>{page}{modal&&<Modal title={modalNames[modal]} subtitle={modal==="leave"?"This Admin action bypasses standard employee leave validation.":undefined} onClose={closeModal} onSave={onSave} wide={["employee","asset","request-type","role","apply-leave","new-request"].includes(modal)} footer={isDetail?<DetailFooter data={modalData} role={role} onClose={closeModal}/>:isDecision?<><Button kind="secondary" onClick={closeModal}>Cancel</Button><Button kind={modal==="team-delete"?"primary":"danger"} icon={Trash2} onClick={()=>{announce("Action completed and recorded in Activity Logs");closeModal()}}>{modal==="team-delete"?"Delete Team":"Confirm action"}</Button></>:undefined}><ModalContent type={modal} data={modalData} role={role}/></Modal>}</Shell>;
 }
