@@ -68,7 +68,6 @@ npm run db:seed
 npm run dev
 ```
 
-
 ### Start the admin prototype
 
 The admin workspace has its own dependency lock because it is currently an independent Vite runtime:
@@ -200,7 +199,7 @@ Push the branch to `origin`, then open a pull request into `must-matildaanashie/
 For a production deployment:
 
 1. Provision PostgreSQL and update the Prisma datasource provider.
-2. configure the production environment variables listed above.
+2. Configure the production environment variables listed above.
 3. Set `ENABLE_DEMO_LOGIN=false`.
 4. Run reviewed database migrations.
 5. Build the production application with `npm run build`.
