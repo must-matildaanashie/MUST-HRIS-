@@ -35,6 +35,10 @@
 
 <!-- Add before/after screenshots for UI changes, or write "Not applicable". -->
 
+## Loom walkthrough
+
+<!-- Required: link a short Loom (or equivalent) recording walking through the UI and the code. -->
+
 ## Reviewer notes
 
 <!-- Point reviewers to the most important files or decisions. -->
