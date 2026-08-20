@@ -749,9 +749,9 @@ function MySpaceDashboardPanel({ go, role }) {
       <Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card>
     </div>
     <div className="employee-dashboard-grid"><AttentionPanel go={go}/><ActivityCard go={go}/></div>
-    <div className="employee-dashboard-grid lower"><RecentPaymentsCard go={go}/><TeamAvailability/></div>
-    <div className="employee-dashboard-grid lower"><MyRemindersCard go={go}/><MyDocumentsCard go={go}/></div>
-    <div className="employee-dashboard-grid lower"><UpcomingCard/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div>
+    <div className="employee-dashboard-grid lower dash-even"><RecentPaymentsCard go={go}/><TeamAvailability/></div>
+    <div className="employee-dashboard-grid lower dash-even"><MyRemindersCard go={go}/><MyDocumentsCard go={go}/></div>
+    <div className="employee-dashboard-grid lower dash-even"><UpcomingCard/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div>
   </>;
 }
 function DashboardBanner({ go, open, role, space }) {
@@ -799,19 +799,19 @@ function MustSpaceDashboardPanel({ go, open, role }) {
   ];
   return <>
     <div className="metric-grid">{metrics.map(([label,value,tone,caption]) => <Card className="metric" key={label}><span className="metric-label">{label}</span><strong className={`metric-value ${tone}`}>{value}</strong><small className={`metric-caption ${tone}`}>{caption}</small></Card>)}</div>
-    <div className="admin-dashboard-grid lower">
+    <div className="admin-dashboard-grid lower dash-even">
       <Card className="attention-card dash-attention"><div className="card-head"><div><h2><span className="focal-ic"><Zap size={18}/></span>Needs your attention</h2><p>What the company is waiting on you for</p></div><button onClick={()=>go("/leaves")}>Review all <ChevronRight size={15}/></button></div>{[["2","Leave requests","One request overlaps with a teammate","Review","/leaves"],["3","Employee Services requests","Equipment and document requests","Review","/all-requests"],["1","Reported issue","Employee profile export failed","Open","/settings/platform"],["94","Feedback responses","Open across active cycles","Remind","/feedbacks"],["3","Missing manager","Employees with no reporting line set","Assign","/employees"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>
       <Card><div className="card-head"><div><h2><Building2 size={18}/>By department</h2></div><button onClick={()=>go("/reports")}>Reports <ChevronRight size={15}/></button></div>{departments.map(([name,value])=><div className="department-bar" key={name}><span>{name}<b>{value}</b></span><i><em style={{width:`${Math.max(8,value/84*100)}%`}}/></i></div>)}</Card>
     </div>
-    <div className="admin-dashboard-grid lower">
+    <div className="admin-dashboard-grid lower dash-even">
       <Card><div className="card-head"><div><h2>Team availability</h2><p>Today across MUST</p></div><button onClick={()=>go("/org-chart")}>Org chart <ChevronRight size={15}/></button></div><div className="availability-strip"><div><strong>278</strong><span>Available</span></div><div><strong>9</strong><span>Out today</span></div><div><strong>4</strong><span>Starting soon</span></div></div></Card>
       <CompanyAnnouncementsCard go={go}/>
     </div>
-    <div className="admin-dashboard-grid lower">
+    <div className="admin-dashboard-grid lower dash-even">
       <Card><div className="card-head"><div><h2><History size={18}/>Activity</h2><p>Recent actions across the system</p></div><button onClick={()=>go("/activity-logs")}>View all <ChevronRight size={15}/></button></div><div className="people-list">{[0,3,4,5,6].map(i=>ACTIVITY_LOG[i]).map((r,i)=><button key={i} onClick={()=>go("/activity-logs")}><Avatar initials={r[1]} small/><div><strong>{r[2]}</strong><span>{r[4]}</span></div><time>{r[0].split(",")[0]}</time></button>)}</div></Card>
       <Card><div className="card-head"><div><h2><ShieldCheck size={18}/>Members on PIP</h2></div>{pipMembers.length>0&&<button onClick={()=>go("/employees")}>View all <ChevronRight size={15}/></button>}</div>{pipMembers.length?<div className="people-list">{pipMembers.map(e=><button key={e.name} onClick={()=>go(`/employees/${slugify(e.name)}`)}><Avatar initials={e.initials} small/><div><strong>{e.name}</strong><span>{e.title}</span></div></button>)}</div>:<Empty icon={Check} title="Everyone is on track" text="No employees are currently on a PIP."/>}</Card>
     </div>
-    <div className="admin-dashboard-grid lower">
+    <div className="admin-dashboard-grid lower dash-even">
       <Card className="recent-card"><div className="card-head"><div><h2><CalendarDays size={19}/>Recently onboarded</h2><p>Newest employees across the company</p></div><button onClick={() => go("/employees")}>View all <ChevronRight size={15}/></button></div><div className="people-list">{employees.slice(1,5).map((e,i) => <button key={e[0]} onClick={() => go("/employees/matilda")}><Avatar initials={e[5]} small/><div><strong>{e[0]}</strong><span>{e[1]} · {e[2]}</span></div><time>{["Aug 8","Aug 4","Jul 29","Jul 22"][i]}<small>2026</small></time></button>)}</div></Card>
       <div><Card><div className="card-head"><div><h2><Cake size={18}/>Upcoming events</h2><p>Birthdays and work anniversaries</p></div></div><div className="people-list"><button onClick={()=>go("/employees")}><Avatar initials="AW" small/><div><strong>Adha Washington</strong><span>Birthday · HR</span></div><time>Aug 14</time></button><button onClick={()=>go("/employees")}><Avatar initials="AQ" small/><div><strong>Abdul Qadir</strong><span>1 year anniversary · BLK</span></div><time>Sep 15</time></button></div></Card><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card></div>
     </div>

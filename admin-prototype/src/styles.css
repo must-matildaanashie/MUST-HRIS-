@@ -282,3 +282,7 @@
 .dash-attention .attention-row{min-height:auto;padding:13px 0;gap:13px;border-bottom:0;border-top:1px solid var(--line,#eef0ef)}
 .dash-attention .attention-row>b{width:30px;height:30px;background:var(--green-soft);color:var(--green-dark);font-size:12.5px;font-weight:700}
 .dash-attention .attention-row>em{margin-left:auto;font-style:normal;font-size:11.5px;font-weight:700;color:#b9770e;background:#fff4e5;padding:5px 13px;border-radius:100px;white-space:nowrap}
+/* Dashboard tab rows: equal-height cards, matching the prototype's single grid */
+.employee-dashboard-grid.dash-even,.admin-dashboard-grid.dash-even{align-items:stretch}
+.dash-even>div{display:flex;flex-direction:column}
+.dash-even>div>.card:last-child{margin-bottom:0}
