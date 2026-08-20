@@ -723,7 +723,39 @@ function DashboardIllustration() {
     <path d="M62 190C68 178 78 172 92 172" stroke="#014F22" strokeWidth="10" strokeLinecap="round"/>
   </svg>;
 }
+function SpaceTabs({ space, setSpace }) {
+  return <div className="tabs-scroll"><div className="tabs line-tabs section-line-tabs">{[["My Space","me"],["MUST Space","must"]].map(([label,key]) => <button key={key} className={space===key?"active":""} onClick={()=>setSpace(key)}>{label}</button>)}</div></div>;
+}
+function RecentPaymentsCard({ go }) {
+  return <Card><div className="card-head"><div><h2><CircleDollarSign size={18}/>Recent payments</h2><p>Your latest payslips</p></div><button onClick={()=>go("/my-salary")}>View all <ChevronRight size={15}/></button></div>{[["June 2026 payslip","Salary · paid Jul 1 · $588.00","Completed"],["May 2026 payslip","Salary · paid Jun 1 · $563.00","Completed"]].map(([title,sub,status])=><div className="activity-item" key={title}><span><CircleDollarSign size={18}/></span><div><strong>{title}</strong><small>{sub}</small></div><Status>{status}</Status></div>)}</Card>;
+}
+function MyDocumentsCard({ go }) {
+  return <Card><div className="card-head"><div><h2><FileText size={18}/>Documents</h2><p>Shared with you</p></div><button onClick={()=>go("/my-documents")}>View all <ChevronRight size={15}/></button></div>{[["Employment Contract","Contract · 26 Feb 2025","Completed"],["Employee Handbook","Policy · 1 Aug 2026","Active"],["NDA","Legal · 26 Feb 2025","Completed"]].map(([title,sub,status])=><div className="activity-item" key={title}><span><FileText size={18}/></span><div><strong>{title}</strong><small>{sub}</small></div><Status>{status}</Status></div>)}</Card>;
+}
+function CompanyAnnouncementsCard({ go }) {
+  return <Card><div className="card-head"><div><h2><Megaphone size={18}/>Company announcements</h2><p>Latest posts</p></div><button onClick={()=>go("/announcements")}>All posts <ChevronRight size={15}/></button></div>{ANNOUNCEMENTS.slice(0,3).map(([title,audience,author,when,status])=><div className="activity-item" key={title}><span><Megaphone size={18}/></span><div><strong>{title}</strong><small>{audience} · {when}</small></div><Status>{status}</Status></div>)}</Card>;
+}
+function MySpaceDashboardPanel({ go, role }) {
+  return <>
+    <div className="metric-grid three employee-metrics">
+      <Card className="simple-metric"><span>Latest payslip</span><strong>$588.00</strong><p>June 2026 · 392 hrs</p></Card>
+      <Card className="simple-metric"><span>Paid YTD</span><strong>$3,528.00</strong><p>6 payslips</p></Card>
+      <Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card>
+    </div>
+    <div className="employee-dashboard-grid"><ActivityCard go={go}/><AttentionPanel go={go}/></div>
+    <div className="employee-dashboard-grid lower"><RecentPaymentsCard go={go}/><MyDocumentsCard go={go}/></div>
+    <div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div>
+  </>;
+}
 function Dashboard({ go, open, role }) {
+  const [space, setSpace] = useState("me");
+  return <>
+    <SpaceTabs space={space} setSpace={setSpace}/>
+    {space === "me" ? <MySpaceDashboardPanel go={go} role={role}/> : <MustSpaceDashboardPanel go={go} open={open} role={role}/>}
+  </>;
+}
+
+function MustSpaceDashboardPanel({ go, open, role }) {
   const pipMembers = EMPLOYEE_DIRECTORY.filter(e=>e.status==="On PIP");
   const departments = DEPARTMENTS;
   const pendingApprovals = 2 + 3;
@@ -766,6 +798,9 @@ function Dashboard({ go, open, role }) {
     <div className="admin-dashboard-grid lower">
       <Card><div className="card-head"><div><h2><Cake size={18}/>Upcoming events</h2><p>Birthdays and work anniversaries</p></div></div><div className="people-list"><button onClick={()=>go("/employees")}><Avatar initials="AW" small/><div><strong>Adha Washington</strong><span>Birthday · HR</span></div><time>Aug 14</time></button><button onClick={()=>go("/employees")}><Avatar initials="AQ" small/><div><strong>Abdul Qadir</strong><span>1 year anniversary · BLK</span></div><time>Sep 15</time></button></div></Card>
       <Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card>
+    </div>
+    <div className="admin-dashboard-grid lower">
+      <CompanyAnnouncementsCard go={go}/>
     </div>
   </>;
 }
