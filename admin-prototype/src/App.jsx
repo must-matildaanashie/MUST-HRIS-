@@ -6,7 +6,7 @@ import {
   IdCard, LayoutDashboard, ListChecks, LockKeyhole, Megaphone, Menu, MessageCircle, MessageSquareText, MoreHorizontal, Package, Send,
   Landmark, Mail, MapPin, Network, NotebookPen, PackagePlus, PanelLeftClose, Phone, Plus, RotateCcw, Search, Settings,
   ShieldCheck, SlidersHorizontal, Trash2, TrendingUp, Upload, UserCheck, UserCog, UserMinus, UserPlus, Users, WalletCards,
-  X, ZoomIn, ZoomOut
+  X, Zap, ZoomIn, ZoomOut
 } from "lucide-react";
 import { Bar, BarChart as ReportBarChart, CartesianGrid, Line, LineChart as ReportLineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -429,7 +429,7 @@ const navGroups = [
     ["Settings", "/settings", Settings],
   ]],
   ["My Space", [
-    ["My Dashboard", "/my-dashboard", LayoutDashboard], ["My Profile", "/my-profile", UserCog],
+    ["My Profile", "/my-profile", UserCog],
     ["My Team", "/my-team", Users], ["My Leaves & Requests", "/my-leaves", CalendarDays],
   ]],
 ];
@@ -800,7 +800,7 @@ function MustSpaceDashboardPanel({ go, open, role }) {
   return <>
     <div className="metric-grid">{metrics.map(([label,value,tone,caption]) => <Card className="metric" key={label}><span className="metric-label">{label}</span><strong className={`metric-value ${tone}`}>{value}</strong><small className={`metric-caption ${tone}`}>{caption}</small></Card>)}</div>
     <div className="admin-dashboard-grid lower">
-      <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your action</h2><p>Approvals, reminders and system health</p></div><button onClick={()=>go("/leaves")}>Review all <ChevronRight size={15}/></button></div>{[["2","Leave requests","One request overlaps with a teammate","Review","/leaves"],["3","Employee Services requests","Equipment and document requests","Review","/all-requests"],["1","Reported issue","Employee profile export failed","Open","/settings/platform"],["94","Feedback responses","Open across active cycles","Remind","/feedbacks"],["3","Missing manager","Employees with no reporting line set","Assign","/employees"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>
+      <Card className="attention-card dash-attention"><div className="card-head"><div><h2><span className="focal-ic"><Zap size={18}/></span>Needs your attention</h2><p>What the company is waiting on you for</p></div><button onClick={()=>go("/leaves")}>Review all <ChevronRight size={15}/></button></div>{[["2","Leave requests","One request overlaps with a teammate","Review","/leaves"],["3","Employee Services requests","Equipment and document requests","Review","/all-requests"],["1","Reported issue","Employee profile export failed","Open","/settings/platform"],["94","Feedback responses","Open across active cycles","Remind","/feedbacks"],["3","Missing manager","Employees with no reporting line set","Assign","/employees"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>
       <Card><div className="card-head"><div><h2><Building2 size={18}/>By department</h2></div><button onClick={()=>go("/reports")}>Reports <ChevronRight size={15}/></button></div>{departments.map(([name,value])=><div className="department-bar" key={name}><span>{name}<b>{value}</b></span><i><em style={{width:`${Math.max(8,value/84*100)}%`}}/></i></div>)}</Card>
     </div>
     <div className="admin-dashboard-grid lower">
@@ -835,7 +835,7 @@ function MySpacePage({path,go,role,open}) {
   return <TeamApprovalsPage open={open} role={role} path={path}/>;
 }
 function ActivityCard({go}) { return <Card><div className="card-head"><div><h2>Latest activity</h2><p>Your most recent requests</p></div><button onClick={()=>go("/my-leaves")}>See all <ChevronRight size={15}/></button></div>{myActivities.slice(0,2).map(([name,date,status])=><div className="activity-item" key={name}><span><CalendarDays size={18}/></span><div><strong>{name}</strong><small>{date}</small></div><Status>{status}</Status></div>)}</Card> }
-function AttentionPanel({go}) { return <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your attention</h2><p>Announcements and reminders</p></div><button onClick={()=>announce("All reminders marked as read")}>Mark all read</button></div>{[["OKRs pending to fill","Complete your objectives","Due Jul 20"],["New document to sign","Awaiting your signature","Sign"],["Give peers feedback","Take a moment for your team","Feedback"]].map(([title,text,cta])=><button className="attention-row" key={title}><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card> }
+function AttentionPanel({go}) { return <Card className="attention-card dash-attention"><div className="card-head"><div><h2><span className="focal-ic"><Zap size={18}/></span>Needs your attention</h2><p>Waiting on you to act</p></div><button onClick={()=>go("/requests")}>My requests <ChevronRight size={15}/></button></div>{[["1","New document to sign","Awaiting your signature","Sign","/my-documents"],["3","Give peers feedback","Take a moment for your team","Feedback","/my-feedbacks"],["1","Leave request pending","Annual Leave \u00b7 12\u201314 Aug \u00b7 with your lead","Track","/my-leaves"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card> }
 function TeamAvailability(){ return <Card><div className="card-head"><div><h2>Who’s out</h2><p>Your team, this week</p></div><button>Team calendar</button></div><div className="week-strip">{[["Mon","10"],["Tue","11"],["Wed","12"],["Thu","13"],["Fri","14"]].map(([day,date])=><span className={day==="Wed"?"active":""} key={day}><small>{day}</small><strong>{date}</strong></span>)}</div><div className="people-list">{[["SG","Sophie Grant","Annual · 12–14 Aug"],["FH","Felix Harper","Sick · Today"],["AM","Adam Mercer","WFH · Today"]].map(([ini,name,note])=><button key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{note}</span></div></button>)}</div></Card> }
 function LeaveBalanceCard({go}) { return <Card className="leave-balance-card"><div className="card-head"><h2><CalendarDays size={19}/>Annual Leave</h2><button onClick={()=>go?.("/my-leaves")}><ChevronRight size={16}/></button></div><div className="leave-summary"><strong>7</strong><span>days left<br/>of 15 days</span><b>47% available</b></div><div className="progress"><i/></div></Card> }
 
