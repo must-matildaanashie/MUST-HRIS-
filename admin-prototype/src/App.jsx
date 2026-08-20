@@ -735,6 +735,12 @@ function MyDocumentsCard({ go }) {
 function CompanyAnnouncementsCard({ go }) {
   return <Card><div className="card-head"><div><h2><Megaphone size={18}/>Company announcements</h2><p>Latest posts</p></div><button onClick={()=>go("/announcements")}>All posts <ChevronRight size={15}/></button></div>{ANNOUNCEMENTS.slice(0,3).map(([title,audience,author,when,status])=><div className="activity-item" key={title}><span><Megaphone size={18}/></span><div><strong>{title}</strong><small>{audience} · {when}</small></div><Status>{status}</Status></div>)}</Card>;
 }
+function MyRemindersCard({ go }) {
+  return <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Announcements &amp; Reminders</h2><p>Updates for you</p></div><button onClick={()=>announce("Announcements marked as read")}>Mark all read</button></div>{[["OKRs pending to fill","Complete your objectives","Due Jul 20"],["New leave policy \u2014 Bonus Vacation","Acknowledgement required","Read"],["New teammate joining soon","Welcome them aboard","Soon"],["Q3 all-hands on 20 Aug","All staff \u00b7 2 days away","Soon"]].map(([title,text,cta])=><button className="attention-row" key={title} onClick={()=>go("/announcements")}><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>;
+}
+function UpcomingCard() {
+  return <Card><div className="card-head"><div><h2><Cake size={18}/>Upcoming</h2><p>Your milestones</p></div></div>{[["Birthday","Mar 14","in 7 months"],["Work anniversary \u00b7 6yr","Jan 11","in 5 months"],["Annual increment","Jan 11","in 5 months"]].map(([title,date,when])=><div className="activity-item" key={title}><span><CalendarDays size={18}/></span><div><strong>{title}</strong><small>{date}</small></div><time>{when}</time></div>)}</Card>;
+}
 function MySpaceDashboardPanel({ go, role }) {
   return <>
     <div className="metric-grid three employee-metrics">
@@ -742,14 +748,38 @@ function MySpaceDashboardPanel({ go, role }) {
       <Card className="simple-metric"><span>Paid YTD</span><strong>$3,528.00</strong><p>6 payslips</p></Card>
       <Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card>
     </div>
-    <div className="employee-dashboard-grid"><ActivityCard go={go}/><AttentionPanel go={go}/></div>
-    <div className="employee-dashboard-grid lower"><RecentPaymentsCard go={go}/><MyDocumentsCard go={go}/></div>
-    <div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div>
+    <div className="employee-dashboard-grid"><AttentionPanel go={go}/><ActivityCard go={go}/></div>
+    <div className="employee-dashboard-grid lower"><RecentPaymentsCard go={go}/><TeamAvailability/></div>
+    <div className="employee-dashboard-grid lower"><MyRemindersCard go={go}/><MyDocumentsCard go={go}/></div>
+    <div className="employee-dashboard-grid lower"><UpcomingCard/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div>
   </>;
+}
+function DashboardBanner({ go, open, role, space }) {
+  const isMust = space === "must";
+  return <div className="dash-banner">
+    <div className="dash-banner-copy">
+      <div className="dash-banner-eyebrow">{(role||"Super Admin").toUpperCase()} · PEOPLE OPERATIONS</div>
+      <h1>Good morning, <span>Matilda</span> 👋</h1>
+      <p>{isMust ? "Here\u2019s what needs attention across MUST today \u2014 12 August 2026." : "Here\u2019s what needs your attention today \u2014 12 August 2026."}</p>
+      <div className="dash-banner-actions">
+        {isMust ? <>
+          <Button icon={UserPlus} onClick={() => open("employee")}>Add Employee</Button>
+          <Button kind="secondary" icon={Megaphone} onClick={() => open("announcement")}>Post Announcement</Button>
+          <Button kind="secondary" icon={UserCog} onClick={() => open("user")}>Invite User</Button>
+          <Button kind="secondary" icon={BarChart3} onClick={() => go("/reports")}>Run Report</Button>
+        </> : <>
+          <Button icon={CircleDollarSign} onClick={() => go("/my-salary")}>View payslips</Button>
+          <Button kind="secondary" icon={Users} onClick={() => go("/my-team")}>My Team</Button>
+        </>}
+      </div>
+    </div>
+    <DashboardIllustration/>
+  </div>;
 }
 function Dashboard({ go, open, role }) {
   const [space, setSpace] = useState("me");
   return <>
+    <DashboardBanner go={go} open={open} role={role} space={space}/>
     <SpaceTabs space={space} setSpace={setSpace}/>
     {space === "me" ? <MySpaceDashboardPanel go={go} role={role}/> : <MustSpaceDashboardPanel go={go} open={open} role={role}/>}
   </>;
@@ -768,20 +798,6 @@ function MustSpaceDashboardPanel({ go, open, role }) {
     ["Total headcount",287,"neutral","▲ 6 this quarter"],
   ];
   return <>
-    <div className="dash-banner">
-      <div className="dash-banner-copy">
-        <div className="dash-banner-eyebrow">{(role||"Super Admin").toUpperCase()} · PEOPLE OPERATIONS</div>
-        <h1>Good morning, <span>Matilda</span> 👋</h1>
-        <p>Here’s what needs attention across MUST today — 12 August 2026.</p>
-        <div className="dash-banner-actions">
-          <Button icon={UserPlus} onClick={() => open("employee")}>Add Employee</Button>
-          <Button kind="secondary" icon={Megaphone} onClick={() => open("announcement")}>Post Announcement</Button>
-          <Button kind="secondary" icon={UserCog} onClick={() => open("user")}>Invite User</Button>
-          <Button kind="secondary" icon={BarChart3} onClick={() => go("/reports")}>Run Report</Button>
-        </div>
-      </div>
-      <DashboardIllustration/>
-    </div>
     <div className="metric-grid">{metrics.map(([label,value,tone,caption]) => <Card className="metric" key={label}><span className="metric-label">{label}</span><strong className={`metric-value ${tone}`}>{value}</strong><small className={`metric-caption ${tone}`}>{caption}</small></Card>)}</div>
     <div className="admin-dashboard-grid lower">
       <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your action</h2><p>Approvals, reminders and system health</p></div><button onClick={()=>go("/leaves")}>Review all <ChevronRight size={15}/></button></div>{[["2","Leave requests","One request overlaps with a teammate","Review","/leaves"],["3","Employee Services requests","Equipment and document requests","Review","/all-requests"],["1","Reported issue","Employee profile export failed","Open","/settings/platform"],["94","Feedback responses","Open across active cycles","Remind","/feedbacks"],["3","Missing manager","Employees with no reporting line set","Assign","/employees"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card>
