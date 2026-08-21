@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Activity, AlertTriangle, Archive, ArrowLeft, BarChart3, Bell, Boxes, BriefcaseBusiness,
+  Activity, AlertTriangle, Archive, ArrowLeft, BarChart3, Bell, Boxes, BriefcaseBusiness, Flag,
   Building2, Cake, CalendarDays, Check, ChevronDown, ChevronRight, CircleDollarSign, ClipboardCheck,
   Clock3, Copy, Crown, Download, Edit3, Eye, FileText, Filter, GitBranch, Globe2, GraduationCap, History,
   IdCard, LayoutDashboard, ListChecks, LockKeyhole, Megaphone, Menu, MessageCircle, MessageSquareText, MoreHorizontal, Package, Send,
@@ -206,25 +206,25 @@ const LEAVE_REQUESTS = [
 // Catalog shown in the employee-facing Apply for Leave picker — mirrors the live HRIS's
 // per-type policy summary, entitlement, unit and live balance.
 const LEAVE_TYPES = [
-  {key:"annual", name:"Annual Leaves", tone:"green", paid:true, entitlement:"96h/year", unit:"4h units", balance:"76h left",
+  {key:"annual", name:"Annual Leaves", tone:"green", icon:CalendarDays, paid:true, entitlement:"96h/year", unit:"4h units", balance:"76h left", leftHours:76, totalHours:96,
     policy:"Employees are entitled to annual paid leave based on their employment category, MF/MS. These leave entitlements become available only after the successful completion of the employee's probation period. For employees who join the organization mid-year, leave entitlement is calculated on a pro rata basis, depending on the number of remaining months in the calendar year following completion of probation. MS – 15 days · MF – 12 days."},
-  {key:"bvl", name:"Bonus Vacation Leave (BVL)", tone:"blue", paid:true, entitlement:"32h/year", unit:"any duration", balance:"0h left",
+  {key:"bvl", name:"Bonus Vacation Leave (BVL)", tone:"blue", icon:PackagePlus, paid:true, entitlement:"32h/year", unit:"any duration", balance:"0h left", leftHours:0, totalHours:32,
     policy:"Regular full-time employees who have completed probation may earn Bonus Vacation Leave (BVL) as a reward for consistent attendance and compliance with company policies. Employees who achieve 100% attendance, with no unpaid/short leave and no policy violations, may receive 4 days of BVL. These leaves cannot be combined with any other leave."},
-  {key:"family", name:"Family Leave", tone:"pink", paid:true, entitlement:"40h/year", unit:"any duration", balance:"40h left",
+  {key:"family", name:"Family Leave", tone:"pink", icon:Users, paid:true, entitlement:"40h/year", unit:"any duration", balance:"40h left", leftHours:40, totalHours:40,
     policy:"Eligible regular employees may take up to 5 consecutive days of paid Family Leave for their own marriage, serious illness of an immediate family member, or bereavement. Planned events require advance notice and supporting documents. Leave must be taken in full-day increments and is subject to approval and operational requirements."},
-  {key:"maternity", name:"Maternity Leave", tone:"blue", paid:true, entitlement:"360h/year", unit:"any duration", balance:"360h left",
+  {key:"maternity", name:"Maternity Leave", tone:"blue", icon:UserPlus, paid:true, entitlement:"360h/year", unit:"any duration", balance:"360h left", leftHours:360, totalHours:360,
     policy:"Full-time regular female employees with at least one year of service are entitled to 1.5 months (45 calendar days) of paid maternity leave upon providing a medical certificate. The leave can commence up to five days before the expected delivery date. If medically justified, an employee may request additional unpaid leave, subject to management and HR approval; the paid leave is non-convertible to cash."},
-  {key:"ot", name:"Overtime (OT)", tone:"amber", paid:true, entitlement:"Unlimited", unit:"any duration", balance:"Unlimited",
+  {key:"ot", name:"Overtime (OT)", tone:"amber", icon:Clock3, paid:true, entitlement:"Unlimited", unit:"any duration", balance:"Unlimited", unlimited:true,
     policy:"The purpose of overtime is to meet urgent demands, additional workloads and critical deadlines, or to handle emergencies and peak operational hours. This policy outlines the terms under which employees may be required or allowed to work beyond regular hours, ensuring fair compensation and regulatory compliance. The maximum duration for regular overtime is 3 hours, and it must always be requested and approved before the work is performed — it cannot be applied for after the fact."},
-  {key:"pto", name:"Paid Time Off (PTO)", tone:"purple", paid:true, entitlement:"Unlimited", unit:"any duration", balance:"Unlimited",
+  {key:"pto", name:"Paid Time Off (PTO)", tone:"purple", icon:BriefcaseBusiness, paid:true, entitlement:"Unlimited", unit:"any duration", balance:"Unlimited", unlimited:true,
     policy:"PTO is designated for work-related scenarios where time cannot be logged through the timer application — official travel or work conducted outside the office for company business (client meetings, site visits), and attendance at company-organized events, seminars or training sessions. PTO must be applied for in advance or on the day it is being taken; late submissions are not permitted. Eligibility: all full-time employees."},
-  {key:"holiday", name:"Public Holiday", tone:"green", paid:true, entitlement:"120h/year", unit:"any duration", balance:"48h left",
+  {key:"holiday", name:"Public Holiday", tone:"green", icon:Landmark, paid:true, entitlement:"120h/year", unit:"any duration", balance:"48h left", leftHours:48, totalHours:120,
     policy:"Full-time employees who have completed their probation are entitled to 15 paid public holidays annually. Employees with less than one year of tenure must also have achieved at least 80% attendance in the previous month to be eligible; this requirement is waived for employees with one year or more of service."},
-  {key:"tenure", name:"Tenure leave", tone:"blue", paid:true, entitlement:"40h/year", unit:"any duration", balance:"8h left",
+  {key:"tenure", name:"Tenure leave", tone:"blue", icon:Crown, paid:true, entitlement:"40h/year", unit:"any duration", balance:"8h left", leftHours:8, totalHours:40,
     policy:"Tenure Leave is an additional paid leave granted to employees on the anniversary of their employment as recognition of their continued service. Employees become eligible after completing one full year of service. The leave is provided incrementally according to completed years of service, starting from 1 day after the first year and increasing up to a maximum of 5 days after five or more years of service."},
-  {key:"uto", name:"Unpaid Time Off (UTO)", tone:"red", paid:false, entitlement:"Unlimited", unit:"any duration", balance:"Unlimited",
+  {key:"uto", name:"Unpaid Time Off (UTO)", tone:"red", icon:FileText, paid:false, entitlement:"Unlimited", unit:"any duration", balance:"Unlimited", unlimited:true,
     policy:"Monday–Friday employees have a monthly limit of 8 hours; Monday–Saturday employees, 16 hours. Consecutive unpaid leave is not allowed by default, and requests for more than 2 unpaid days (16 hours) must be approved by the Business Head or higher. UTO is available only after Annual Leave has been exhausted, and employees must provide a valid reason for the absence."},
-  {key:"vl", name:"Vacation Leave (VL)", tone:"blue", paid:true, entitlement:"24h/year", unit:"any duration", balance:"24h left",
+  {key:"vl", name:"Vacation Leave (VL)", tone:"blue", icon:WalletCards, paid:true, entitlement:"24h/year", unit:"any duration", balance:"24h left", leftHours:24, totalHours:24,
     policy:"Regular full-time employees who have completed probation may earn Vacation Leave (VL) as a reward for consistent attendance and compliance with company policies. Eligible employees may receive 3 days of VL for maintaining at least 90% attendance, using less than 10% unpaid/short leave, and having no policy violations during a calendar year. These leaves cannot be combined with any other leave."},
 ];
 
@@ -383,7 +383,8 @@ const routeMeta = {
   "/my-documents": ["My Documents", "My Documents", "Your employee documents"],
   "/my-team": ["My Team", "My Team", "Your team and reporting line"],
   "/my-feedbacks": ["My Feedback", "My Feedback", "Your feedback activity"],
-  "/my-leaves": ["My Leaves", "My Leaves", "Your leave balance and requests"],
+  "/my-leaves": ["My Leaves", "My Leaves", "Your leave requests"],
+  "/leave-holidays": ["Leave & Holidays", "Leave & Holidays", "Your leave balances, public holidays and team on leave"],
   "/requests": ["Requests", "Requests", "Your Employee Services requests"],
   "/approvals": ["Approvals", "Approvals", "Requests awaiting your decision"],
   "/sops": ["SOPs & Policies", "SOPs & Policies", "Company standard operating procedures and policies"],
@@ -413,24 +414,27 @@ const routeMeta = {
 };
 
 const navGroups = [
-  ["Overview", [
+  ["Home", [
     ["Dashboard", "/dashboard", LayoutDashboard],
   ]],
   ["People", [
-    ["Employee Directory", "/employees", Users], ["Announcements", "/announcements", Megaphone],
+    ["Employee Directory", "/employees", Users], ["Announcements", "/announcements", Megaphone], ["Feedback Cycles", "/feedbacks", MessageSquareText],
   ]],
-  ["Time & Requests", [
-    ["Leave & Requests", "/leaves", CalendarDays], ["Feedback Cycles", "/feedbacks", MessageSquareText],
+  ["Requests", [
+    ["Leave & Requests", "/leaves", CalendarDays],
   ]],
-  ["Assets & Reports", [
-    ["Assets", "/assets", Boxes], ["Documents", "/documents", FileText], ["Reports", "/reports", BarChart3],
+  ["Assets & Documents", [
+    ["Assets", "/assets", Boxes], ["Documents", "/documents", FileText],
   ]],
-  ["Settings", [
-    ["Settings", "/settings", Settings],
+  ["Reports", [
+    ["Reports", "/reports", BarChart3],
   ]],
   ["My Space", [
     ["My Profile", "/my-profile", UserCog],
     ["My Team", "/my-team", Users], ["My Leaves & Requests", "/my-leaves", CalendarDays],
+  ]],
+  ["Settings", [
+    ["Settings", "/settings", Settings],
   ]],
 ];
 
@@ -439,7 +443,7 @@ const MY_SPACE_FLAT_EMPLOYEE = [
   ["My Salary", "/my-salary", CircleDollarSign], ["My Documents", "/my-documents", FileText],
   ["SOPs & Policies", "/sops", NotebookPen], ["My Team", "/my-team", Users],
   ["My Feedbacks", "/my-feedbacks", MessageSquareText], ["My Leaves", "/my-leaves", CalendarDays],
-  ["My Requests", "/requests", ClipboardCheck],
+  ["Leave & Holidays", "/leave-holidays", Flag], ["My Requests", "/requests", ClipboardCheck],
 ];
 const MY_SPACE_FLAT_TEAM_LEAD = [
   ...MY_SPACE_FLAT_EMPLOYEE,
@@ -457,7 +461,7 @@ const MY_PROFILE_TABS = [
   ["Documents", "/my-documents", FileText], ["Feedback", "/my-feedbacks", MessageSquareText],
 ];
 function myRequestsTabs(role) {
-  const tabs = [["My Leaves", "/my-leaves", CalendarDays], ["Requests", "/requests", ClipboardCheck]];
+  const tabs = [["My Leaves", "/my-leaves", CalendarDays], ["Leave & Holidays", "/leave-holidays", Flag], ["Requests", "/requests", ClipboardCheck]];
   if (role !== "Employee") tabs.push(["Approvals", "/approvals", Archive]);
   return tabs;
 }
@@ -484,9 +488,9 @@ function useRoute() {
   return [path, go];
 }
 
-const avatarPalette = [["#018038","#016A2D"],["#0B4F75","#08344C"],["#5B3E8C","#402A63"],["#96650F","#74500C"],["#3A3D3C","#242424"],["#0F6B5C","#0B4F45"]];
-function avatarColor(seed = "") { let h = 0; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0; const [a, b] = avatarPalette[h % avatarPalette.length]; return `linear-gradient(145deg,${a},${b})`; }
-function Avatar({ initials = "M", small = false }) { return <span className={`avatar ${small ? "small" : ""}`} style={{background: avatarColor(initials)}}>{initials}</span>; }
+const avatarPalette = [["#E6F4EC","#016A2D"],["#E3EFF7","#0B4F75"],["#F1EAFB","#5B3E8C"],["#FBF0DC","#8A5C0C"],["#EEF0EF","#3A3D3C"],["#E1F3F0","#0B4F45"]];
+function avatarStyle(seed = "") { let h = 0; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0; const [background, color] = avatarPalette[h % avatarPalette.length]; return { background, color }; }
+function Avatar({ initials = "M", small = false, photo }) { if (photo) return <span className={`avatar ${small ? "small" : ""}`}><img className="avatar-photo" src={photo} alt=""/></span>; return <span className={`avatar ${small ? "small" : ""}`} style={avatarStyle(initials)}>{initials}</span>; }
 function Status({ children }) { return <span className={`status ${String(children).toLowerCase().replaceAll(" ", "-")}`}>{children}</span>; }
 function IconButton({ icon: Icon, label, onClick, danger = false, success = false, className = "" }) { return <button className={`icon-btn ${danger ? "danger" : ""} ${success ? "success" : ""} ${className}`} aria-label={label} title={label} onClick={onClick || (()=>announce(`${label} action opened`))}><Icon size={17}/></button>; }
 const FILTER_DOT_GREEN=["Active","Approved","Created","Logged in","Completed"];
@@ -583,8 +587,8 @@ function BasicForm({ type }) {
 }
 
 const roleRules = {
-  "Super Admin": ["Overview","People","Time & Requests","Assets & Reports","Settings","My Space"],
-  "Admin": ["Overview","People","Time & Requests","Assets & Reports","Settings","My Space"],
+  "Super Admin": ["Home","People","Requests","Assets & Documents","Reports","My Space","Settings"],
+  "Admin": ["Home","People","Requests","Assets & Documents","Reports","My Space","Settings"],
   "Team Lead": ["My Space"],
   "Employee": ["My Space"],
 };
@@ -697,9 +701,9 @@ function Shell({ path, go, children, role, setRole, open, isMySpace }) {
   const crumb = isPreviewRole ? (path === "/my-dashboard" ? "Dashboard" : (routeMeta[path]?.[0] || "Dashboard")) : path.startsWith("/teams/") ? (teams[Number(path.split("/").pop())]?.name || "Team Detail") : path.startsWith("/employees/") ? (EMPLOYEE_DIRECTORY.find(e=>slugify(e.name)===path.slice(11))?.name || "Matilda Ipeh Anashie") : path.startsWith("/documents/") ? ([...DOCUMENT_TEMPLATES,...COMPANY_DOCUMENTS].find(([n])=>slugify(n)===path.slice(11))?.[0] || "Document") : (routeMeta[path]?.[0] || "Dashboard");
   const searchHits=employees.filter(e=>e[0].toLowerCase().includes(globalQ.toLowerCase())).slice(0,4);
   return <div className={`app-shell role-${slugify(role)} ${collapsed?"sidebar-collapsed":""}`}>
-    <LogoDefs/>{isPreviewRole ? <PreviewSidebar path={path} go={go} role={role} drawer={drawer} setDrawer={setDrawer}/> : <aside className={`sidebar ${drawer ? "open" : ""}`}><div className="brand"><a className="brandmark" href="/dashboard" onClick={e=>{e.preventDefault();go("/dashboard")}}><svg className="logo-full"><use href="#mc-logo"/></svg><svg className="logo-mark"><use href="#mc-mark"/></svg></a><IconButton icon={PanelLeftClose} label={drawer?"Close menu":collapsed?"Expand sidebar":"Collapse sidebar"} onClick={()=>drawer?setDrawer(false):setCollapsed(!collapsed)}/></div><div className="nav-scroll">{navGroups.filter(([group])=>roleRules[role].includes(group)).map(([group, items]) => <div className="nav-group" key={group}><button className="nav-group-toggle" aria-expanded={!closedGroups.has(group)} onClick={()=>toggleGroup(group)}><span>{group}</span><ChevronDown size={13} className={closedGroups.has(group)?"closed-arrow":""}/></button><div className={`nav-group-items ${closedGroups.has(group)?"closed":""}`}><div>{items.filter(([label])=>role!=="Employee"||!["My Team","Approvals"].includes(label)).map(([label,to,Icon]) => <button title={label} key={to} className={(path === to || (to === "/employees" && (path.startsWith("/employees/")||path==="/teams"||path.startsWith("/teams/")||path==="/org-chart")) || (to === "/leaves" && (path==="/leave-balances"||path==="/all-requests")) || (to === "/my-profile" && (path==="/my-salary"||path==="/my-documents"||path==="/my-feedbacks")) || (to === "/my-leaves" && (path==="/requests"||path==="/approvals")) || (to === "/settings" && (path.startsWith("/settings/")||path==="/activity-logs"||path==="/feedback-form-builder"))) ? "active" : ""} onClick={() => { go(to); setDrawer(false); }}><Icon size={18}/><span>{label}</span></button>)}</div></div></div>)}</div></aside>}
+    <LogoDefs/>{isPreviewRole ? <PreviewSidebar path={path} go={go} role={role} drawer={drawer} setDrawer={setDrawer}/> : <aside className={`sidebar ${drawer ? "open" : ""}`}><div className="brand"><a className="brandmark" href="/dashboard" onClick={e=>{e.preventDefault();go("/dashboard")}}><svg className="logo-full"><use href="#mc-logo"/></svg><svg className="logo-mark"><use href="#mc-mark"/></svg></a><IconButton icon={PanelLeftClose} label={drawer?"Close menu":collapsed?"Expand sidebar":"Collapse sidebar"} onClick={()=>drawer?setDrawer(false):setCollapsed(!collapsed)}/></div><div className="nav-scroll">{navGroups.filter(([group])=>roleRules[role].includes(group)).map(([group, items]) => <div className="nav-group" key={group}><button className="nav-group-toggle" aria-expanded={!closedGroups.has(group)} onClick={()=>toggleGroup(group)}><span>{group}</span><ChevronDown size={13} className={closedGroups.has(group)?"closed-arrow":""}/></button><div className={`nav-group-items ${closedGroups.has(group)?"closed":""}`}><div>{items.filter(([label])=>role!=="Employee"||!["My Team","Approvals"].includes(label)).map(([label,to,Icon]) => <button title={label} key={to} className={(path === to || (to === "/employees" && (path.startsWith("/employees/")||path==="/teams"||path.startsWith("/teams/")||path==="/org-chart")) || (to === "/leaves" && (path==="/leave-balances"||path==="/all-requests")) || (to === "/my-profile" && (path==="/my-salary"||path==="/my-documents"||path==="/my-feedbacks")) || (to === "/my-leaves" && (path==="/leave-holidays"||path==="/requests"||path==="/approvals")) || (to === "/settings" && (path.startsWith("/settings/")||path==="/activity-logs"||path==="/feedback-form-builder"))) ? "active" : ""} onClick={() => { go(to); setDrawer(false); }}><Icon size={18}/><span>{label}</span></button>)}</div></div></div>)}</div></aside>}
     {drawer && <button className="scrim" aria-label="Close menu" onClick={() => setDrawer(false)}/>} 
-    <div className="workspace"><header className="topbar"><button className="menu-btn" aria-label="Open menu" onClick={() => setDrawer(true)}><Menu size={20}/></button><svg className="mobile-logo"><use href="#mc-logo"/></svg>{crumbParent&&<div className="breadcrumbs"><span>{crumbParent}</span><b>/</b><strong>{crumb}</strong></div>}<div className="top-search"><Search size={17}/><input aria-label="Search employees globally" placeholder={isPreviewRole ? "Search employees, documents…" : "Search employees…"} value={globalQ} onChange={e=>setGlobalQ(e.target.value)}/>{globalQ&&<div className="global-results">{searchHits.length?searchHits.map(e=><button key={e[0]} onClick={()=>{go("/employees/matilda");setGlobalQ("")}}><Avatar initials={e[5]} small/><span><strong>{e[0]}</strong><small>{e[1]}</small></span></button>):<p>No employees found</p>}</div>}</div><div className="top-actions"><label className="language" title="Language"><Globe2 size={16}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>English</option><option>한국어</option></select><ChevronDown size={12}/></label><div className="quick-create">{path==="/approvals"?null:showRequest?<Button icon={Plus} onClick={()=>open?.("new-request")}>Request</Button>:<><Button icon={Plus} onClick={()=>{setQuickCreate(!quickCreate);setNotices(false);setAccount(false)}}>Create</Button>{quickCreate&&<div className="quick-create-menu"><button onClick={()=>{open?.("employee");setQuickCreate(false)}}><UserPlus size={14}/>Add Employee</button><button onClick={()=>{open?.("team");setQuickCreate(false)}}><Network size={14}/>Create Team</button><button onClick={()=>{open?.("user");setQuickCreate(false)}}><UserCog size={14}/>Invite User</button><button onClick={()=>{open?.("announcement");setQuickCreate(false)}}><Megaphone size={14}/>Post Announcement</button></div>}</>}</div><span className="notif-wrap"><IconButton icon={Bell} label="Notifications" onClick={()=>{setNotices(!notices);setQuickCreate(false);setAccount(false)}}/><span className="notif-count">3</span></span><button className="account" title={`${identity.name} — ${role}`} aria-label={`Account menu for ${identity.name}, ${role}`} onClick={()=>{setAccount(!account);setQuickCreate(false);setNotices(false)}}><Avatar initials={identity.initials}/><ChevronDown size={14}/></button></div>{notices&&<div className="header-popover notifications"><h3>Needs your attention</h3><p>{role==="Employee"?"3 announcements and reminders need your attention.":role==="Team Lead"?"2 approvals and 1 reminder need your attention.":"2 approvals and 1 reported issue need review."}</p><button onClick={()=>{go(role==="Employee"?"/my-dashboard":role==="Team Lead"?"/approvals":"/leaves");setNotices(false)}}>Review now</button></div>}{account&&<div className="header-popover account-menu"><div className="account-menu-id"><Avatar initials={identity.initials}/><span><strong>{identity.name}</strong><small>{role}</small></span></div><strong>Quick links</strong><div className="profile-switch-list">{[["My Salary","/my-salary",CircleDollarSign],["My Documents","/my-documents",FileText],["My Feedback","/my-feedbacks",MessageSquareText]].map(([label,to,Icon])=><button className="profile-row" key={to} onClick={()=>{go(to);setAccount(false)}}><Icon size={16}/><span className="profile-row-copy"><strong>{label}</strong></span></button>)}</div><div className="preview-switch"><strong>{isPreviewRole?"Switch profile":"Preview access"}</strong><p>Prototype preview — lets you demo other role views. Not shipped to real users.</p><div className="profile-switch-list">{Object.keys(roleRules).map(item=>{const p=roleProfile(item); const displayName=(isPreviewRole&&PREVIEW_DISPLAY_NAME[item])?PREVIEW_DISPLAY_NAME[item]:p.name; return <button className={`profile-row ${role===item?"selected":""}`} key={item} onClick={()=>{setRole(item);setAccount(false);go(roleHome(item));announce(`Viewing as ${item}`)}}><Avatar initials={p.initials} small/><span className="profile-row-copy"><strong>{item}</strong><small>{displayName} · {p.title}</small></span>{role===item&&<Check size={16}/>}</button>})}</div></div><button onClick={()=>{const key=role==="Team Lead"?"team-lead":role==="Employee"?"employee":"admin";setAccount(false);go(`/login/${key}`)}}>Sign out</button></div>}</header><main className="content">{children}</main></div>
+    <div className="workspace"><header className="topbar"><button className="menu-btn" aria-label="Open menu" onClick={() => setDrawer(true)}><Menu size={20}/></button><svg className="mobile-logo"><use href="#mc-logo"/></svg>{crumbParent&&<div className="breadcrumbs"><span>{crumbParent}</span><b>/</b><strong>{crumb}</strong></div>}<div className="top-search"><Search size={17}/><input aria-label="Search employees globally" placeholder={isPreviewRole ? "Search employees, documents…" : "Search employees…"} value={globalQ} onChange={e=>setGlobalQ(e.target.value)}/>{globalQ&&<div className="global-results">{searchHits.length?searchHits.map(e=><button key={e[0]} onClick={()=>{go("/employees/matilda");setGlobalQ("")}}><Avatar initials={e[5]} small/><span><strong>{e[0]}</strong><small>{e[1]}</small></span></button>):<p>No employees found</p>}</div>}</div><div className="top-actions"><label className="language" title="Language"><Globe2 size={16}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>ENG</option><option>KOR</option></select><ChevronDown size={12}/></label><div className="quick-create">{path==="/approvals"?null:showRequest?<Button icon={Plus} onClick={()=>open?.("new-request")}>Request</Button>:<><Button icon={Plus} onClick={()=>{setQuickCreate(!quickCreate);setNotices(false);setAccount(false)}}>Create</Button>{quickCreate&&<div className="quick-create-menu"><button onClick={()=>{open?.("employee");setQuickCreate(false)}}><UserPlus size={14}/>Add Employee</button><button onClick={()=>{open?.("team");setQuickCreate(false)}}><Network size={14}/>Create Team</button><button onClick={()=>{open?.("user");setQuickCreate(false)}}><UserCog size={14}/>Invite User</button><button onClick={()=>{open?.("announcement");setQuickCreate(false)}}><Megaphone size={14}/>Post Announcement</button></div>}</>}</div><span className="notif-wrap"><IconButton icon={Bell} label="Notifications" onClick={()=>{setNotices(!notices);setQuickCreate(false);setAccount(false)}}/><span className="notif-count">3</span></span><button className="account" title={`${identity.name} — ${role}`} aria-label={`Account menu for ${identity.name}, ${role}`} onClick={()=>{setAccount(!account);setQuickCreate(false);setNotices(false)}}><Avatar initials={identity.initials} photo="/assets/avatar-placeholder.svg"/><ChevronDown size={14}/></button></div>{notices&&<div className="header-popover notifications"><h3>Needs your attention</h3><p>{role==="Employee"?"3 announcements and reminders need your attention.":role==="Team Lead"?"2 approvals and 1 reminder need your attention.":"2 approvals and 1 reported issue need review."}</p><button onClick={()=>{go(role==="Employee"?"/my-dashboard":role==="Team Lead"?"/approvals":"/leaves");setNotices(false)}}>Review now</button></div>}{account&&<div className="header-popover account-menu"><div className="account-menu-id"><Avatar initials={identity.initials} photo="/assets/avatar-placeholder.svg"/><span><strong>{identity.name}</strong><small>{role}</small></span></div><strong>Quick links</strong><div className="profile-switch-list">{[["My Salary","/my-salary",CircleDollarSign],["My Documents","/my-documents",FileText],["My Feedback","/my-feedbacks",MessageSquareText]].map(([label,to,Icon])=><button className="profile-row" key={to} onClick={()=>{go(to);setAccount(false)}}><Icon size={16}/><span className="profile-row-copy"><strong>{label}</strong></span></button>)}</div><div className="preview-switch"><strong>{isPreviewRole?"Switch profile":"Preview access"}</strong><p>Prototype preview — lets you demo other role views. Not shipped to real users.</p><div className="profile-switch-list">{Object.keys(roleRules).map(item=>{const p=roleProfile(item); const displayName=(isPreviewRole&&PREVIEW_DISPLAY_NAME[item])?PREVIEW_DISPLAY_NAME[item]:p.name; return <button className={`profile-row ${role===item?"selected":""}`} key={item} onClick={()=>{setRole(item);setAccount(false);go(roleHome(item));announce(`Viewing as ${item}`)}}><Avatar initials={p.initials} small/><span className="profile-row-copy"><strong>{item}</strong><small>{displayName} · {p.title}</small></span>{role===item&&<Check size={16}/>}</button>})}</div></div><button onClick={()=>{const key=role==="Team Lead"?"team-lead":role==="Employee"?"employee":"admin";setAccount(false);go(`/login/${key}`)}}>Sign out</button></div>}</header><main className="content">{children}</main></div>
     <AskHris role={role} go={go} identity={identity} scrolling={scrolling} setScrolling={setScrolling}/>
     <button className={`report-issue ${scrolling?"docked":""}`} aria-label="Report an issue" onClick={()=>{setScrolling(false);announce("Issue report opened — describe the problem and attach evidence")}}><MessageSquareText size={16}/>Report an issue</button>{toast&&<div className={`toast ${toast.tone||"success"}`} role="status">{toast.message}<button aria-label="Dismiss notification" onClick={()=>setToast(null)}><X size={14}/></button></div>}
   </div>;
@@ -821,23 +825,72 @@ function MustSpaceDashboardPanel({ go, open, role }) {
 function PermissionDenied({go}) { return <Card className="unlinked-state"><span><LockKeyhole size={25}/></span><h2>You don’t have access to this page</h2><p>Your current role does not include this permission. Switch role preview or return to your dashboard.</p><Button kind="secondary" icon={ArrowLeft} onClick={()=>go("/my-dashboard")}>Back to dashboard</Button></Card> }
 
 const myActivities = [["Annual Leave","12–14 Aug · 3 days","Pending"],["Casual Leave","3 Jul · 1 day","Approved"],["Employment Letter","Requested 18 Jun","Completed"]];
+const myPayments = [["June 2026 payslip","Salary · paid Jul 1","$588.00","Paid"],["May 2026 payslip","Salary · paid Jun 1","$560.00","Paid"]];
+const myUpcoming = [["Birthday","Oct 9","in 3 months",Cake],["Work anniversary · 2yr","Feb 26","in 8 months",Crown],["Annual increment","Feb 26","in 8 months",TrendingUp]];
+const TEAM_LEVELS = {Head:{color:"#016A2D",soft:"rgba(1,106,45,.12)"},Leader:{color:"#018038",soft:"rgba(1,128,56,.12)"},Senior:{color:"#0EA5E9",soft:"rgba(14,165,233,.14)"},Junior:{color:"#E08600",soft:"rgba(224,134,0,.14)"},Intern:{color:"#8B5CF6",soft:"rgba(139,92,246,.14)"},"Team member":{color:"#6b7280",soft:"rgba(107,114,128,.12)"}};
+const TEAM_MEMBERS = [
+  {initials:"DK",bg:"#242424",name:"David Kim",role:"Head of Blockchain Dp.",level:"Head",location:"Seoul, KR",email:"david.kim@must.company",phone:"+82 10 2345 6789",timezone:"Asia/Seoul (GMT+9)"},
+  {initials:"MI",bg:"#016a2d",name:"Maya Ingram",role:"Project Leader · Product Designer",level:"Leader",location:"Singapore, SG",email:"maya.ingram@must.company",phone:"+65 8123 4567",timezone:"Asia/Singapore (GMT+8)"},
+  {initials:"SG",bg:"#0a7d43",name:"Sophie Grant",role:"Senior Product Designer",level:"Senior",location:"Lahore, PK",email:"sophie.grant@must.company",phone:"+92 300 1234567",timezone:"Asia/Karachi (GMT+5)"},
+  {initials:"FH",bg:"#c0392b",name:"Felix Harper",role:"Senior Visual Designer",level:"Senior",location:"London, UK",email:"felix.harper@must.company",phone:"+44 7700 900123",timezone:"Europe/London (GMT+0)"},
+  {initials:"LO",bg:"#0a5c34",name:"Liam Ortega",role:"UI Designer",level:"Junior",location:"Manila, PH",email:"liam.ortega@must.company",phone:"+63 917 123 4567",timezone:"Asia/Manila (GMT+8)"},
+  {initials:"AM",bg:"#016a2d",name:"Adam Mercer",role:"Video Editor",level:"Junior",location:"Karachi, PK",email:"adam.mercer@must.company",phone:"+92 321 7654321",timezone:"Asia/Karachi (GMT+5)"},
+  {initials:"AK",bg:"#7a3fa0",name:"Aisha Khan",role:"Design Intern",level:"Intern",location:"Lahore, PK",email:"aisha.khan@must.company",phone:"+92 333 9876543",timezone:"Asia/Karachi (GMT+5)"},
+];
+function MyDashboardContent({role,go}) {
+  const isLead=role==="Team Lead";
+  return <><PageTitle className="greeting-title" title={<>Good morning, <span>{isLead?"Ethan":"Matilda"}</span></>} subtitle="Here’s what’s happening at MUST today — 12 August 2026." actions={<Button kind="secondary" icon={FileText} onClick={()=>go("/my-salary")}>View payslip</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>per hour</p></Card><Card className="simple-metric"><span>Latest payslip</span><strong>$588.00</strong><p>June 2026 · 392 hrs</p></Card><Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card></div><div className="employee-dashboard-grid">{isLead?<Card className="attention-card"><div className="card-head"><div><h2><span className="count-badge">2</span>Requests awaiting your approval</h2></div><button onClick={()=>go("/approvals")}>View all <ChevronRight size={15}/></button></div>{[["SG","Sophie Grant","Annual Leave","12–14 Aug · 3 days","2 overlapping teammates"],["FH","Felix Harper","Overtime","14 Aug · 2 hrs",""]].map(([ini,name,type,date,overlap])=><button className="approval-row" key={name} onClick={()=>go("/approvals")}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{type} · {date}</small>{overlap&&<em>{overlap}</em>}</span><b>Review</b></button>)}<div className="active-request"><strong>Your active request</strong><span>Annual Leave · 12–14 Aug</span><Status>Pending</Status></div></Card>:<ActivityCard go={go}/>}<AttentionPanel go={go}/></div><div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div><div className="employee-dashboard-grid lower"><RecentPaymentsCard go={go}/><UpcomingCard/></div></>;
+}
 function MySpacePage({path,go,role,open}) {
-  const isLead=role==="Team Lead"; const title=routeMeta[path]?.[1]||"My Dashboard";
-  if(path==="/my-dashboard") return <><PageTitle className="greeting-title" title={<>Good morning, <span>{isLead?"Ethan":"Matilda"}</span></>} subtitle="Here’s what’s happening at MUST today — 12 August 2026." actions={<Button kind="secondary" icon={FileText} onClick={()=>go("/my-salary")}>View payslip</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>per hour</p></Card><Card className="simple-metric"><span>Latest payslip</span><strong>$588.00</strong><p>June 2026 · 392 hrs</p></Card><Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card></div><div className="employee-dashboard-grid">{isLead?<Card className="attention-card"><div className="card-head"><div><h2><span className="count-badge">2</span>Requests awaiting your approval</h2></div><button onClick={()=>go("/approvals")}>View all <ChevronRight size={15}/></button></div>{[["SG","Sophie Grant","Annual Leave","12–14 Aug · 3 days","2 overlapping teammates"],["FH","Felix Harper","Overtime","14 Aug · 2 hrs",""]].map(([ini,name,type,date,overlap])=><button className="approval-row" key={name} onClick={()=>go("/approvals")}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{type} · {date}</small>{overlap&&<em>{overlap}</em>}</span><b>Review</b></button>)}<div className="active-request"><strong>Your active request</strong><span>Annual Leave · 12–14 Aug</span><Status>Pending</Status></div></Card>:<ActivityCard go={go}/>}<AttentionPanel go={go}/></div><div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div></>;
+  if(path==="/my-dashboard") return <MyDashboardContent role={role} go={go}/>;
   if(path==="/my-profile") return <RoleProfile role={role} go={go}/>;
   if(path==="/my-salary") return <><PageTitle title="My Salary" subtitle="Payslips and salary history" actions={<Button icon={Download}>Download latest</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Latest net pay</span><strong>$588.00</strong><p>June 2026</p></Card><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>effective Feb 2025</p></Card><Card className="simple-metric"><span>Hours</span><strong>392</strong><p>June 2026</p></Card></div><Card><DataTable columns={["Pay period","Hours","Gross","Deductions","Net","Status"]} rows={[["June 2026","392","$628.00","$40.00","$588.00","Completed"],["May 2026","376","$601.00","$38.00","$563.00","Completed"]]} renderActions={()=> <IconButton icon={Download} label="Download payslip"/>}/></Card></>;
   if(path==="/my-documents") return <><PageTitle title="My Documents" subtitle="Documents shared with you"/><Card><DataTable columns={["Document","Category","Shared","Status"]} rows={[["Employment Contract","Contract","26 Feb 2025","Completed"],["Employee Handbook","Policy","1 Aug 2026","Active"],["NDA","Legal","26 Feb 2025","Completed"]]} renderActions={()=> <IconButton icon={Download} label="Download document"/>}/></Card></>;
-  if(path==="/my-team") return <><PageTitle title="My Team" subtitle="Your reporting line and team members"/><Card><div className="card-head"><div><h2>BLK-UXI · UX/UI Team</h2><p>2 members · Ismail Gorkem Kara, team lead</p></div></div><div className="people-list">{[["MA","Matilda Ipeh Anashie","Senior Product Designer"],["SG","Sneha Gupta","Product Designer"]].map(([ini,name,job])=><button key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{job}</span></div></button>)}</div></Card></>;
+  if(path==="/my-team") { const levelsUsed=[...new Set(TEAM_MEMBERS.map(m=>m.level||"Team member"))].sort((a,b)=>Object.keys(TEAM_LEVELS).indexOf(a)-Object.keys(TEAM_LEVELS).indexOf(b)); return <><PageTitle eyebrow="Blockchain Dp." title="My Team" subtitle="The people you work with, colour-coded by role."/><div className="tm-banner"><div className="tmb-stats"><div className="tmb-stat"><b>{TEAM_MEMBERS.length}</b><span>Team members</span></div><div className="tmb-div"/><div className="tmb-stat"><b>5</b><span>Countries</span></div><div className="tmb-div"/><div className="tmb-stat"><b>4</b><span>Time zones</span></div></div><div className="tm-legend">{levelsUsed.map(name=><span key={name}><i style={{background:TEAM_LEVELS[name].color}}/>{name}</span>)}</div></div><div className="tm-grid">{TEAM_MEMBERS.map(m=><TeamMemberCard key={m.name} m={m}/>)}</div></>; }
   if(path==="/my-feedbacks") return <><PageTitle title="My Feedback" subtitle="Feedback cycles and responses"/><Card><DataTable columns={["Cycle","Reviewer","Due date","Progress","Status"]} rows={[["Q3 Performance Review","Ismail Gorkem Kara","20 Aug 2026","3 of 5 answers","Pending"],["Probation Review","Sneha Gupta","26 May 2025","5 of 5 answers","Completed"]]} renderActions={(r)=> <Button kind="secondary">{r[4]==="Completed"?"View":"Continue"}</Button>}/></Card></>;
   if(path==="/my-leaves") return <MyLeavesPage open={open}/>;
+  if(path==="/leave-holidays") return <LeaveHolidaysPage go={go}/>;
   if(path==="/requests") return <MyRequestsPage open={open}/>;
   if(path==="/sops") return <><PageTitle title="SOPs & Policies" subtitle="Company standard operating procedures and policies"/><Card><Empty icon={FileText} title="No SOPs published yet" text="Standard operating procedures and policy documents will appear here once published."/></Card></>;
   return <TeamApprovalsPage open={open} role={role} path={path}/>;
 }
 function ActivityCard({go}) { return <Card><div className="card-head"><div><h2>Latest activity</h2><p>Your most recent requests</p></div><button onClick={()=>go("/my-leaves")}>See all <ChevronRight size={15}/></button></div>{myActivities.slice(0,2).map(([name,date,status])=><div className="activity-item" key={name}><span><CalendarDays size={18}/></span><div><strong>{name}</strong><small>{date}</small></div><Status>{status}</Status></div>)}</Card> }
+const myPublicHolidays = [["Independence Day","Office closed","Thu, 14 Aug","in 5 weeks"],["Eid Milad un-Nabi","Public holiday","Fri, 4 Sep","in 9 weeks"],["Iqbal Day","Public holiday","Mon, 9 Nov","in 4 months"]];
+const myTeamOnLeave = [["SG","Sophie Grant","Product Designer","Annual · back Mon"],["FH","Felix Harper","Visual Designer","Sick · today"],["AM","Adam Mercer","Video Editor","WFH · today"]];
+const UPCOMING_TEAM_HOLIDAYS = [
+  {flag:"🇸🇬", country:"Singapore", teammates:1, holiday:"National Day", date:"Mon, Aug 10, 2026", eta:"in 18 days", avatars:["MI"]},
+  {flag:"🇵🇰", country:"Pakistan", teammates:3, holiday:"Independence Day", date:"Fri, Aug 14, 2026", eta:"in 22 days", avatars:["SG","AM","AK"]},
+  {flag:"🇰🇷", country:"South Korea", teammates:1, holiday:"Liberation Day", date:"Sat, Aug 15, 2026", eta:"in 23 days", avatars:["DK"]},
+  {flag:"🇵🇭", country:"Philippines", teammates:1, holiday:"Ninoy Aquino Day", date:"Fri, Aug 21, 2026", eta:"in 29 days", avatars:["LO"]},
+  {flag:"🇬🇧", country:"United Kingdom", teammates:1, holiday:"Summer Bank Holiday", date:"Mon, Aug 31, 2026", eta:"in 39 days", avatars:["FH"]},
+];
+function PublicHolidaysCard() { return <Card><div className="card-head"><div><h2><Flag size={18}/>Public holidays</h2><p>Lahore, PK · 2026</p></div><button onClick={()=>announce("Showing all public holidays")}>See all</button></div><div className="people-list">{myPublicHolidays.map(([name,sub,date,eta])=><div className="person-row" key={name}><span className="team-icon"><Flag size={18}/></span><div><strong>{name}</strong><span>{sub}</span></div><time>{date}<small>{eta}</small></time></div>)}</div></Card> }
+function TeamOnLeaveCard({go}) { return <Card><div className="card-head"><div><h2>Team on leave</h2><p>Coming up this week</p></div><button onClick={()=>go("/my-team")}>My team <ChevronRight size={15}/></button></div><div className="people-list">{myTeamOnLeave.map(([ini,name,role,note])=>{ const tone=note.startsWith("Annual")?"annual":note.startsWith("Sick")?"sick":"wfh"; return <div className="person-row" key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{role}</span></div><span className={`status ${tone}`}>{note}</span></div>; })}</div></Card> }
+function UpcomingTeamHolidaysCard() { return <Card><div className="card-head"><div><h2>Upcoming Team holidays</h2><p>Nearing holidays by country · through next month</p></div></div><div className="th-list">{UPCOMING_TEAM_HOLIDAYS.map(c=><div className="th-country" key={c.country}><div className="th-country-head"><span className="th-flag">{c.flag}</span><div className="th-country-text"><strong>{c.country}</strong><span>{c.teammates} teammate{c.teammates>1?"s":""} from here</span></div><div className="avatar-stack">{c.avatars.map((a,i)=><span key={a+i} style={avatarStyle(a)}>{a}</span>)}</div></div><div className="th-holiday"><i/><div><strong>{c.holiday}</strong><span>{c.date}</span></div><b>{c.eta}</b></div></div>)}</div></Card> }
 function AttentionPanel({go}) { return <Card className="attention-card dash-attention"><div className="card-head"><div><h2><span className="focal-ic"><Zap size={18}/></span>Needs your attention</h2><p>Waiting on you to act</p></div><button onClick={()=>go("/requests")}>My requests <ChevronRight size={15}/></button></div>{[["1","New document to sign","Awaiting your signature","Sign","/my-documents"],["3","Give peers feedback","Take a moment for your team","Feedback","/my-feedbacks"],["1","Leave request pending","Annual Leave \u00b7 12\u201314 Aug \u00b7 with your lead","Track","/my-leaves"]].map(([n,title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><b>{n}</b><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card> }
 function TeamAvailability(){ return <Card><div className="card-head"><div><h2>Who’s out</h2><p>Your team, this week</p></div><button>Team calendar</button></div><div className="week-strip">{[["Mon","10"],["Tue","11"],["Wed","12"],["Thu","13"],["Fri","14"]].map(([day,date])=><span className={day==="Wed"?"active":""} key={day}><small>{day}</small><strong>{date}</strong></span>)}</div><div className="people-list">{[["SG","Sophie Grant","Annual · 12–14 Aug"],["FH","Felix Harper","Sick · Today"],["AM","Adam Mercer","WFH · Today"]].map(([ini,name,note])=><button key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{note}</span></div></button>)}</div></Card> }
-function LeaveBalanceCard({go}) { return <Card className="leave-balance-card"><div className="card-head"><h2><CalendarDays size={19}/>Annual Leave</h2><button onClick={()=>go?.("/my-leaves")}><ChevronRight size={16}/></button></div><div className="leave-summary"><strong>7</strong><span>days left<br/>of 15 days</span><b>47% available</b></div><div className="progress"><i/></div></Card> }
+function LeaveBalanceCard({go}) { return <Card className="leave-balance-card"><div className="card-head"><h2><CalendarDays size={19}/>Annual Leave</h2><button onClick={()=>go?.("/leave-holidays")}><ChevronRight size={16}/></button></div><div className="leave-summary"><strong>7</strong><span>days left<br/>of 15 days</span><b>47% available</b></div><div className="progress"><i/></div></Card> }
+function reservedHoursFor(typeName) { return MY_LEAVES.filter(r=>r.status==="Pending"&&r.type===typeName.replace(/Leaves$/,"Leave")).reduce((sum,r)=>sum+(parseInt(r.hours,10)||0),0); }
+function LeaveTypeBalancesGrid() { return <div className="profile-balance-grid leave-type-balance-grid">{LEAVE_TYPES.map(t=>{
+  const pct=t.unlimited?100:Math.round(t.leftHours/t.totalHours*100);
+  const used=t.unlimited?null:t.totalHours-t.leftHours;
+  const reserved=t.unlimited?0:reservedHoursFor(t.name);
+  const Icon=t.icon;
+  return <div key={t.key}>
+    <span className={`leave-tile-icon ${t.tone}`}><Icon size={16}/></span>
+    <strong>{t.name.replace(/Leaves$/,"Leave")}</strong>
+    <p>{t.unlimited?<b className="inf">∞</b>:<><b>{t.leftHours}</b> hrs left</>}</p>
+    {!t.unlimited&&<small className="lvb-of">of {t.totalHours} hrs</small>}
+    <div className="lvb-bar-row"><i><em style={{width:`${pct}%`}}/></i><span>{t.unlimited?"∞":`${pct}%`}</span></div>
+    {!t.unlimited&&<div className="lvb-brk">
+      <p><span>Entitlement</span><b>{t.totalHours} hrs</b></p>
+      <p><span>Used</span><b>{used} hrs</b></p>
+      {reserved>0&&<p className="reserved"><span>Reserved · pending</span><b>{reserved} hrs</b></p>}
+    </div>}
+    <button type="button" className="lvb-report-link" onClick={()=>announce(`Opened balance issue report for ${t.name}`)}>Report a balance issue</button>
+  </div>;
+})}</div> }
+function TeamMemberCard({m}) { const level=m.level||"Team member"; const lvl=TEAM_LEVELS[level]||TEAM_LEVELS["Team member"]; return <div className="tm-card" style={{"--lvl":lvl.color}}><div className="tm-top"><div className="tm-avwrap"><span className="avatar" style={{background:m.bg}}>{m.initials}</span></div><span className="tm-lvl" style={{color:lvl.color,background:lvl.soft}}>{level}</span></div><div className="tm-name">{m.name}</div><div className="tm-role">{m.role}</div><div className="tm-details"><div className="tm-row"><MapPin size={15}/>{m.location}</div><div className="tm-row"><Mail size={15}/>{m.email}</div><div className="tm-row"><Phone size={15}/>{m.phone}</div><div className="tm-row"><Clock3 size={15}/>{m.timezone}</div></div><a className="tm-slack" href="https://app.slack.com/client" target="_blank" rel="noopener noreferrer"><MessageCircle size={16}/>Message on Slack</a></div> }
 
 function ProfileField({icon:Icon,label,value}) { return <div className="self-profile-field"><span><Icon size={18}/></span><div><small>{label}</small><strong>{value}</strong></div></div>; }
 function RoleProfile({role,go}) {
@@ -848,7 +901,7 @@ function RoleProfile({role,go}) {
     <Card className="self-profile-section"><h2>Personal information</h2><div className="self-profile-grid"><ProfileField icon={Mail} label="Email" value={person.email}/><ProfileField icon={Phone} label="Phone" value={person.phone}/><ProfileField icon={Building2} label="Department" value="Blockchain Dp."/><ProfileField icon={BriefcaseBusiness} label="Company entity" value="MUST SG"/><ProfileField icon={BriefcaseBusiness} label="Designation" value={person.title}/><ProfileField icon={CalendarDays} label="Joining date" value={person.start}/><ProfileField icon={Clock3} label="Tenure" value={person.tenure}/><ProfileField icon={Globe2} label="Time zone" value="17:00 ~ 02:00 (KST)"/></div><div className="skill-list"><small>Tech stack</small><div>{["Maze","Visual Studio Code","GitHub","Adobe Illustrator","Rive","Figma"].map(x=><span key={x}>{x}</span>)}</div></div></Card>
     <Card className="self-profile-section"><h2>Emergency contact & address</h2><div className="self-profile-grid"><ProfileField icon={IdCard} label="Emergency contact" value="Mildred Anashie"/><ProfileField icon={Phone} label="Emergency phone" value="+234 814 350 9138"/><ProfileField icon={MapPin} label="City" value="FCT Abuja"/><ProfileField icon={Globe2} label="Country" value="Nigeria"/><ProfileField icon={MapPin} label="Address" value="FCT Abuja, Nigeria"/></div></Card>
     <Card className="self-profile-section"><h2>Team & reporting</h2><div className="reporting-copy"><span>Department & team</span><strong>Blockchain Dp. <ChevronRight size={14}/> UX/UI Team <b>BLK-UXI</b></strong></div><ProfileField icon={Users} label="Reports to" value={person.manager}/>{isLead&&<button className="profile-team-link" onClick={()=>go("/my-team")}>View your team <ChevronRight size={15}/></button>}</Card>
-    <Card className="self-profile-section"><div className="card-head"><h2>Leave balances · 2026</h2><button onClick={()=>go("/my-leaves")}>View leave history <ChevronRight size={15}/></button></div><div className="profile-balance-grid">{[["Annual Leave","7","15","47%"],["Family Leave","5","5","100%"],["Vacation Leave","3","3","100%"],["Tenure Leave","1","5","20%"]].map(([name,left,total,pct])=><div key={name}><strong>{name}</strong><p><b>{left}</b> / {total} days left</p><i><em style={{width:pct}}/></i></div>)}</div></Card>
+    <LeaveBalanceCard go={go}/>
     <div className="self-profile-split"><Card className="self-profile-section"><h2>ID & passport</h2><Empty icon={IdCard} title="No identity documents" text="Nothing has been recorded yet."/></Card><Card className="self-profile-section"><h2>Education</h2><Empty icon={GraduationCap} title="No education records" text="Nothing has been added yet."/></Card></div>
     <Card className="self-profile-section"><div className="card-head"><div><h2><Landmark size={18}/>Bank details</h2><p>Recipient information — must match the bank’s records.</p></div><button onClick={()=>announce("Bank detail change request opened")}><Edit3 size={14}/>Request change</button></div><Info rows={[["Bank name","Guaranty Trust Bank (GTB) PLC"],["Account number","•••• •••• 4634"],["Account type","Single sole owner"],["Branch","Lagos, Nigeria"],["SWIFT code","GTBINGLAXXX"],["Account holder","Anashie Matilda Ipeh"]]}/></Card>
     <Card className="self-profile-section"><h2>Assigned assets</h2><Empty icon={PackagePlus} title="No assets issued to you" text="No assignment history yet."/></Card>
@@ -864,10 +917,10 @@ function MyLeavesPage({open}) {
   const pendingCount=rows.filter(r=>r.status==="Pending").length;
   const visible=rows.filter(r=>tab==="All Leaves"||(tab==="Completed"?r.status!=="Pending":r.status==="Pending"));
   return <>
-    <PageTitle title="My Leaves" subtitle="Apply for leave and track your requests" actions={<Button icon={Plus} onClick={()=>open("apply-leave")}>Apply for Leave</Button>}/>
-    <LeaveBalanceCard/>
-    <div className="tabs-scroll"><div className="tabs pill-tabs">{["Pending","Completed","All Leaves"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}<span>{x==="Pending"?pendingCount:x==="Completed"?rows.length-pendingCount:rows.length}</span></button>)}</div></div>
-    <Card>{visible.length?<div className="leave-card-list">{visible.map(d=><div className="record-card" key={d.id}>
+    <PageTitle title="My Leaves" subtitle="Your leave requests."/>
+    <Card className="raised">
+    <div className="tabs pill-tabs in-card">{["All Leaves","Pending","Completed"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}<span>{x==="Pending"?pendingCount:x==="Completed"?rows.length-pendingCount:rows.length}</span></button>)}</div>
+    {visible.length?<div className="leave-card-list">{visible.map(d=><div className="record-card" key={d.id}>
       <div className="record-card-head"><h3><i className={`tone-dot ${d.tone}`}/>{d.type}</h3><Status>{d.status}</Status></div>
       <div className="record-card-meta">
         <span><CalendarDays size={13}/>{d.dates}</span>
@@ -890,6 +943,14 @@ function MyLeavesPage({open}) {
         </div>
       </div>
     </div>)}</div>:<Empty icon={CalendarDays} title="No Leave Requests" text={`You have no ${tab.toLowerCase()} leave requests.`}/>}</Card>
+  </>;
+}
+function LeaveHolidaysPage({go}) {
+  return <>
+    <PageTitle title="Leave & Holidays" subtitle="Your leave balances, public holidays and team on leave."/>
+    <LeaveTypeBalancesGrid/>
+    <div className="detail-grid"><PublicHolidaysCard/><TeamOnLeaveCard go={go}/></div>
+    <UpcomingTeamHolidaysCard/>
   </>;
 }
 
@@ -1012,7 +1073,7 @@ function EmployeePage({ go, open, path }) {
   <Card className="phero">
     <div className="phero-cover"/>
     <div className="phero-top">
-      <span className="avatar-lg" style={{background:avatarColor(person.initials)}}>{person.initials}</span>
+      <span className="avatar-lg" style={avatarStyle(person.initials)}>{person.initials}</span>
       <div className="phero-id">
         <div className="phero-name-row"><h1>{person.name}</h1><Status>{person.status}</Status></div>
         <p className="phero-role">{person.title}</p>
@@ -1039,7 +1100,7 @@ function RecordSection({title,text,action,onAction,rows,empty}) { return <Card><
 function LeaveBalances({compact=false}) { const rows=[["Annual Leave","15 days","7 days","8 days"],["Sick Leave","10 days","1 day","9 days"],["Compassionate Leave","5 days","0 days","5 days"]]; return <Card><div className="card-head"><div><h2>Leave Balances</h2><p>Current entitlement and usage</p></div></div><DataTable columns={["Leave type","Allowance","Used","Remaining"]} rows={rows}/>{!compact&&<p className="helper">Balances include approved requests for the 2026 leave year.</p>}</Card>; }
 function WorkingHours(){ const [mode,setMode]=useState("Monthly"); return <Card><div className="card-head"><div><h2>Working Hours</h2><p>August 2026 attendance summary</p></div><div className="segmented"><button className={mode==="Monthly"?"active":""} onClick={()=>setMode("Monthly")}>Monthly</button><button className={mode==="Daily"?"active":""} onClick={()=>setMode("Daily")}>Daily</button></div></div>{mode==="Monthly"?<div className="hours-grid">{[["Days worked","8"],["Total hours","61h 24m"],["Average / day","7h 41m"],["Late arrivals","1"]].map(x=><div key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></div>)}</div>:<DataTable columns={["Date","Clock in","Clock out","Duration","Status"]} rows={[["Aug 11, 2026","08:57","17:18","8h 21m","Completed"],["Aug 10, 2026","09:12","17:05","7h 53m","Completed"]]}/>}</Card> }
 
-function TeamCard({team,go}) { return <button className="live-team-card" onClick={()=>go(`/teams/${team.index}`)}><span className="team-topline"/><span className="live-team-icon"><Users size={22}/></span><ChevronRight className="team-arrow" size={17}/><h3>{team.name}</h3><span className="team-code">{team.code}</span><span className="team-spacer"/><div className="team-card-foot"><div className="avatar-stack">{team.avatars.map((a,i)=><span key={`${a}-${i}`} className={a.startsWith("+")?"more":""} style={a.startsWith("+")?undefined:{background:avatarColor(a)}}>{a}</span>)}</div><span className="member-count">{team.count} {team.count===1?"member":"members"}</span>{team.leader!=="—"?<strong><Crown size={13}/>{team.leader}</strong>:<span className="no-leader">No leader assigned</span>}</div></button> }
+function TeamCard({team,go}) { return <button className="live-team-card" onClick={()=>go(`/teams/${team.index}`)}><span className="team-topline"/><span className="live-team-icon"><Users size={22}/></span><ChevronRight className="team-arrow" size={17}/><h3>{team.name}</h3><span className="team-code">{team.code}</span><span className="team-spacer"/><div className="team-card-foot"><div className="avatar-stack">{team.avatars.map((a,i)=><span key={`${a}-${i}`} className={a.startsWith("+")?"more":""} style={a.startsWith("+")?undefined:avatarStyle(a)}>{a}</span>)}</div><span className="member-count">{team.count} {team.count===1?"member":"members"}</span>{team.leader!=="—"?<strong><Crown size={13}/>{team.leader}</strong>:<span className="no-leader">No leader assigned</span>}</div></button> }
 
 function TeamsPage({go,open}) { const [q,setQ]=useState(""); const list=teams.filter(t=>`${t.name} ${t.code} ${t.leader}`.toLowerCase().includes(q.toLowerCase())); return <><PageTitle title="Teams" subtitle={`${list.length} teams`} actions={<Button icon={Plus} onClick={()=>open("team")}>Create Team</Button>}/><div className="team-search"><SearchBox placeholder="Search by team name, description, leader, or member…" value={q} onChange={setQ}/></div>{list.length?<div className="live-team-grid">{list.map(team=><TeamCard key={`${team.code}-${team.index}`} team={team} go={go}/>)}</div>:<Empty icon={Users} title="No teams found" text="No team matches this search."/>}</> }
 
@@ -1062,26 +1123,19 @@ function LeavesPage({open}) {
   return <><PageTitle className="leave-page-title" title="Leave Management" subtitle="Review and manage employee leave requests" actions={<><Button kind="secondary" icon={CalendarDays}>Leave Sheet</Button><Button icon={Plus} onClick={()=>open("leave")}>Apply for Employee</Button></>}/><div className="tabs-scroll"><div className="tabs pill-tabs">{["Pending","Completed","All Requests"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>{setTab(x);setSelected(new Set())}}>{x}<span>{x==="Pending"?pending:x==="Completed"?allRows.length-pending:allRows.length}</span></button>)}</div></div><Card><Toolbar><SearchBox placeholder="Search employee"/><Select><option>All leave types</option><option>Annual Leave</option><option>Sick Leave</option></Select><Select value={state} onChange={setState}><option>Data</option><option>Empty</option><option>Loading error</option></Select><Button kind="secondary" icon={Filter}>Filters</Button></Toolbar>{tab==="Pending"&&selected.size>0&&<div className="bulk-action-bar"><strong>{selected.size} selected</strong><Button icon={Check} onClick={()=>decide(rows.filter(r=>selected.has(r.id)),"Approved")}>Approve</Button><Button kind="danger" icon={X} onClick={()=>decide(rows.filter(r=>selected.has(r.id)),"Rejected")}>Reject</Button><button className="bulk-clear" onClick={()=>setSelected(new Set())}>Clear</button></div>}{state==="Loading error"?<ErrorState message="The leave request service returned an unexpected database response."/>:state==="Empty"?<Empty title="No leave requests" text={`There are no ${tab.toLowerCase()} leave requests.`}/>:<DataTable columns={["Employee","Team","Leave type","Dates","Hours","Flags","Status"]} rows={cells} selectable={tab==="Pending"} selected={selected} onToggle={toggleOne} onToggleAll={toggleAll} getKey={(row,i)=>rows[i].id} renderActions={(r,i)=>{const rec=rows[i]; return <div className="row-actions"><IconButton icon={Eye} label="View request" onClick={()=>open("leave-detail",rec)}/>{rec.status==="Pending"&&<><IconButton icon={Check} label="Approve" success onClick={()=>decide([rec],"Approved")}/><IconButton icon={X} label="Reject" danger onClick={()=>decide([rec],"Rejected")}/></>}</div>}}/>}</Card></> }
 
 function leaveSeed(str) { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }
-function leaveBalanceRows() {
-  const rows=[];
-  employees.forEach(e => {
-    LEAVE_TYPES.forEach(t => {
-      const m=/(\d+)h/.exec(t.entitlement);
-      if (m) {
-        const total=parseInt(m[1],10);
-        const seed=leaveSeed(e[0]+t.key);
-        const used=Math.min(total,Math.round((total*(seed%101)/100)/4)*4);
-        const pending=(seed%5===0)?Math.min(8,total-used):0;
-        const balance=Math.max(0,total-used-pending);
-        rows.push([e[0],t.name,`${total}h`,`${used}h`,`${pending}h`,`${balance}h`]);
-      } else {
-        rows.push([e[0],t.name,"Unlimited","—","—","Unlimited"]);
-      }
-    });
-  });
-  return rows;
+function leaveBalanceCell(e, t) {
+  const m=/(\d+)h/.exec(t.entitlement);
+  if (!m) return <strong>Unlimited</strong>;
+  const total=parseInt(m[1],10);
+  const seed=leaveSeed(e[0]+t.key);
+  const used=Math.min(total,Math.round((total*(seed%101)/100)/4)*4);
+  const pending=(seed%5===0)?Math.min(8,total-used):0;
+  const balance=Math.max(0,total-used-pending);
+  return <><strong>{balance}h left</strong><small>{used}h / {total}h used</small></>;
 }
-function LeaveBalancesPage({open}) { return <><PageTitle title="Leave Balances" subtitle="View and adjust employee leave balances" actions={<Button kind="secondary" icon={Download}>Export Balances</Button>}/><Card><Toolbar><SearchBox placeholder="Search employees"/><Select><option>All entities</option><option>MUST Company Ghana</option></Select><Select><option>2026</option><option>2025</option></Select><Select><option>All leave types</option>{LEAVE_TYPES.map(t=><option key={t.key}>{t.name}</option>)}</Select></Toolbar><DataTable columns={["Employee","Leave type","Allowance","Used","Pending","Balance"]} rows={leaveBalanceRows()} renderActions={()=> <IconButton icon={Edit3} label="Edit balance" onClick={()=>open("balance")}/>} /></Card></> }
+function LeaveBalancesPage({open}) {
+  return <><PageTitle title="Leave Balances" subtitle="View and adjust employee leave balances" actions={<Button kind="secondary" icon={Download}>Export Balances</Button>}/><Card><Toolbar><SearchBox placeholder="Search employees"/><Select><option>All entities</option><option>MUST Company Ghana</option></Select><Select><option>2026</option><option>2025</option></Select><Select><option>All leave types</option>{LEAVE_TYPES.map(t=><option key={t.key}>{t.name}</option>)}</Select></Toolbar><div className="table-scroll responsive-table"><table className="leave-matrix"><thead><tr><th>Employee</th><th>Schedule</th>{LEAVE_TYPES.map(t=><th key={t.key}><span className={`leave-col-head ${t.tone}`}><i/>{t.name}</span></th>)}<th>Actions</th></tr></thead><tbody>{employees.map(e=><tr key={e[0]}><td><span className="person-cell"><Avatar initials={e[5]} small/><span><strong>{e[0]}</strong><small>{e[1]}</small></span></span></td><td>Mon–Fri</td>{LEAVE_TYPES.map(t=><td key={t.key}><div className="leave-balance-cell">{leaveBalanceCell(e,t)}</div></td>)}<td><IconButton icon={Edit3} label={`Edit ${e[0]}’s leave balance`} onClick={()=>open("balance")}/></td></tr>)}</tbody></table></div></Card></>;
+}
 
 function RequestsPage({open}) {
   const [state,setState]=useState("Data");
@@ -1175,24 +1229,27 @@ function ReportsPage() {
   const onPip=EMPLOYEE_DIRECTORY.filter(e=>e.status==="On PIP");
   const departed=EMPLOYEE_DIRECTORY.filter(e=>["Resigned","Terminated","Laid Off"].includes(e.status));
   const totalHeadcount=departments.reduce((sum,[,value])=>sum+value,0);
+  const leaveTypeUsage=[["Annual Leave",62],["Sick Leave",24],["WFH",41],["Casual Leave",18],["Unpaid Leave",3]];
+  const maxLeaveDays=Math.max(...leaveTypeUsage.map(([,days])=>days));
   const summary=[
     ["Total Employees",totalHeadcount,"neutral",`Across ${departments.length} departments`],
     ["Inactive",0,"neutral","No inactive records"],
     ["On PIP",onPip.length,onPip.length?"amber":"neutral",onPip.length?"Review needed":"All clear"],
     ["Departures YTD",departed.length,departed.length?"red":"neutral",departed.length?"Resignations & terminations":"None recorded"],
   ];
-  return <><PageTitle className="reports-page-title" title="Reports" subtitle="Comprehensive HR analytics and insights" actions={<div className="report-downloads">{["Headcount","Salary","Tenure","Pip"].map(x=><Button key={x} kind="secondary" icon={Download}>{x}</Button>)}</div>}/>
+  return <><PageTitle className="reports-page-title" title="Reports" subtitle="Comprehensive HR analytics and insights" actions={<div className="report-downloads">{["Headcount","Leave","Salary","Tenure","Pip"].map(x=><Button key={x} kind="secondary" icon={Download}>{x}</Button>)}</div>}/>
     <div className="metric-grid four">{summary.map(([label,value,tone,caption])=><Card className="metric" key={label}><span className="metric-label">{label}</span><strong className={`metric-value ${tone}`}>{value}</strong><small className={`metric-caption ${tone}`}>{caption}</small></Card>)}</div>
     <div className="report-live-grid">
       <Card className="span-2 workforce-report"><div className="card-head"><h2><TrendingUp size={18}/>Workforce Growth</h2><p>Total headcount over the last 10 months</p></div><WorkforceTrend/></Card>
       <Card className="payroll-report"><div className="card-head"><h2>Payroll Summary</h2></div><Empty icon={WalletCards} title="Payroll not connected" text="Connect a payroll provider to see gross pay, deductions and net pay by department."/></Card>
       <Card className="department-report"><div className="card-head"><h2><BriefcaseBusiness size={18}/>Headcount by Department</h2><button onClick={()=>announce("Headcount CSV export prepared")}><Download size={13}/>CSV</button></div>{departments.map(([name,value])=><div className="department-bar" key={name}><span>{name}<b>{value} ({value}A / 0I)</b></span><i><em style={{width:`${Math.max(8,value/84*100)}%`}}/></i></div>)}</Card>
       <Card className="employment-report"><div className="card-head"><h2><Users size={18}/>Employment Type</h2></div><div className="employment-row"><strong>{totalHeadcount}</strong><div><b>Full-time</b><span>100% of workforce</span></div><i/></div><h3>AVG HOURLY RATE BY DEPARTMENT</h3>{departments.map(([n])=><p key={n}>{n}<b>{n==="UNASSIGNED"?"$0/hr":"$25/hr"}</b></p>)}</Card>
+      <Card className="leave-report"><div className="card-head"><div><h2><CalendarDays size={18}/>Leave Report</h2><p>Days taken by leave type, year to date</p></div><button onClick={()=>announce("Leave CSV export prepared")}><Download size={13}/>CSV</button></div>{leaveTypeUsage.map(([name,days])=><div className="department-bar" key={name}><span>{name}<b>{days} days</b></span><i><em style={{width:`${Math.max(8,days/maxLeaveDays*100)}%`}}/></i></div>)}</Card>
       <Card><div className="card-head"><h2><BriefcaseBusiness size={18}/>Open Positions</h2><p>Active requisitions across the company</p></div>{OPEN_POSITIONS.map(([role,dept,candidates])=><div className="mini-row" key={role}><span><strong>{role}</strong> · {dept}</span><span>{candidates}</span></div>)}</Card>
       <Card><div className="card-head"><h2><UserMinus size={18}/>Departures</h2><p>Resignations, terminations and layoffs this year</p></div>{departed.length?<div className="people-list">{departed.map(e=><div className="person-row" key={e.name}><Avatar initials={e.initials} small/><div><strong>{e.name}</strong><span>{e.title}</span></div><time>{e.separationDate}<small>{e.status}</small></time></div>)}</div>:<Empty icon={UserMinus} title="0" text="No departures recorded"/>}</Card>
       <Card><div className="card-head"><h2>PIP Report</h2></div>{onPip.length?<div className="people-list">{onPip.map(e=><div className="person-row" key={e.name}><Avatar initials={e.initials} small/><div><strong>{e.name}</strong><span>{e.title}</span></div></div>)}</div>:<Empty icon={AlertTriangle} title="0" text="No active PIPs"/>}</Card>
       <Card><div className="card-head"><h2><ShieldCheck size={18}/>Document Compliance</h2></div><Empty icon={ShieldCheck} title="Not tracked yet" text="Connect e-signature status to see contract completion by employee here."/></Card>
-      <Card><div className="card-head"><h2><BarChart3 size={18}/>Saved Reports</h2></div>{[["Headcount by department","Headcount CSV export prepared"],["Payroll summary","Payroll CSV export prepared"],["Members on PIP","PIP CSV export prepared"]].map(([label,msg])=><div className="mini-row" key={label}><span><strong>{label}</strong></span><button onClick={()=>announce(msg)}>Run →</button></div>)}</Card>
+      <Card><div className="card-head"><h2><BarChart3 size={18}/>Saved Reports</h2></div>{[["Headcount by department","Headcount CSV export prepared"],["Leave utilization","Leave CSV export prepared"],["Payroll summary","Payroll CSV export prepared"],["Members on PIP","PIP CSV export prepared"]].map(([label,msg])=><div className="mini-row" key={label}><span><strong>{label}</strong></span><button onClick={()=>announce(msg)}>Run →</button></div>)}</Card>
       <Card className="span-2"><div className="card-head"><h2>Tenure Analysis</h2><p>Distribution of employees by time in company</p></div><div className="tenure-head"><strong>19 mo</strong><span>Average Tenure</span></div><TenureChart/><h3 className="tenure-longest-head">LONGEST TENURED</h3><div className="people-list">{LONGEST_TENURED.map(([name,dept,years])=><div className="person-row" key={name}><Avatar initials={name.split(" ").slice(0,2).map(w=>w[0]).join("")} small/><div><strong>{name}</strong><span>{dept}</span></div><span className="tenure-longest-tag">{years}</span></div>)}</div></Card>
     </div>
   </> }
@@ -1531,7 +1588,7 @@ function LoginScreen({ roleKey, go, setRole }) {
   const signIn = () => { setRole(content.role); announce(`Signed in as ${content.role}`); go(roleHome(content.role)); };
   return <div className="login-screen">
     <LogoDefs/>
-    <label className="login-lang"><Globe2 size={14}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>English</option><option>한국어</option></select><ChevronDown size={12}/></label>
+    <label className="login-lang"><Globe2 size={14}/><select aria-label="Language" onChange={e=>announce(`Language changed to ${e.target.value}`)}><option>ENG</option><option>KOR</option></select><ChevronDown size={12}/></label>
     <div className="login-wrap">
       <div className="login-left">
         <div className="login-brand"><svg className="logo-full"><use href="#mc-logo"/></svg></div>
@@ -1564,7 +1621,7 @@ export function App() {
   useEffect(()=>{ if(path==="/") go("/dashboard") },[]);
   useEffect(()=>{window.localStorage.setItem("hris-preview-role",role);if((role==="Employee"||role==="Team Lead")&&path==="/dashboard")go("/my-dashboard")},[role,path]);
   if(path.startsWith("/login")) return <LoginScreen roleKey={path.split("/")[2]} go={go} setRole={setRole}/>;
-  const isMySpace=["/my-dashboard","/my-profile","/my-salary","/my-documents","/my-team","/my-feedbacks","/my-leaves","/requests","/approvals","/sops","/decision-history"].includes(path);
+  const isMySpace=["/my-dashboard","/my-profile","/my-salary","/my-documents","/my-team","/my-feedbacks","/my-leaves","/leave-holidays","/requests","/approvals","/sops","/decision-history"].includes(path);
   const isPreviewRole = role==="Team Lead"||role==="Employee";
   const isAdministration=path.startsWith("/settings")||path==="/activity-logs"||path==="/feedback-form-builder";
   const isManagement=!isMySpace&&!isAdministration;
@@ -1572,7 +1629,7 @@ export function App() {
   const denied=(!capabilities.approvals&&(path==="/approvals"||path==="/decision-history"))||(!capabilities.myTeam&&path==="/my-team")||(!capabilities.managePeople&&isManagement)||(!capabilities.administer&&isAdministration)||(role!=="Super Admin"&&path==="/settings/platform");
   let page;
   if(denied) page=<PermissionDenied go={go}/>;
-  else if(isMySpace) { const myProfileTabPaths=["/my-profile","/my-salary","/my-documents","/my-feedbacks"]; const myRequestsTabPaths=["/my-leaves","/requests","/approvals"]; const spaceTabs=isPreviewRole?null:myProfileTabPaths.includes(path)?MY_PROFILE_TABS:myRequestsTabPaths.includes(path)?myRequestsTabs(role):null; page=<>{spaceTabs&&<SectionTabs tabs={spaceTabs} path={path} go={go}/>}<MySpacePage path={path} go={go} role={role} open={openModal}/></>; }
+  else if(isMySpace) { const myProfileTabPaths=["/my-profile","/my-salary","/my-documents","/my-feedbacks"]; const myRequestsTabPaths=["/my-leaves","/leave-holidays","/requests","/approvals"]; const spaceTabs=isPreviewRole?null:myProfileTabPaths.includes(path)?MY_PROFILE_TABS:myRequestsTabPaths.includes(path)?myRequestsTabs(role):null; page=<>{spaceTabs&&<SectionTabs tabs={spaceTabs} path={path} go={go} line/>}<MySpacePage path={path} go={go} role={role} open={openModal}/></>; }
   else if(path==="/dashboard") page=<Dashboard go={go} open={openModal} role={role}/>;
   else if(path==="/employees") page=<><SectionTabs tabs={EMPLOYEE_DIRECTORY_TABS} path={path} go={go} line/><EmployeesPage go={go} open={openModal}/></>;
   else if(path.startsWith("/employees/")) page=<EmployeePage go={go} open={openModal} path={path}/>;
