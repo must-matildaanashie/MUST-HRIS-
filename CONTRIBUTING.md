@@ -15,6 +15,19 @@ Thank you for helping build MUST HRIS. The repository uses short-lived branches 
 
 If you have write access, clone the shared repository and push a branch. If you do not have write access, fork it and open a pull request from your fork. Both approaches use the same review rules.
 
+## Contributor areas
+
+Write-access contributors are expected to keep their changes scoped to their assigned area of the repository. A pull request that reaches outside that area should explain why in the description.
+
+| Area | Owner | Notes |
+| --- | --- | --- |
+| `src/` (production Next.js app), `prisma/` | @must-matildaanashie | Sensitive paths listed in `.github/CODEOWNERS`. |
+| `admin-prototype/` | @must-matildaanashie | Vite/React admin prototype. |
+| `prototype/` | @must-matildaanashie | Static employee/team-lead reference. |
+| `superadmin-prototype/` | @must-sneha | Static clickable Super Admin prototype, mirrors the `prototype/src/` layout. |
+
+CODEOWNERS requests the area owner as a reviewer automatically; the blanket rule in `.github/CODEOWNERS` also requests @must-matildaanashie on every pull request regardless of area.
+
 ## Start a change
 
 ```bash
@@ -92,6 +105,8 @@ Open the pull request against `main`, complete the template, and keep it as a dr
 - how the change was verified;
 - whether schema, environment, privacy, or security behavior changed;
 - how to review any visual change.
+
+Every pull request must include a short Loom (or equivalent screen recording) walking through the UI and the code, linked in the description. Reviewers use it to review both the visual result and the implementation before approving — do not request review without it.
 
 Resolve review conversations and update the branch when `main` changes. Do not force-push after review has started unless you coordinate with reviewers.
 

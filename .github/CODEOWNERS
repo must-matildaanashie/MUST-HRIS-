@@ -8,3 +8,7 @@
 /src/app/api/ @must-matildaanashie
 /admin-prototype/ @must-matildaanashie
 /.github/ @must-matildaanashie
+
+# Prototype areas: contributors work within their assigned folder;
+# the additional path owner is requested alongside the blanket rule above.
+/superadmin-prototype/ @must-sneha
