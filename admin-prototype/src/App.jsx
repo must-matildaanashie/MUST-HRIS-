@@ -568,7 +568,7 @@ function Card({ children, className = "", ...props }) { return <section classNam
 function PageTitle({ eyebrow, title, subtitle, actions, className = "" }) { return <div className={`page-title ${className}`}><div>{eyebrow&&<span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1><p>{subtitle}</p></div>{actions && <div className="page-actions">{actions}</div>}</div>; }
 function Toolbar({ children }) { return <div className="toolbar">{children}</div>; }
 function SearchBox({ placeholder = "Search", value, onChange }) { return <label className="search-box"><Search size={17}/><input aria-label={placeholder} placeholder={placeholder} value={value || ""} onChange={e => onChange?.(e.target.value)}/></label>; }
-function Select({ children, value, onChange, label }) { return <label className="select-wrap">{label && <span>{label}</span>}<select value={value} onChange={e => onChange?.(e.target.value)}>{children}</select><ChevronDown size={14}/></label>; }
+function Select({ children, value, onChange, label, className }) { return <label className={`select-wrap${className?` ${className}`:""}`}>{label && <span>{label}</span>}<select value={value} onChange={e => onChange?.(e.target.value)}>{children}</select><ChevronDown size={14}/></label>; }
 function Empty({ icon: Icon = FileText, title = "No records found", text = "There is nothing to display yet.", action }) { return <div className="empty"><span><Icon size={24}/></span><h3>{title}</h3><p>{text}</p>{action}</div>; }
 function ErrorState({ message = "Something went wrong while loading this data." }) { return <div className="error-state"><AlertTriangle size={22}/><div><strong>Unable to load data</strong><p>{message}</p></div><Button kind="secondary" icon={RotateCcw}>Try again</Button></div>; }
 
@@ -769,7 +769,7 @@ function DashboardIllustration() {
   </svg>;
 }
 function Dashboard({ go, open, role }) {
-  const [tab,setTab] = useState("Overview");
+  const [tab,setTab] = useState("MUST Space");
   const pipMembers = EMPLOYEE_DIRECTORY.filter(e=>e.status==="On PIP");
   const departments = DEPARTMENTS;
   const pendingApprovals = 2 + 3;
@@ -782,8 +782,8 @@ function Dashboard({ go, open, role }) {
     ["Total headcount",287,"neutral","▲ 6 this quarter"],
   ];
   return <>
-    <div className="tabs pill-tabs dashboard-view-tabs">{["Overview","My Space"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}</button>)}</div>
-    {tab==="My Space" ? <MyDashboardContent role={role} go={go}/> : <>
+    <div className="tabs pill-tabs dashboard-view-tabs">{["MUST Space","My Space"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}</button>)}</div>
+    {tab==="My Space" ? <MyDashboardContent role={role} go={go} open={open}/> : <>
     <div className="dash-banner">
       <div className="dash-banner-copy">
         <div className="dash-banner-eyebrow">{(role||"Super Admin").toUpperCase()} · PEOPLE OPERATIONS</div>
@@ -830,12 +830,18 @@ const TEAM_MEMBERS = [
   {initials:"AM",bg:"#016a2d",name:"Adam Mercer",role:"Video Editor",level:"Junior",location:"Karachi, PK",email:"adam.mercer@must.company",phone:"+92 321 7654321",timezone:"Asia/Karachi (GMT+5)"},
   {initials:"AK",bg:"#7a3fa0",name:"Aisha Khan",role:"Design Intern",level:"Intern",location:"Lahore, PK",email:"aisha.khan@must.company",phone:"+92 333 9876543",timezone:"Asia/Karachi (GMT+5)"},
 ];
-function MyDashboardContent({role,go}) {
+function MyDashboardContent({role,go,open}) {
   const isLead=role==="Team Lead";
-  return <><PageTitle className="greeting-title" title={<>Good morning, <span>{isLead?"Ethan":"Matilda"}</span></>} subtitle="Here’s what’s happening at MUST today — 12 August 2026." actions={<Button kind="secondary" icon={FileText} onClick={()=>go("/my-salary")}>View payslip</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>per hour</p></Card><Card className="simple-metric"><span>Latest payslip</span><strong>$588.00</strong><p>June 2026 · 392 hrs</p></Card><Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card></div><div className="employee-dashboard-grid">{isLead?<Card className="attention-card"><div className="card-head"><div><h2><span className="count-badge">2</span>Requests awaiting your approval</h2></div><button onClick={()=>go("/approvals")}>View all <ChevronRight size={15}/></button></div>{[["SG","Sophie Grant","Annual Leave","12–14 Aug · 3 days","2 overlapping teammates"],["FH","Felix Harper","Overtime","14 Aug · 2 hrs",""]].map(([ini,name,type,date,overlap])=><button className="approval-row" key={name} onClick={()=>go("/approvals")}><Avatar initials={ini} small/><span><strong>{name}</strong><small>{type} · {date}</small>{overlap&&<em>{overlap}</em>}</span><b>Review</b></button>)}<div className="active-request"><strong>Your active request</strong><span>Annual Leave · 12–14 Aug</span><Status>Pending</Status></div></Card>:<ActivityCard go={go}/>}<AttentionPanel go={go}/></div><div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div><div className="employee-dashboard-grid lower"><RecentPaymentsCard go={go}/><UpcomingCard/></div></>;
+  const isAdminRole=role==="Super Admin"||role==="Admin";
+  const canApprove=roleCapabilities[role].approvals;
+  const pendingApprovals=canApprove?[...LEAVE_REQUESTS.filter(d=>d.manager==="Matilda Ipeh Anashie"&&d.status==="Pending").map(d=>({...d,kind:"leave"})),...REQUESTS.filter(d=>d.manager==="Matilda Ipeh Anashie"&&d.status==="Pending").map(d=>({...d,kind:"request"}))]:[];
+  const bannerEyebrow=isAdminRole?"MY SPACE · PERSONAL WORKSPACE":isLead?"MY SPACE · TEAM LEAD":"MY SPACE · EMPLOYEE";
+  const bannerName=isLead?"Ethan":"Matilda";
+  const bannerSecondary=isLead?{label:"Team Requests",icon:Archive,to:"/approvals"}:{label:"My Team",icon:Users,to:"/my-team"};
+  return <><div className="dash-banner"><div className="dash-banner-copy"><div className="dash-banner-eyebrow">{bannerEyebrow}</div><h1>Good morning, <span>{bannerName}</span> 👋</h1><p>Here’s what’s happening at MUST today — 12 August 2026.</p><div className="dash-banner-actions"><Button icon={FileText} onClick={()=>go("/my-salary")}>View payslip</Button><Button kind="secondary" icon={bannerSecondary.icon} onClick={()=>go(bannerSecondary.to)}>{bannerSecondary.label}</Button></div></div><DashboardIllustration/></div><div className="metric-grid four employee-metrics"><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>per hour</p></Card><Card className="simple-metric"><span>Latest payslip</span><strong>$588.00</strong><p>June 2026 · 392 hrs</p></Card><Card className="simple-metric"><span>Paid YTD</span><strong>$3,528.00</strong><p>6 payslips</p></Card><Card className="simple-metric"><span>Tenure</span><strong>1y 4m</strong><p>since Feb 26, 2025</p></Card></div><div className="employee-dashboard-grid">{canApprove?<Card className="attention-card"><div className="card-head"><div><h2><span className="count-badge">{pendingApprovals.length}</span>Requests awaiting your approval</h2></div><button onClick={()=>go("/approvals")}>View all <ChevronRight size={15}/></button></div>{pendingApprovals.slice(0,2).map(d=><button className="approval-row" key={d.id} onClick={()=>open(d.kind==="leave"?"leave-detail":"request-detail",d)}><Avatar initials={d.initials} small/><span><strong>{d.employee}</strong><small>{d.type} · {d.kind==="leave"?`${d.dates} · ${d.hours}`:d.summary}</small>{d.kind==="leave"&&d.overlap&&<em>{d.overlap}</em>}</span><b>Review</b></button>)}<div className="active-request"><strong>Your active request</strong><span>Annual Leave · 12–14 Aug</span><Status>Pending</Status></div></Card>:<ActivityCard go={go}/>}{isAdminRole?<AdminAttentionPanel go={go}/>:<AttentionPanel go={go}/>}</div><div className="employee-dashboard-grid lower"><TeamAvailability/><div><Card className="holiday-card"><small>NEXT PUBLIC HOLIDAY</small><h2>Independence Day</h2><p>Thu, 14 August · office closed</p><span>2 days to go</span></Card><LeaveBalanceCard go={go}/></div></div><div className="employee-dashboard-grid lower" style={{alignItems:"stretch"}}><RecentPaymentsCard go={go}/><UpcomingCard/></div></>;
 }
 function MySpacePage({path,go,role,open}) {
-  if(path==="/my-dashboard") return <MyDashboardContent role={role} go={go}/>;
+  if(path==="/my-dashboard") return <MyDashboardContent role={role} go={go} open={open}/>;
   if(path==="/my-profile") return <RoleProfile role={role} go={go}/>;
   if(path==="/my-salary") return <><PageTitle title="My Salary" subtitle="Payslips and salary history" actions={<Button icon={Download}>Download latest</Button>}/><div className="metric-grid three employee-metrics"><Card className="simple-metric"><span>Latest net pay</span><strong>$588.00</strong><p>June 2026</p></Card><Card className="simple-metric"><span>Hourly rate</span><strong>$1.50</strong><p>effective Feb 2025</p></Card><Card className="simple-metric"><span>Hours</span><strong>392</strong><p>June 2026</p></Card></div><Card className="payslip-card"><DataTable columns={["Pay period","Hours","Gross","Deductions","Net","Status"]} rows={[["June 2026","392","$628.00","$40.00","$588.00","Completed"],["May 2026","376","$601.00","$38.00","$563.00","Completed"]]} renderActions={()=> <IconButton icon={Download} label="Download payslip"/>}/></Card></>;
   if(path==="/my-documents") return <><PageTitle title="My Documents" subtitle="Documents shared with you"/><Card><DataTable columns={["Document","Category","Shared","Status"]} rows={[["Employment Contract","Contract","26 Feb 2025","Completed"],["Employee Handbook","Policy","1 Aug 2026","Active"],["NDA","Legal","26 Feb 2025","Completed"]]} renderActions={()=> <IconButton icon={Download} label="Download document"/>}/></Card></>;
@@ -861,6 +867,9 @@ function PublicHolidaysCard() { return <Card><div className="card-head"><div><h2
 function TeamOnLeaveCard({go}) { return <Card><div className="card-head"><div><h2>Team on leave</h2><p>Coming up this week</p></div><button onClick={()=>go("/my-team")}>My team <ChevronRight size={15}/></button></div><div className="people-list">{myTeamOnLeave.map(([ini,name,role,note])=>{ const tone=note.startsWith("Annual")?"annual":note.startsWith("Sick")?"sick":"wfh"; return <div className="person-row" key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{role}</span></div><span className={`status ${tone}`}>{note}</span></div>; })}</div></Card> }
 function UpcomingTeamHolidaysCard() { return <Card><div className="card-head"><div><h2>Upcoming Team holidays</h2><p>Nearing holidays by country · through next month</p></div></div><div className="th-list">{UPCOMING_TEAM_HOLIDAYS.map(c=><div className="th-country" key={c.country}><div className="th-country-head"><span className="th-flag">{c.flag}</span><div className="th-country-text"><strong>{c.country}</strong><span>{c.teammates} teammate{c.teammates>1?"s":""} from here</span></div><div className="avatar-stack">{c.avatars.map((a,i)=><span key={a+i} style={avatarStyle(a)}>{a}</span>)}</div></div><div className="th-holiday"><i/><div><strong>{c.holiday}</strong><span>{c.date}</span></div><b>{c.eta}</b></div></div>)}</div></Card> }
 function AttentionPanel({go}) { return <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your attention</h2><p>Announcements and reminders</p></div><button onClick={()=>announce("All reminders marked as read")}>Mark all read</button></div>{[["OKRs pending to fill","Complete your objectives","Due Jul 20"],["New document to sign","Awaiting your signature","Sign"],["Give peers feedback","Take a moment for your team","Feedback"]].map(([title,text,cta])=><button className="attention-row" key={title}><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card> }
+// Admin-only "My Space" variant of AttentionPanel — deliberately a separate component (not a role
+// branch inside AttentionPanel) so Employee/Team Lead's dashboard can never be changed by editing this.
+function AdminAttentionPanel({go}) { return <Card className="attention-card"><div className="card-head"><div><h2><Bell size={18}/>Needs your attention</h2><p>Waiting on you to act</p></div><button onClick={()=>go("/my-leaves")}>My requests <ChevronRight size={15}/></button></div>{[["New document to sign","Awaiting your signature","Sign","/my-documents"],["Give peers feedback","Take a moment for your team","Feedback","/my-feedbacks"],["Leave request pending","Annual Leave · 12–14 Aug · with your lead","Track","/my-leaves"]].map(([title,text,cta,to])=><button className="attention-row" key={title} onClick={()=>go(to)}><span><strong>{title}</strong><small>{text}</small></span><em>{cta}</em></button>)}</Card> }
 function TeamAvailability(){ return <Card><div className="card-head"><div><h2>Who’s out</h2><p>Your team, this week</p></div><button>Team calendar</button></div><div className="week-strip">{[["Mon","10"],["Tue","11"],["Wed","12"],["Thu","13"],["Fri","14"]].map(([day,date])=><span className={day==="Wed"?"active":""} key={day}><small>{day}</small><strong>{date}</strong></span>)}</div><div className="people-list">{[["SG","Sophie Grant","Annual · 12–14 Aug"],["FH","Felix Harper","Sick · Today"],["AM","Adam Mercer","WFH · Today"]].map(([ini,name,note])=><button key={name}><Avatar initials={ini} small/><div><strong>{name}</strong><span>{note}</span></div></button>)}</div></Card> }
 function LeaveBalanceCard({go}) { return <Card className="leave-balance-card"><div className="card-head"><h2><CalendarDays size={19}/>Annual Leave</h2><button onClick={()=>go?.("/leave-holidays")}><ChevronRight size={16}/></button></div><div className="leave-summary"><strong>7</strong><span>days left<br/>of 15 days</span><b>47% available</b></div><div className="progress"><i/></div></Card> }
 function reservedHoursFor(typeName) { return MY_LEAVES.filter(r=>r.status==="Pending"&&r.type===typeName.replace(/Leaves$/,"Leave")).reduce((sum,r)=>sum+(parseInt(r.hours,10)||0),0); }
@@ -985,6 +994,8 @@ function TeamApprovalsPage({open,role,path}) {
   const [tab,setTab]=useState(path==="/decision-history"?"Decision history":"Awaiting decision");
   const [leaves,setLeaves]=useState(()=>LEAVE_REQUESTS.filter(d=>d.manager==="Matilda Ipeh Anashie"));
   const [requests,setRequests]=useState(()=>REQUESTS.filter(d=>d.manager==="Matilda Ipeh Anashie"));
+  const [typeFilter,setTypeFilter]=useState("All types");
+  const [sort,setSort]=useState("Newest first");
   const decide=(kind,rec,status)=>{
     const bump=(list,setList)=>setList(list.map(item=>item.id!==rec.id?item:{...item,status,stage:"Done",
       progress:item.progress?item.progress.map(s=>s.tone==="pending"?{...s,tone:status==="Approved"?"done":"rejected"}:s):item.progress,
@@ -993,11 +1004,20 @@ function TeamApprovalsPage({open,role,path}) {
     announce(`${rec.employee}'s ${rec.type} ${status.toLowerCase()} and added to decision history`);
   };
   const combined=[...leaves.map(d=>({...d,kind:"leave"})),...requests.map(d=>({...d,kind:"request"}))];
-  const visible=combined.filter(d=>tab==="Awaiting decision"?d.status==="Pending":d.status!=="Pending");
+  const typeOptions=[...new Set(combined.map(d=>d.type))].sort();
+  const visible=combined.filter(d=>tab==="Awaiting decision"?d.status==="Pending":d.status!=="Pending")
+    .filter(d=>typeFilter==="All types"||d.type===typeFilter)
+    .sort((a,b)=>{const diff=new Date(b.submitted)-new Date(a.submitted);return sort==="Newest first"?diff:-diff;});
   const pendingCount=combined.filter(d=>d.status==="Pending").length;
   return <>
     <PageTitle title="Approvals" subtitle="Requests awaiting your decision and your decision history"/>
-    <div className="tabs pill-tabs">{["Awaiting decision","Decision history"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}{x==="Awaiting decision"&&<span>{pendingCount}</span>}</button>)}</div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"12px"}}>
+      <div className="tabs pill-tabs">{["Awaiting decision","Decision history"].map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x}{x==="Awaiting decision"&&<span>{pendingCount}</span>}</button>)}</div>
+      <div className="toolbar" style={{margin:0}}>
+        <Select className="select-compact" value={typeFilter} onChange={setTypeFilter}><option>All types</option>{typeOptions.map(t=><option key={t}>{t}</option>)}</Select>
+        <Select className="select-compact" value={sort} onChange={setSort}><option>Newest first</option><option>Oldest first</option></Select>
+      </div>
+    </div>
     <Card>{visible.length?<div className="leave-card-list">{visible.map(d=><div className="record-card" key={d.id}>
       <div className="record-card-head"><h3><Avatar initials={d.initials} small/>{d.employee}</h3><Status>{d.status}</Status></div>
       <div className="record-card-meta">
