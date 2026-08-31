@@ -823,69 +823,21 @@ function Shell({ path, go, children, role, setRole, open, isMySpace }) {
 }
 
 function DashboardIllustration() {
-  return <svg className="dash-illustration" viewBox="0 0 260 210" fill="none" aria-hidden="true">
-    {/* organic blob background */}
-    <path d="M28 118C18 62 58 14 128 12C196 10 246 44 248 104C250 158 214 198 132 202C62 205 37 168 28 118Z" fill="#E6F4EC"/>
-    <circle cx="48" cy="148" r="4" fill="#F2C293"/>
-    <circle cx="224" cy="142" r="5" fill="#F2C29399"/>
-    <circle cx="70" cy="16" r="3" fill="#B8DFC7"/>
-    <circle cx="236" cy="60" r="3.5" fill="#fff"/>
-    <path d="M22 96C28 88 30 78 28 68M30 98C36 92 40 84 40 76" stroke="#B8DFC7" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M240 176C234 170 231 162 232 154M236 180C230 176 226 170 224 163" stroke="#B8DFC7" strokeWidth="2" strokeLinecap="round"/>
-    {/* browser window */}
-    <rect x="34" y="22" width="196" height="118" rx="9" fill="#fff"/>
-    <path d="M34 31C34 26 38 22 43 22H221C226 22 230 26 230 31V38H34V31Z" fill="#77C298"/>
-    <circle cx="45" cy="30" r="2.4" fill="#fff"/><circle cx="53" cy="30" r="2.4" fill="#fff"/><circle cx="61" cy="30" r="2.4" fill="#fff"/>
-    {/* sidebar: employee record nav */}
-    <rect x="40" y="44" width="30" height="90" rx="4" fill="#EFF8F2"/>
-    <circle cx="55" cy="56" r="6.5" fill="#77C298"/>
-    <circle cx="55" cy="54" r="2.3" fill="#fff"/><path d="M50.5 59.5C51.5 57.5 53 56.6 55 56.6C57 56.6 58.5 57.5 59.5 59.5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
-    <rect x="45" y="68" width="20" height="3" rx="1.5" fill="#B8DFC7"/>
-    <rect x="45" y="76" width="20" height="3" rx="1.5" fill="#B8DFC7"/>
-    <rect x="45" y="84" width="14" height="3" rx="1.5" fill="#B8DFC7"/>
-    <rect x="45" y="92" width="18" height="3" rx="1.5" fill="#B8DFC7"/>
-    {/* main panel: chart with rising arrow */}
-    <rect x="76" y="44" width="100" height="60" rx="4" fill="#F4FAF6"/>
-    <rect x="84" y="82" width="8" height="14" rx="2" fill="#B8DFC7"/>
-    <rect x="97" y="72" width="8" height="24" rx="2" fill="#77C298"/>
-    <rect x="110" y="86" width="8" height="10" rx="2" fill="#B8DFC7"/>
-    <rect x="123" y="66" width="8" height="30" rx="2" fill="#018038"/>
-    <rect x="136" y="76" width="8" height="20" rx="2" fill="#77C298"/>
-    <path d="M84 74L102 62L116 68L150 50" stroke="#018038" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M150 50L143 49M150 50L149 57" stroke="#018038" strokeWidth="2.2" strokeLinecap="round"/>
-    <rect x="158" y="52" width="12" height="3" rx="1.5" fill="#B8DFC7"/>
-    <rect x="158" y="59" width="9" height="3" rx="1.5" fill="#B8DFC7"/>
-    {/* employee record rows */}
-    <rect x="76" y="110" width="100" height="11" rx="3" fill="#EFF8F2"/>
-    <circle cx="83" cy="115.5" r="3" fill="#77C298"/>
-    <rect x="89" y="112" width="34" height="2.6" rx="1.3" fill="#B8DFC7"/><rect x="89" y="117" width="22" height="2.6" rx="1.3" fill="#DDEFE4"/>
-    <rect x="76" y="125" width="100" height="11" rx="3" fill="#EFF8F2"/>
-    <circle cx="83" cy="130.5" r="3" fill="#F2C293"/>
-    <rect x="89" y="127" width="28" height="2.6" rx="1.3" fill="#B8DFC7"/><rect x="89" y="132" width="38" height="2.6" rx="1.3" fill="#DDEFE4"/>
-    {/* right column: donut gauges */}
-    <circle cx="203" cy="60" r="11" stroke="#EAD7C4" strokeWidth="4.5"/>
-    <circle cx="203" cy="60" r="11" stroke="#018038" strokeWidth="4.5" strokeDasharray="62 69" strokeLinecap="round" transform="rotate(-90 203 60)"/>
-    <text x="203" y="62.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="#018038" fontFamily="inherit">90%</text>
-    <circle cx="203" cy="94" r="11" stroke="#DDEFE4" strokeWidth="4.5"/>
-    <circle cx="203" cy="94" r="11" stroke="#77C298" strokeWidth="4.5" strokeDasharray="41 69" strokeLinecap="round" transform="rotate(-90 203 94)"/>
-    <text x="203" y="96.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="#4E9B72" fontFamily="inherit">60%</text>
-    <rect x="188" y="114" width="30" height="3" rx="1.5" fill="#B8DFC7"/>
-    <rect x="188" y="122" width="22" height="3" rx="1.5" fill="#DDEFE4"/>
-    {/* faceless admin at laptop */}
-    <path d="M113 140C113 125 120 117 130 117C140 117 147 125 147 140C142 131 137 129 130 129C123 129 118 131 113 140Z" fill="#2B2320"/>
-    <circle cx="130" cy="143" r="16" fill="#F7D2A6"/>
-    <path d="M114 141C114 130 121 124 130 124C139 124 146 130 146 141C141 133 137 131 130 131C123 131 119 133 114 141Z" fill="#2B2320"/>
-    <path d="M99 206V188C99 172 112 163 130 163C148 163 161 172 161 188V206Z" fill="#016A2D"/>
-    <path d="M99 206V188C99 174 109 165 122 163C111 169 105 177 105 188V206Z" fill="#014F22"/>
-    <path d="M122 163L130 171L138 163" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    {/* laptop lid facing viewer */}
-    <rect x="98" y="172" width="64" height="34" rx="6" fill="#018038"/>
-    <path d="M124 189C124 185 127 183 130 185C133 181 138 184 137 188C139 189 139 192 136 192H126C123 192 122 190 124 189Z" fill="#E6F4EC"/>
-    {/* desk, mug */}
-    <rect x="56" y="204" width="148" height="7" rx="3.5" fill="#014F22"/>
-    <rect x="176" y="190" width="12" height="14" rx="3" fill="#F2C293"/>
-    <path d="M188 193H191C193.5 193 193.5 200 191 200H188" stroke="#F2C293" strokeWidth="2.2"/>
-    <path d="M180 186C180 184 182 184 182 182M185 186C185 184 187 184 187 182" stroke="#01803855" strokeWidth="1.6" strokeLinecap="round"/>
+  return <svg className="dash-illustration" viewBox="0 0 200 210" fill="none" aria-hidden="true">
+    <circle cx="100" cy="104" r="92" fill="#E6F4EC"/>
+    <ellipse cx="98" cy="204" rx="52" ry="7" fill="#01803814"/>
+    <path d="M60 210V158C60 128 77 114 99 114C121 114 138 128 138 158V210Z" fill="#016A2D"/>
+    <path d="M60 210V158C60 132 74 118 92 115C78 121 68 135 68 158V210Z" fill="#014F22"/>
+    <rect x="85" y="122" width="28" height="18" rx="6" fill="#F2C293"/>
+    <circle cx="99" cy="88" r="35" fill="#F7D2A6"/>
+    <path d="M65 84C65 61 80 46 99 46C118 46 133 61 133 84C124 71 116 67 99 67C82 67 74 71 65 84Z" fill="#2B2320"/>
+    <circle cx="87" cy="90" r="3.6" fill="#2B2320"/>
+    <circle cx="111" cy="90" r="3.6" fill="#2B2320"/>
+    <path d="M91 101C94 104 104 104 107 101" stroke="#2B2320" strokeWidth="2.6" strokeLinecap="round"/>
+    <rect x="89" y="135" width="20" height="9" rx="3" fill="#fff"/>
+    <path d="M136 148C150 141 160 122 157 104" stroke="#016A2D" strokeWidth="17" strokeLinecap="round"/>
+    <circle cx="159" cy="100" r="13" fill="#F7D2A6"/>
+    <path d="M62 190C68 178 78 172 92 172" stroke="#014F22" strokeWidth="10" strokeLinecap="round"/>
   </svg>;
 }
 function Dashboard({ go, open, role }) {
