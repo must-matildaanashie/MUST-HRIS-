@@ -222,9 +222,9 @@
   @media(max-width:1000px){.doc-grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:640px){.doc-grid{grid-template-columns:1fr}}
   .filt{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-  .filt button{padding:8px 15px;border:1px solid var(--line);background:var(--card);border-radius:100px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:.14s}
+  .filt button{padding:7px 14px;border:1px solid var(--line);background:var(--card);border-radius:100px;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:.14s}
   .filt button:hover{color:var(--ink)}
-  .filt button.on{background:var(--green);border-color:var(--green);color:#fff}
+  .filt button:hover{color:var(--ink);border-color:#cbd3ce}.filt button.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
   .b-res{background:#EAF1FB;color:#2563eb}
   .pay-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .pay-search{display:flex;align-items:center;gap:8px;background:var(--wash);border:1px solid var(--line);border-radius:10px;padding:0 12px;height:38px;min-width:150px}
@@ -767,7 +767,43 @@
   .thc-hols{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:11px}
   .th-left{margin-left:auto;background:var(--green-soft);color:#04713c;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:100px;white-space:nowrap;flex:none}
   .th-hn small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:1px}
-</style>
+
+  /* My Profile — kept in step with the React app's RoleProfile page. */
+  .page.self-profile.on{display:flex;flex-direction:column;gap:20px}
+  .self-profile .phead{margin-bottom:0}
+  .self-profile-hero{position:relative;display:flex;align-items:center;gap:20px;padding:28px 30px;border-top:7px solid var(--green)}
+  .self-profile-hero .avatar-lg{width:78px;height:78px;border-radius:18px;font-size:25px;box-shadow:none}
+  .self-profile-hero h1{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.02em;margin:0 0 5px}
+  .self-profile-hero p{font-size:14px;color:var(--muted)}
+  .self-profile-hero .hero-chips{display:flex;align-items:center;gap:9px;margin-top:12px}
+  .self-profile-hero .hero-chips b{border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--muted);font-size:11px;font-weight:600}
+  .self-profile-section{padding:27px 30px}
+  .self-profile-section>h2{font-family:var(--display);text-transform:uppercase;font-size:14px;letter-spacing:.02em;font-weight:700;margin-bottom:4px}
+  .self-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 34px}
+  .self-profile-field{display:flex;align-items:center;gap:13px;min-height:72px;padding:11px 0}
+  .self-profile-field>span{width:38px;height:38px;border-radius:9px;background:#f7f8f7;color:#777;display:flex;align-items:center;justify-content:center;flex:none}
+  .self-profile-field>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .self-profile-field small,.reporting-copy>span,.skill-list>small{text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-size:10px}
+  .self-profile-field strong{font-size:13px;font-weight:600;overflow-wrap:anywhere}
+  .self-profile-field.is-link{padding-left:51px}
+  .self-profile-field.is-link>div>a{font-size:13px;font-weight:650;color:var(--green-dark);overflow-wrap:anywhere}
+  .self-profile-field.is-link>div>a:hover{text-decoration:underline}
+  .skill-list{margin-top:14px}
+  .skill-list>div{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .skill-list span,.reporting-copy b{border:1px solid #bde0c5;background:var(--green-soft);color:var(--green-dark);border-radius:7px;padding:6px 10px;font-size:11px;font-weight:650}
+  .reporting-copy{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+  .reporting-copy strong{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+  .reporting-copy b{padding:4px 7px}
+  .profile-team-link{border:0;background:transparent;color:var(--green);font-weight:650;font-size:12px;display:flex;align-items:center;gap:4px;margin:8px 0 0 50px;cursor:pointer}
+  .self-profile-split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .self-profile-split .empty{padding:28px 16px}
+  .self-profile-section .info-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 32px}
+  .self-profile-section .info-list>div{padding:13px 0;border-bottom:1px solid var(--line)}
+  .self-profile-section .info-list dt{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:4px}
+  .self-profile-section .info-list dd{font-size:13px;font-weight:600;overflow-wrap:anywhere}
+  .self-profile-section .chead{margin-bottom:14px}
+  @media(max-width:700px){.self-profile{gap:14px}.self-profile-hero{padding:22px 20px}.self-profile-hero .avatar-lg{width:62px;height:62px;font-size:19px}.self-profile-hero h1{font-size:19px}.self-profile-section{padding:20px}.self-profile-grid,.self-profile-split,.self-profile-section .info-list{grid-template-columns:1fr}.self-profile-field.is-link{padding-left:0}.self-profile-field{min-height:62px}}
+  </style>
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mc-logo" viewBox="0 0 247 68">
@@ -1035,55 +1071,13 @@
       </section>
 
       <!-- ============ MY PROFILE ============ -->
-      <section class="page" id="s-profile">
-        <div class="phead"><div><div class="eyebrow">Personal record</div><h1>My Profile</h1><p>Your personal information at MUST.</p></div><button class="btn ghost" data-open="edit">Edit</button></div>
-        <div class="card raised phero" style="margin-bottom:20px">
-          <div class="phero-cover"><span class="phero-tag">Challenge · Together · Achieve</span></div>
-          <div class="phero-top">
-            <div id="profileAvatar" class="avatar-lg me-av">EM</div>
-            <div class="phero-id">
-              <div class="pname">Ethan Miller</div>
-              <div class="prole">Lead · UI/UX Department</div>
-              <div class="phero-chips">
-                <span class="pstatus"><span class="dot-g"></span> Active · Regular</span>
-                <span class="pstatus" style="background:var(--wash);color:var(--muted)">MUST SG · Singapore</span>
-                <span class="pstatus" style="background:var(--wash);color:var(--muted)"><svg class="ico" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Lahore, PK</span>
-              </div>
-            </div>
-            <div class="phero-actions">
-              <button class="btn ghost" id="avatarBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 20h14"/></svg> Upload photo</button>
-            </div>
-          </div>
-          <div class="phero-stats">
-            <div class="pstat"><div class="k">Joined</div><div class="v"><svg class="mi ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg> Feb 26, 2025</div></div>
-            <div class="pstat"><div class="k">Tenure</div><div class="v"><svg class="mi ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2.5 1.5"/></svg> 1y 4m</div></div>
-            <div class="pstat"><div class="k">Work schedule</div><div class="v"><svg class="mi ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg> Mon–Fri (5-day)</div></div>
-            <div class="pstat"><div class="k">Next increment</div><div class="v"><svg class="mi ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M21 7v5M21 7h-5"/></svg> Feb 26, 2027</div></div>
-          </div>
-        </div>
-        <div class="grid g2" style="align-items:start">
-          <div>
-            <div class="card hoverable"><div class="chead-ic"><div class="chic"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></div><h3>Personal &amp; contact</h3></div><div class="rec c3">
-              <div style="grid-column:span 2"><div class="k">Work email</div><div class="v" style="font-size:12.5px">ethan.miller@must.company</div></div><div><div class="k">Phone</div><div class="v">+92 334 267 9404</div></div>
-              <div><div class="k">Date of birth</div><div class="v">Oct 9, 1998</div></div><div><div class="k">Gender</div><div class="v">Male</div></div><div><div class="k">Time zone</div><div class="v">Asia/Karachi (GMT+5)</div></div>
-            </div></div>
-            <div class="card hoverable" style="margin-top:20px"><div class="chead-ic"><div class="chic"><svg class="ico" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Emergency contact</h3></div><div class="rec">
-              <div><div class="k">Contact name</div><div class="v">James Miller</div></div><div><div class="k">Relationship</div><div class="v">Immediate family</div></div>
-              <div style="grid-column:span 2"><div class="k">Emergency phone</div><div class="v">+92 333 738 8906</div></div>
-            </div></div>
-          </div>
-          <div class="card hoverable"><div class="chead-ic"><div class="chic"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2.5 20c0-3 2.9-4.6 6.5-4.6s6.5 1.6 6.5 4.6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M16 15.6c2.6.2 4.5 1.7 4.5 4.4"/></svg></div><div><h3>Team &amp; reporting</h3><span class="sub">UX/UI Team · 3 members</span></div><a class="link" data-s2="team" style="margin-left:auto">See details →</a></div>
-            <div class="mlbl">You report to</div>
-            <div class="row lead-row trow"><div class="av" style="background:#242424">MI</div><div class="nm">Maya Ingram<small>Team Lead · Product Designer</small></div><a class="btn ghost msg-btn ml-auto" href="https://app.slack.com/client" target="_blank" rel="noopener" style="padding:7px 13px">Message</a></div>
-            <div class="mlbl" style="margin-top:16px">Teammates</div>
-            <div class="list">
-              <div class="row trow"><div class="av" style="background:#0a7d43">SG</div><div class="nm">Sophie Grant<small>Product Designer · UX/UI</small></div><a class="btn ghost msg-btn ml-auto" href="https://app.slack.com/client" target="_blank" rel="noopener" style="padding:7px 13px">Message</a></div>
-              <div class="row trow"><div class="av" style="background:#0a5c34">LO</div><div class="nm">Liam Ortega<small>UI Designer · UX/UI</small></div><a class="btn ghost msg-btn ml-auto" href="https://app.slack.com/client" target="_blank" rel="noopener" style="padding:7px 13px">Message</a></div>
-            </div>
-          </div>
-        </div>
-        <div class="lb-bank" style="margin-top:20px">
-          <div class="card hoverable lb-card" data-s2="leaves">
+      <section class="page self-profile" id="s-profile">
+        <div class="phead"><div><h1>Welcome, Ethan</h1><p>Your personal information</p></div><button class="btn ghost" data-open="edit"><svg class="ico" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Request a change</button></div>
+        <div class="card raised self-profile-hero"><div id="profileAvatar" class="avatar-lg me-av">EM</div><div><h1>Ethan Miller</h1><p>Product Design Team Lead &middot; Blockchain Dp.</p><div class="hero-chips"><span class="pstatus">Active</span><b>Regular</b></div></div><button class="btn ghost" id="avatarBtn" style="margin-left:auto"><svg class="ico" viewBox="0 0 24 24"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 20h14"/></svg> Upload photo</button></div>
+        <div class="card self-profile-section"><h2>Personal information</h2><div class="self-profile-grid"><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span><div><small>Email</small><strong>ethan.miller@must.company</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><div><small>Phone</small><strong>+92 334 267 9404</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg></span><div><small>Department</small><strong>Blockchain Dp.</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg></span><div><small>Company entity</small><strong>MUST SG</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg></span><div><small>Designation</small><strong>Product Design Team Lead</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span><div><small>Joining date</small><strong>Feb 26, 2025</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3.75 2.25"/></svg></span><div><small>Tenure</small><strong>1y 4m</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg></span><div><small>Work schedule</small><strong>Mon–Fri (5-day)</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></span><div><small>Hourly rate</small><strong>$1.50/hr</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/></svg></span><div><small>Date of birth</small><strong>Oct 9, 1998</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></span><div><small>Next increment</small><strong>Feb 26, 2027</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M16 10h2M16 14h2M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span><div><small>Gender</small><strong>Male</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg></span><div><small>Employment status</small><strong>Regular</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span><div><small>Probation end</small><strong>May 26, 2025</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3.75 2.25"/></svg></span><div><small>Time zone</small><strong>Asia/Karachi (GMT+5)</strong></div></div><div class="self-profile-field is-link"><div><small>LinkedIn</small><a href="https://www.linkedin.com/in/ethan-miller" target="_blank" rel="noopener noreferrer">www.linkedin.com/in/ethan-miller</a></div></div></div><div class="skill-list"><small>Tech stack</small><div><span>Maze</span><span>Visual Studio Code</span><span>GitHub</span><span>Adobe Illustrator</span><span>Rive</span><span>Figma</span></div></div></div>
+        <div class="card self-profile-section"><h2>Emergency contact &amp; address</h2><div class="self-profile-grid"><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M16 10h2M16 14h2M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span><div><small>Emergency contact</small><strong>Rachel Miller</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><div><small>Emergency phone</small><strong>+92 333 738 8906</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><div><small>City</small><strong>Lahore</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></span><div><small>Country</small><strong>Pakistan</strong></div></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><div><small>Address</small><strong>Lahore, Pakistan</strong></div></div></div></div>
+        <div class="card self-profile-section"><h2>Team &amp; reporting</h2><div class="reporting-copy"><span>Department &amp; team</span><strong>Blockchain Dp. <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="m9 18 6-6-6-6"/></svg> UX/UI Team <b>BLK-UXI</b></strong></div><div class="self-profile-field"><span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><small>Reports to</small><strong>Ismail Gorkem Kara</strong></div></div><button class="profile-team-link" data-s2="team">View your team <svg class="ico" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="m9 18 6-6-6-6"/></svg></button></div>
+        <div class="card hoverable lb-card self-profile-section" data-s2="leaves">
             <div class="lb-head">
               <div class="lb-ic"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/><path d="M7 14h.01M11 14h.01M7 17.5h.01"/><circle cx="17.5" cy="17.5" r="5" fill="#fff" stroke="none"/><circle cx="17.5" cy="17.5" r="4.3"/><path d="M15.6 17.6l1.3 1.3 2.4-2.7"/></svg></div>
               <div class="lb-name">Annual Leave</div>
@@ -1093,14 +1087,9 @@
             <div class="lb-of">of 15 days</div>
             <div class="lb-bar-row"><div class="lb-bar"><i style="width:47%"></i></div><div class="lb-pct">47%</div></div>
           </div>
-          <div class="card hoverable">
-          <div class="chead"><div style="display:flex;align-items:center;gap:12px"><div class="chic"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></div><div><h3>Bank details</h3><span class="sub">Locked during salary processing</span></div></div><button class="btn ghost" data-toast="Bank details are locked">🔒 Locked</button></div>
-          <div class="rec c3">
-            <div><div class="k">Bank name</div><div class="v">United Bank Ltd (UBL)</div></div><div><div class="k">Account type</div><div class="v">Salaried</div></div><div><div class="k">SWIFT</div><div class="v">UNILPKKA</div></div>
-            <div style="grid-column:span 2"><div class="k">IBAN</div><div class="v">PK•• •••• •••• •••• 7503</div></div><div><div class="k">Account holder</div><div class="v">Ethan Miller</div></div>
-          </div>
-        </div>
-        </div>
+        <div class="self-profile-split"><div class="card self-profile-section"><h2>ID &amp; passport</h2><div class="empty"><div class="ei"><svg class="ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M16 10h2M16 14h2M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></div><h4>No identity documents</h4><p>Nothing has been recorded yet.</p></div></div><div class="card self-profile-section"><h2>Education</h2><div class="empty"><div class="ei"><svg class="ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><h4>No education records</h4><p>Nothing has been added yet.</p></div></div></div>
+        <div class="card self-profile-section"><div class="chead"><div style="display:flex;align-items:center;gap:10px"><h2 style="display:flex;align-items:center;gap:8px;margin:0"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M10 18v-7M14 18v-7M6 18v-7M18 18v-7"/><path d="M3 22h18M2 10l10-7 10 7"/></svg> Bank details</h2></div><button class="btn ghost" data-toast="Bank detail change request opened"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Request change</button></div><p class="sub" style="color:var(--muted);font-size:12px;margin:-8px 0 12px">Recipient information — must match the bank's records.</p><dl class="info-list"><div><dt>Bank name</dt><dd>United Bank Ltd (UBL)</dd></div><div><dt>IBAN</dt><dd>PK•• •••• •••• •••• 7503</dd></div><div><dt>Account type</dt><dd>Salaried</dd></div><div><dt>SWIFT</dt><dd>UNILPKKA</dd></div><div><dt>Account holder</dt><dd>Ethan Miller</dd></div></dl></div>
+        <div class="card self-profile-section"><h2>Assigned assets</h2><div class="empty"><div class="ei"><svg class="ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M16 16h6M19 13v6"/><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><h4>No assets issued to you</h4><p>No assignment history yet.</p></div></div>
       </section>
 
       <!-- ============ MY SALARY ============ -->
